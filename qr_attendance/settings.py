@@ -14,11 +14,11 @@ s.connect(("8.8.8.8", 80))
 server_ip = s.getsockname()[0]
 
 # 🔹 Automatically allow localhost + detected LAN IP
-ALLOWED_HOSTS = [".onrender.com", "qrattendance-production-5d22.up.railway.app", ".ngrok-free.app", "ngrok-free.dev", "mooned-mom-unlikable.ngrok-free.dev", '127.0.0.1', '10.218.31.108', 'localhost', f"{server_ip}", '*' ]
+ALLOWED_HOSTS = [".onrender.com", "qrattendance-production-9015.up.railway.app", ".ngrok-free.app", "ngrok-free.dev", "mooned-mom-unlikable.ngrok-free.dev", '127.0.0.1', '10.218.31.108', 'localhost', f"{server_ip}", '*' ]
 
 # ✅ CSRF Trusted Origins
 CSRF_TRUSTED_ORIGINS = [
-    "https://qrattendance-production-5d22.up.railway.app",
+    "https://qrattendance-production-9015.up.railway.app",
     "https://*.ngrok-free.dev",
     "https://*.ngrok-free.app",
     "https://mooned-mom-unlikable.ngrok-free.dev"

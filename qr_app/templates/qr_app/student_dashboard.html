@@ -19,6 +19,7 @@
     --accent-3:     #0ea5e9;
     --success:      #10b981;
     --warning:      #f59e0b;
+    --danger:       #f43f5e;
     --shadow-sm:    0 2px 8px rgba(79,70,229,0.07);
     --shadow-md:    0 8px 28px rgba(79,70,229,0.12);
     --shadow-lg:    0 20px 55px rgba(79,70,229,0.18);
@@ -26,8 +27,9 @@
     --radius-md:    18px;
     --radius-lg:    24px;
     --radius-xl:    32px;
+    --spring:       cubic-bezier(0.34,1.56,0.64,1);
+    --ease-out:     cubic-bezier(0.22,0.68,0,1.15);
 }
-
 body.dark {
     --bg:            #060a14;
     --surface:       #0f1628;
@@ -40,392 +42,338 @@ body.dark {
     --shadow-md:     0 8px 28px rgba(0,0,0,0.35);
     --shadow-lg:     0 20px 55px rgba(0,0,0,0.45);
 }
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh;overflow-x:hidden;transition:background 0.4s ease,color 0.4s ease;}
+body::before{content:'';position:fixed;top:-140px;right:-100px;width:460px;height:460px;background:radial-gradient(circle,rgba(79,70,229,0.1) 0%,transparent 70%);border-radius:50%;pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;bottom:-80px;left:-80px;width:320px;height:320px;background:radial-gradient(circle,rgba(14,165,233,0.08) 0%,transparent 70%);border-radius:50%;pointer-events:none;z-index:0;}
 
-* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-
-body {
-    font-family: 'Sora', sans-serif;
-    background: var(--bg);
-    color: var(--text-primary);
-    min-height: 100vh;
-    overflow-x: hidden;
-    transition: background 0.4s ease, color 0.4s ease;
-}
-
-/* ── BG ORBS ── */
-body::before {
-    content: '';
-    position: fixed;
-    top: -140px; right: -100px;
-    width: 460px; height: 460px;
-    background: radial-gradient(circle, rgba(79,70,229,0.1) 0%, transparent 70%);
-    border-radius: 50%;
-    pointer-events: none; z-index: 0;
-}
-body::after {
-    content: '';
-    position: fixed;
-    bottom: -80px; left: -80px;
-    width: 320px; height: 320px;
-    background: radial-gradient(circle, rgba(14,165,233,0.08) 0%, transparent 70%);
-    border-radius: 50%;
-    pointer-events: none; z-index: 0;
-}
-
-/* ══ CONTAINER ══ */
-.dashboard-container {
-    max-width: 760px;
-    margin: 0 auto;
-    padding: 20px 16px 110px;
-    position: relative; z-index: 1;
-}
+.dashboard-container{max-width:760px;margin:0 auto;padding:20px 16px 110px;position:relative;z-index:1;}
 
 /* ══ HERO ══ */
-.hero-card {
-    background: linear-gradient(145deg, #4f46e5 0%, #7c3aed 52%, #0ea5e9 100%);
-    border-radius: var(--radius-xl);
-    padding: 30px 24px 26px;
-    margin-bottom: 18px;
-    position: relative; overflow: hidden;
-    box-shadow: var(--shadow-lg);
-    animation: slideDown 0.6s cubic-bezier(.22,.68,0,1.2) both;
-}
-.hero-card::before {
-    content: '';
-    position: absolute;
-    width: 320px; height: 320px; border-radius: 50%;
-    background: rgba(255,255,255,0.07);
-    top: -150px; right: -80px;
-}
-.hero-card::after {
-    content: '';
-    position: absolute;
-    width: 160px; height: 160px; border-radius: 50%;
-    background: rgba(255,255,255,0.05);
-    bottom: -70px; left: -30px;
-}
-
-.hero-inner {
-    position: relative; z-index: 2;
-    display: flex; align-items: center; gap: 18px;
-}
-
-.hero-avatar {
-    width: 68px; height: 68px; border-radius: 50%;
-    background: rgba(255,255,255,0.16);
-    border: 2px solid rgba(255,255,255,0.32);
-    backdrop-filter: blur(10px);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 26px; font-weight: 800; color: #fff;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-    flex-shrink: 0;
-}
-
-.hero-text h2 {
-    font-size: 22px; font-weight: 800; color: #fff;
-    margin-bottom: 6px;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.15);
-}
-
-.hero-tags {
-    display: flex; flex-wrap: wrap; gap: 7px;
-}
-
-.hero-tag {
-    display: inline-flex; align-items: center; gap: 5px;
-    background: rgba(255,255,255,0.15);
-    border: 1px solid rgba(255,255,255,0.25);
-    backdrop-filter: blur(8px);
-    border-radius: 100px;
-    padding: 4px 12px;
-    font-size: 11.5px; font-weight: 500;
-    color: rgba(255,255,255,0.95);
-}
+.hero-card{background:linear-gradient(145deg,#4f46e5 0%,#7c3aed 52%,#0ea5e9 100%);border-radius:var(--radius-xl);padding:30px 24px 26px;margin-bottom:18px;position:relative;overflow:hidden;box-shadow:var(--shadow-lg);animation:slideDown 0.6s var(--ease-out) both;}
+.hero-card::before{content:'';position:absolute;width:320px;height:320px;border-radius:50%;background:rgba(255,255,255,0.07);top:-150px;right:-80px;}
+.hero-card::after{content:'';position:absolute;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,0.05);bottom:-70px;left:-30px;}
+.hero-inner{position:relative;z-index:2;display:flex;align-items:center;gap:18px;}
+.hero-avatar{width:68px;height:68px;border-radius:50%;background:rgba(255,255,255,0.16);border:2px solid rgba(255,255,255,0.32);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff;box-shadow:0 8px 24px rgba(0,0,0,0.15);flex-shrink:0;}
+.hero-text h2{font-size:22px;font-weight:800;color:#fff;margin-bottom:6px;text-shadow:0 1px 4px rgba(0,0,0,0.15);}
+.hero-tags{display:flex;flex-wrap:wrap;gap:7px;}
+.hero-tag{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);backdrop-filter:blur(8px);border-radius:100px;padding:4px 12px;font-size:11.5px;font-weight:500;color:rgba(255,255,255,0.95);}
 
 /* ══ STATS ROW ══ */
-.stats-row {
-    display: grid;
-    grid-template-columns: repeat(3,1fr);
-    gap: 14px;
-    margin-bottom: 18px;
-}
-
-.stat-card {
-    border-radius: var(--radius-lg);
-    padding: 20px 18px;
-    color: #fff;
-    position: relative; overflow: hidden;
-    box-shadow: var(--shadow-md);
-}
-.stat-card::before {
-    content: '';
-    position: absolute;
-    width: 130px; height: 130px; border-radius: 50%;
-    background: rgba(255,255,255,0.1);
-    top: -55px; right: -35px;
-}
-.stat-card::after {
-    content: '';
-    position: absolute;
-    width: 70px; height: 70px; border-radius: 50%;
-    background: rgba(255,255,255,0.06);
-    bottom: -25px; left: -15px;
-}
-
-.subject-card   { background: linear-gradient(135deg,#4f46e5,#7c3aed); }
-.attendance-card{ background: linear-gradient(135deg,#0ea5e9,#3b82f6); }
-.class-card     { background: linear-gradient(135deg,#10b981,#0284c7); }
-
-.stat-icon {
-    font-size: 20px; margin-bottom: 6px;
-    position: relative; z-index: 2;
-}
-.stat-label {
-    font-size: 10px; font-weight: 600;
-    text-transform: uppercase; letter-spacing: 0.07em;
-    color: rgba(255,255,255,0.7);
-    margin-bottom: 4px;
-    position: relative; z-index: 2;
-}
-.stat-value {
-    font-size: 36px; font-weight: 800; line-height: 1;
-    position: relative; z-index: 2;
-    counter-reset: num var(--n);
-}
+.stats-row{display:flex;flex-direction:row;gap:10px;margin-bottom:18px;overflow-x:visible;}
+.stat-card{border-radius:var(--radius-md);padding:14px 14px 14px 16px;color:#fff;position:relative;overflow:hidden;box-shadow:var(--shadow-md);flex:1;min-width:0;display:flex;flex-direction:row;align-items:center;gap:12px;}
+.stat-card::before{content:'';position:absolute;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,0.1);top:-40px;right:-25px;}
+.stat-card::after{content:'';position:absolute;width:55px;height:55px;border-radius:50%;background:rgba(255,255,255,0.06);bottom:-20px;left:-12px;}
+.subject-card{background:linear-gradient(135deg,#4f46e5,#7c3aed);}
+.attendance-card{background:linear-gradient(135deg,#0ea5e9,#3b82f6);}
+.class-card{background:linear-gradient(135deg,#10b981,#0284c7);}
+.stat-icon-wrap{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;z-index:2;}
+.stat-icon{font-size:18px;position:relative;z-index:2;}
+.stat-text{position:relative;z-index:2;min-width:0;}
+.stat-label{font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:rgba(255,255,255,0.72);margin-bottom:2px;}
+.stat-value{font-size:26px;font-weight:800;line-height:1;}
 
 /* ══ CARD ══ */
-.card {
-    background: var(--surface);
-    border-radius: var(--radius-lg);
-    padding: 22px 20px;
-    margin-bottom: 18px;
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow-sm);
-    transition: background 0.4s, border-color 0.4s;
-}
+.card{background:var(--surface);border-radius:var(--radius-lg);padding:22px 20px;margin-bottom:18px;border:1px solid var(--border);box-shadow:var(--shadow-sm);transition:background 0.4s,border-color 0.4s;}
 
 /* ══ SECTION HEADER ══ */
-.section-header {
-    display: flex; align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
-}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.section-header-left{display:flex;align-items:center;gap:10px;}
+.section-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.icon-purple{background:#f5f3ff;}
+.icon-blue{background:#eff6ff;}
+.icon-green{background:#f0fdf4;}
+body.dark .icon-purple{background:rgba(79,70,229,0.15);}
+body.dark .icon-blue{background:rgba(14,165,233,0.12);}
+body.dark .icon-green{background:rgba(16,185,129,0.12);}
+.section-header h3{font-size:15px;font-weight:700;color:var(--text-primary);}
 
-.section-header-left {
-    display: flex; align-items: center; gap: 10px;
-}
-
-.section-icon {
-    width: 36px; height: 36px; border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 17px; flex-shrink: 0;
-}
-.icon-purple { background: #f5f3ff; }
-.icon-blue   { background: #eff6ff; }
-.icon-green  { background: #f0fdf4; }
-
-.section-header h3 {
-    font-size: 15px; font-weight: 700; color: var(--text-primary);
-}
+/* ══ VIEW TOGGLE ══ */
+.view-toggle-wrap{display:flex;align-items:center;gap:8px;margin-bottom:20px;}
+.view-toggle{display:flex;width:100%;background:var(--surface-2);border:1.5px solid var(--border);border-radius:14px;padding:5px;gap:5px;}
+body.dark .view-toggle{background:rgba(255,255,255,0.04);}
+.toggle-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:14px 10px;border-radius:10px;border:none;background:transparent;color:var(--text-muted);font-family:'Sora',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.28s var(--spring);white-space:nowrap;letter-spacing:0.01em;}
+.toggle-btn .btn-icon{width:38px;height:38px;border-radius:10px;background:rgba(148,163,184,0.12);display:flex;align-items:center;justify-content:center;transition:all 0.28s var(--spring);}
+.toggle-btn i{font-size:17px;transition:transform 0.28s var(--spring);}
+.toggle-btn .btn-label{font-size:12.5px;font-weight:700;transition:color 0.25s;}
+.toggle-btn.active{background:var(--accent);color:#fff;box-shadow:0 6px 22px rgba(79,70,229,0.32);}
+.toggle-btn.active .btn-icon{background:rgba(255,255,255,0.18);}
+.toggle-btn.active i{transform:scale(1.12);}
+.toggle-btn.active .btn-label{color:#fff;}
+.toggle-btn:not(.active):hover{color:var(--text-primary);background:var(--surface);}
+.toggle-btn:not(.active):hover .btn-icon{background:rgba(79,70,229,0.1);}
 
 /* ══ CHART ══ */
-.chart-wrapper {
-    position: relative;
-    height: 300px;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-}
+.chart-wrapper{position:relative;height:300px;border-radius:var(--radius-md);overflow:hidden;}
 
 /* ══ SUBJECT ROWS ══ */
-.subject-list { display: flex; flex-direction: column; gap: 0; }
-
-.subject-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 16px;
-    padding: 15px 0;
-    border-bottom: 1px solid rgba(148,163,184,0.1);
-    animation: fadeUp 0.5s ease both;
-}
-.subject-row:last-child { border-bottom: none; padding-bottom: 0; }
-.subject-row:nth-child(1){ animation-delay:.1s; }
-.subject-row:nth-child(2){ animation-delay:.15s; }
-.subject-row:nth-child(3){ animation-delay:.2s; }
-.subject-row:nth-child(4){ animation-delay:.25s; }
-.subject-row:nth-child(5){ animation-delay:.3s; }
-
-.subject-left { flex: 1; min-width: 0; }
-
-.subject-name {
-    font-size: 14px; font-weight: 700;
-    color: var(--text-primary); margin-bottom: 3px;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-
-.subject-code-chip {
-    display: inline-flex;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px; font-weight: 600;
-    color: var(--accent);
-    background: #eef2ff;
-    border: 1px solid rgba(79,70,229,0.15);
-    padding: 2px 9px; border-radius: 100px;
-    margin-bottom: 8px;
-}
-body.dark .subject-code-chip {
-    background: rgba(79,70,229,0.15);
-    border-color: rgba(79,70,229,0.25);
-}
-
-.progress-track {
-    width: 100%; height: 7px;
-    background: #e8ecf8;
-    border-radius: 100px; overflow: hidden;
-}
-body.dark .progress-track { background: rgba(99,102,241,0.15); }
-
-.progress-fill {
-    height: 100%; border-radius: 100px;
-    background: linear-gradient(90deg, #4f46e5, #7c3aed);
-    animation: growBar 1.2s cubic-bezier(.4,0,.2,1) both;
-    animation-delay: 0.3s;
-}
-.progress-fill.warn { background: linear-gradient(90deg, #f43f5e, #fb923c); }
-
-.subject-right { flex-shrink: 0; text-align: right; }
-
-.subject-fraction {
-    font-size: 18px; font-weight: 800;
-    color: var(--text-primary);
-}
-.subject-fraction-label {
-    font-size: 10px; color: var(--text-muted); margin-top: 2px;
-}
-
-.pct-chip {
-    display: inline-block; margin-top: 5px;
-    font-size: 11px; font-weight: 700;
-    padding: 3px 10px; border-radius: 100px;
-}
-.pct-good { background: #d1fae5; color: #065f46; }
-.pct-low  { background: #ffe4e6; color: #9f1239; }
+.subject-list{display:flex;flex-direction:column;gap:0;}
+.subject-row{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:15px 0;border-bottom:1px solid rgba(148,163,184,0.1);animation:fadeUp 0.5s ease both;}
+.subject-row:last-child{border-bottom:none;padding-bottom:0;}
+.subject-row:nth-child(1){animation-delay:.1s;}
+.subject-row:nth-child(2){animation-delay:.15s;}
+.subject-row:nth-child(3){animation-delay:.2s;}
+.subject-row:nth-child(4){animation-delay:.25s;}
+.subject-row:nth-child(5){animation-delay:.3s;}
+.subject-left{flex:1;min-width:0;}
+.subject-name{font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.subject-code-chip{display:inline-flex;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:var(--accent);background:#eef2ff;border:1px solid rgba(79,70,229,0.15);padding:2px 9px;border-radius:100px;margin-bottom:8px;}
+body.dark .subject-code-chip{background:rgba(79,70,229,0.15);border-color:rgba(79,70,229,0.25);}
+.progress-track{width:100%;height:7px;background:#e8ecf8;border-radius:100px;overflow:hidden;}
+body.dark .progress-track{background:rgba(99,102,241,0.15);}
+.progress-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,#4f46e5,#7c3aed);animation:growBar 1.2s cubic-bezier(.4,0,.2,1) both;animation-delay:0.3s;}
+.progress-fill.warn{background:linear-gradient(90deg,#f43f5e,#fb923c);}
+.subject-right{flex-shrink:0;text-align:right;}
+.subject-fraction{font-size:18px;font-weight:800;color:var(--text-primary);}
+.subject-fraction-label{font-size:10px;color:var(--text-muted);margin-top:2px;}
+.pct-chip{display:inline-block;margin-top:5px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px;}
+.pct-good{background:#d1fae5;color:#065f46;}
+.pct-low{background:#ffe4e6;color:#9f1239;}
 
 /* ══ TODAY SCHEDULE ══ */
-.schedule-list { display: flex; flex-direction: column; gap: 12px; }
-
-.schedule-card {
-    display: flex; align-items: center; gap: 14px;
-    padding: 14px 16px;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    animation: fadeUp 0.5s ease both;
-    transition: background 0.4s;
-}
-.schedule-card:nth-child(1){ animation-delay:.1s; }
-.schedule-card:nth-child(2){ animation-delay:.17s; }
-.schedule-card:nth-child(3){ animation-delay:.24s; }
-
-.time-block {
-    min-width: 68px; height: 68px;
-    border-radius: 18px;
-    background: linear-gradient(135deg, #4f46e5, #7c3aed);
-    color: #fff;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    gap: 2px;
-    box-shadow: 0 8px 20px rgba(79,70,229,0.28);
-    flex-shrink: 0;
-}
-.time-start {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 14px; font-weight: 700;
-}
-.time-sep { font-size: 9px; opacity: 0.65; font-weight: 600; }
-.time-end {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px; opacity: 0.82;
-}
-
-.schedule-info { flex: 1; min-width: 0; }
-.schedule-name {
-    font-size: 14px; font-weight: 700;
-    color: var(--text-primary); margin-bottom: 4px;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.schedule-meta {
-    font-size: 12px; color: var(--text-muted); font-weight: 500;
-}
+.schedule-list{display:flex;flex-direction:column;gap:12px;}
+.schedule-card{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-md);animation:fadeUp 0.5s ease both;transition:background 0.4s;}
+.schedule-card:nth-child(1){animation-delay:.1s;}
+.schedule-card:nth-child(2){animation-delay:.17s;}
+.schedule-card:nth-child(3){animation-delay:.24s;}
+.time-block{min-width:68px;height:68px;border-radius:18px;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;box-shadow:0 8px 20px rgba(79,70,229,0.28);flex-shrink:0;}
+.time-start{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;}
+.time-sep{font-size:9px;opacity:0.65;font-weight:600;}
+.time-end{font-family:'JetBrains Mono',monospace;font-size:11px;opacity:0.82;}
+.schedule-info{flex:1;min-width:0;}
+.schedule-name{font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.schedule-meta{font-size:12px;color:var(--text-muted);font-weight:500;}
 
 /* ══ EMPTY STATE ══ */
-.empty-box {
-    text-align: center;
-    padding: 40px 20px;
-    border-radius: var(--radius-md);
-    border: 1.5px dashed rgba(99,102,241,0.18);
+.empty-box{text-align:center;padding:40px 20px;border-radius:var(--radius-md);border:1.5px dashed rgba(99,102,241,0.18);}
+.empty-icon{font-size:44px;display:block;margin-bottom:12px;animation:float 3s ease-in-out infinite;}
+.empty-box h3{font-size:16px;font-weight:700;color:var(--text-primary);margin-bottom:6px;}
+.empty-box p{font-size:13px;color:var(--text-muted);}
+
+/* ══════════════════════════════════════
+   CALENDAR VIEW
+══════════════════════════════════════ */
+#calendarView{display:none;}
+#calendarView.active{display:block;animation:fadeUp 0.4s var(--ease-out) both;}
+
+/* ── Subject selector ── */
+.cal-subject-wrap{margin-bottom:16px;}
+.cal-subject-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:8px;}
+.subject-pills{display:flex;flex-wrap:wrap;gap:8px;}
+.subject-pill{padding:7px 16px;border-radius:100px;border:1.5px solid var(--border);background:var(--surface);color:var(--text-secondary);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.25s var(--spring);white-space:nowrap;}
+.subject-pill:hover{border-color:rgba(79,70,229,0.35);color:var(--accent);transform:translateY(-1px);}
+.subject-pill.selected{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 4px 14px rgba(79,70,229,0.30);}
+
+/* ── Calendar frame ── */
+.calendar-frame{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-md);margin-bottom:16px;}
+
+/* ── Calendar nav ── */
+.cal-nav{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,rgba(79,70,229,0.04),rgba(124,58,237,0.03));}
+.cal-month-title{font-size:16px;font-weight:800;color:var(--text-primary);letter-spacing:-0.01em;}
+.cal-nav-btn{width:32px;height:32px;border-radius:9px;border:1.5px solid var(--border);background:var(--surface);color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.22s var(--spring);}
+.cal-nav-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent);transform:scale(1.08);}
+.cal-nav-btn i{font-size:11px;}
+
+/* ── Day-of-week header ── */
+.cal-dow{display:grid;grid-template-columns:repeat(7,1fr);gap:0;padding:0 8px;background:var(--surface-2);border-bottom:1px solid var(--border);}
+.cal-dow span{text-align:center;padding:9px 0;font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);}
+.cal-dow span.weekend{color:var(--danger);opacity:0.7;}
+
+/* ── Calendar grid ── */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;padding:10px 8px 12px;}
+
+/* ── Day cell ── */
+.cal-day{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:50%;cursor:pointer;position:relative;transition:background 0.2s ease,transform 0.2s var(--spring);max-width:36px;max-height:36px;margin:0 auto;width:100%;}
+.cal-day span{font-size:11.5px;font-weight:600;color:var(--text-primary);position:relative;z-index:2;line-height:1;pointer-events:none;}
+.cal-day.empty{cursor:default;pointer-events:none;}
+.cal-day.empty span{opacity:0;}
+
+/* dot indicator */
+.cal-day::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:transparent;transition:background 0.2s ease;}
+
+/* states */
+.cal-day.today{background:linear-gradient(135deg,#4f46e5,#7c3aed);box-shadow:0 3px 12px rgba(79,70,229,0.42);}
+.cal-day.today span{color:#fff;font-weight:800;}
+.cal-day.present{background:rgba(16,185,129,0.16);}
+.cal-day.present span{color:#059669;font-weight:700;}
+.cal-day.present::after{background:#10b981;}
+.cal-day.absent{background:rgba(244,63,94,0.12);}
+.cal-day.absent span{color:#f43f5e;font-weight:700;}
+.cal-day.absent::after{background:#f43f5e;}
+.cal-day.no-class{opacity:0.35;cursor:default;}
+.cal-day:not(.empty):not(.no-class):hover{transform:scale(1.18);z-index:3;}
+.cal-day.selected-day{outline:2px solid var(--accent);outline-offset:2px;box-shadow:0 0 0 3px rgba(79,70,229,0.15);}
+
+.cal-day.partial{background:rgba(245,158,11,0.15);}
+.cal-day.partial span{color:#d97706;font-weight:700;}
+.cal-day.partial::after{background:#f59e0b;}
+
+/* ── Legend ── */
+.cal-legend{display:flex;align-items:center;gap:10px;padding:10px 16px;border-top:1px solid var(--border);flex-wrap:wrap;background:var(--surface-2);}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;color:var(--text-secondary);}
+.legend-dot{width:8px;height:8px;border-radius:50%;}
+.dot-present{background:#10b981;}
+.dot-absent{background:#f43f5e;}
+.dot-today{background:linear-gradient(135deg,#4f46e5,#7c3aed);}
+.dot-noclass{background:var(--border);border:1px solid var(--text-muted);}
+
+/* ── Day detail panel ── */
+#dayDetailPanel{display:none;animation:slideUp 0.38s var(--ease-out) both;}
+#dayDetailPanel.show{display:block;}
+
+@keyframes slideUp{
+  from{opacity:0;transform:translateY(14px);}
+  to{opacity:1;transform:translateY(0);}
 }
-.empty-icon {
-    font-size: 44px; display: block; margin-bottom: 12px;
-    animation: float 3s ease-in-out infinite;
+
+.day-detail-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.day-detail-date{font-size:14px;font-weight:800;color:var(--text-primary);}
+.day-detail-close{width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s var(--spring);}
+.day-detail-close:hover{background:var(--danger);color:#fff;border-color:var(--danger);}
+
+.detail-classes{display:flex;flex-direction:column;gap:10px;}
+
+.detail-class-card{border-radius:var(--radius-md);border:1px solid var(--border);overflow:hidden;animation:fadeUp 0.35s ease both;transition:transform 0.2s var(--spring),box-shadow 0.2s ease;}
+.detail-class-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);}
+.detail-class-card.card-present{border-left:4px solid #10b981;background:linear-gradient(90deg,rgba(16,185,129,0.05) 0%,var(--surface) 100%);}
+.detail-class-card.card-absent{border-left:4px solid #f43f5e;background:linear-gradient(90deg,rgba(244,63,94,0.05) 0%,var(--surface) 100%);}
+
+.detail-class-card.card-partial{
+    border-left:4px solid #f59e0b;
+    background:linear-gradient(
+        90deg,
+        rgba(245,158,11,0.05) 0%,
+        var(--surface) 100%
+    );
 }
-.empty-box h3 { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
-.empty-box p  { font-size: 13px; color: var(--text-muted); }
+.card-partial .detail-status-icon{
+    background:rgba(245,158,11,0.12);
+}
+.card-partial .detail-status-icon i{
+    color:#f59e0b;
+}
+.badge-partial{
+    background:#fef3c7;
+    color:#92400e;
+}
+
+.detail-card-inner{display:flex;align-items:center;gap:14px;padding:14px 16px;}
+
+.detail-status-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.card-present .detail-status-icon{background:rgba(16,185,129,0.12);}
+.card-absent  .detail-status-icon{background:rgba(244,63,94,0.10);}
+.card-present .detail-status-icon i{color:#10b981;font-size:18px;}
+.card-absent  .detail-status-icon i{color:#f43f5e;font-size:18px;}
+
+.detail-info{flex:1;min-width:0;}
+.detail-subject-name{font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.detail-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.detail-chip{display:inline-flex;align-items:center;gap:4px;font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:600;padding:2px 9px;border-radius:100px;}
+.chip-code{background:#eef2ff;color:var(--accent);border:1px solid rgba(79,70,229,0.15);}
+.chip-time{background:var(--surface-2);color:var(--text-secondary);border:1px solid var(--border);}
+body.dark .chip-code{background:rgba(79,70,229,0.15);}
+body.dark .chip-time{background:rgba(255,255,255,0.04);}
+
+.detail-badge{flex-shrink:0;padding:5px 12px;border-radius:100px;font-size:11px;font-weight:700;}
+.badge-present{background:#d1fae5;color:#065f46;}
+.badge-absent{background:#ffe4e6;color:#9f1239;}
+body.dark .badge-present{background:rgba(16,185,129,0.18);color:#6ee7b7;}
+body.dark .badge-absent{background:rgba(244,63,94,0.15);color:#fda4af;}
+
+.no-class-msg{text-align:center;padding:30px;color:var(--text-muted);font-size:13px;font-weight:500;}
+.no-class-msg i{font-size:28px;display:block;margin-bottom:10px;opacity:0.4;}
 
 /* ══ ANIMATIONS ══ */
-@keyframes slideDown {
-    from { opacity:0; transform:translateY(-22px); }
-    to   { opacity:1; transform:translateY(0); }
-}
-@keyframes fadeUp {
-    from { opacity:0; transform:translateY(16px); }
-    to   { opacity:1; transform:translateY(0); }
-}
-@keyframes growBar {
-    from { width:0 !important; }
-}
-@keyframes countUp {
-    from { opacity:0; transform:translateY(8px); }
-    to   { opacity:1; transform:translateY(0); }
-}
-@keyframes float {
-    0%,100% { transform:translateY(0); }
-    50%      { transform:translateY(-10px); }
-}
+@keyframes slideDown{from{opacity:0;transform:translateY(-22px);}to{opacity:1;transform:translateY(0);}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+@keyframes growBar{from{width:0 !important;}}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
 
-/* stat card stagger */
-.stat-card:nth-child(1){ animation: fadeUp 0.5s 0.1s ease both; }
-.stat-card:nth-child(2){ animation: fadeUp 0.5s 0.18s ease both; }
-.stat-card:nth-child(3){ animation: fadeUp 0.5s 0.26s ease both; }
-
-/* card stagger */
-.card:nth-child(1){ animation: fadeUp 0.5s 0.12s ease both; }
-.card:nth-child(2){ animation: fadeUp 0.5s 0.22s ease both; }
-.card:nth-child(3){ animation: fadeUp 0.5s 0.32s ease both; }
+.stat-card:nth-child(1){animation:fadeUp 0.5s 0.1s ease both;}
+.stat-card:nth-child(2){animation:fadeUp 0.5s 0.18s ease both;}
+.stat-card:nth-child(3){animation:fadeUp 0.5s 0.26s ease both;}
+.card:nth-child(1){animation:fadeUp 0.5s 0.12s ease both;}
+.card:nth-child(2){animation:fadeUp 0.5s 0.22s ease both;}
+.card:nth-child(3){animation:fadeUp 0.5s 0.32s ease both;}
 
 /* ══ MOBILE ══ */
-@media (max-width:600px) {
-    .dashboard-container { padding: 14px 12px 90px; }
-    .hero-inner { flex-direction: column; text-align: center; }
-    .hero-tags  { justify-content: center; }
-    .hero-text h2 { font-size: 19px; }
-    .hero-avatar { width: 60px; height: 60px; font-size: 22px; }
-
-    .stats-row { grid-template-columns: 1fr; gap: 10px; }
-    .stat-value { font-size: 30px; }
-
-    .subject-row { flex-direction: column; align-items: flex-start; gap: 10px; }
-    .subject-right { width: 100%; text-align: left; }
-
-    .schedule-card { padding: 12px 14px; }
-    .time-block { min-width: 60px; height: 60px; border-radius: 14px; }
+@media(max-width:600px){
+    .dashboard-container{padding:14px 12px 90px;}
+    .hero-inner{flex-direction:column;text-align:center;}
+    .hero-tags{justify-content:center;}
+    .hero-text h2{font-size:19px;}
+    .hero-avatar{width:60px;height:60px;font-size:22px;}
+    .stats-row{gap:8px;}
+    .stat-card{padding:12px 10px 12px 12px;gap:9px;border-radius:var(--radius-md);}
+    .stat-icon-wrap{width:34px;height:34px;border-radius:10px;}
+    .stat-icon{font-size:15px;}
+    .stat-value{font-size:22px;}
+    .stat-label{font-size:8.5px;}
+    .subject-row{flex-direction:column;align-items:flex-start;gap:10px;}
+    .subject-right{width:100%;text-align:left;}
+    .schedule-card{padding:12px 14px;}
+    .time-block{min-width:60px;height:60px;border-radius:14px;}
+    .toggle-btn{padding:12px 8px;}
+    .toggle-btn .btn-icon{width:34px;height:34px;}
+    .toggle-btn i{font-size:15px;}
+    .toggle-btn .btn-label{font-size:11.5px;}
+    .cal-grid{gap:2px;padding:8px 6px 10px;}
+    .cal-day{max-width:32px;max-height:32px;}
+    .cal-day span{font-size:10.5px;}
 }
-
-@media (max-width:380px) {
-    .stats-row { grid-template-columns: 1fr 1fr; }
-    .class-card { grid-column: span 2; }
+@media(max-width:380px){
+    .stats-row{gap:6px;}
+    .stat-value{font-size:20px;}
+    .stat-label{font-size:8px;}
 }
 </style>
+
+<!-- ══ HIDDEN ATTENDANCE DATA (for JS) ══ -->
+<script id="attendanceData" type="application/json">
+{
+  "subjects": [
+    {% for s in subjects %}
+    {
+      "id": {{ s.id }},
+      "name": "{{ s.name|escapejs }}",
+      "code": "{{ s.code|escapejs }}",
+      "records": [
+          {% for r in s.attendance_records %}
+          {
+            "date": "{{ r.date|date:'Y-m-d' }}",
+            "status": "{{ r.status }}",
+            "present_count": {{ r.present_count }},
+            "total_count": {{ r.total_count }},
+
+"classes": [
+
+    {% for c in r.classes %}
+
+    {
+
+        "status": "{{ c.status }}",
+
+        "created_at": "{{ c.created_at }}",
+
+        "start_time": "{{ c.start_time }}",
+
+        "end_time": "{{ c.end_time }}"
+
+    }
+
+    {% if not forloop.last %},{% endif %}
+
+    {% endfor %}
+
+]
+          }{% if not forloop.last %},{% endif %}
+          {% endfor %}
+      ]
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
 
 <div class="dashboard-container">
 
@@ -434,10 +382,10 @@ body.dark .progress-track { background: rgba(99,102,241,0.15); }
         <div class="hero-inner">
             <div class="hero-avatar">{{ student.name|slice:":1" }}</div>
             <div class="hero-text">
-                <h2>👋 Welcome back, {{ student.name|truncatechars:16 }}!</h2>
+                <h2>Welcome back, {{ student.name|truncatechars:16 }}!</h2>
                 <div class="hero-tags">
-                    <span class="hero-tag">🎓 {{ student.branch.name }}</span>
-                    <span class="hero-tag">📅 Sem {{ student.semester }}</span>
+                    <span class="hero-tag"><i class="fa-solid fa-graduation-cap" style="font-size:10px;"></i> {{ student.branch.name }}</span>
+                    <span class="hero-tag"><i class="fa-regular fa-calendar" style="font-size:10px;"></i> Sem {{ student.semester }}</span>
                 </div>
             </div>
         </div>
@@ -445,32 +393,34 @@ body.dark .progress-track { background: rgba(99,102,241,0.15); }
 
     <!-- ══ STATS ══ -->
     <div class="stats-row">
-
         <div class="stat-card subject-card">
-            <div class="stat-icon">📘</div>
-            <div class="stat-label">Subjects</div>
-            <div class="stat-value" id="val-subjects" data-target="{{ subjects|length }}">0</div>
+            <div class="stat-icon-wrap"><i class="fa-solid fa-book-open stat-icon"></i></div>
+            <div class="stat-text">
+                <div class="stat-label">Subjects</div>
+                <div class="stat-value" id="val-subjects" data-target="{{ subjects|length }}">0</div>
+            </div>
         </div>
-
         <div class="stat-card attendance-card">
-            <div class="stat-icon">✅</div>
-            <div class="stat-label">Attended</div>
-            <div class="stat-value" id="val-attended" data-target="{{ overall }}">0</div>
+            <div class="stat-icon-wrap"><i class="fa-solid fa-circle-check stat-icon"></i></div>
+            <div class="stat-text">
+                <div class="stat-label">Attended</div>
+                <div class="stat-value" id="val-attended" data-target="{{ overall }}">0</div>
+            </div>
         </div>
-
         <div class="stat-card class-card">
-            <div class="stat-icon">📚</div>
-            <div class="stat-label">Total Classes</div>
-            <div class="stat-value" id="val-total" data-target="{{ total_classes }}">0</div>
+            <div class="stat-icon-wrap"><i class="fa-solid fa-layer-group stat-icon"></i></div>
+            <div class="stat-text">
+                <div class="stat-label">Classes</div>
+                <div class="stat-value" id="val-total" data-target="{{ total_classes }}">0</div>
+            </div>
         </div>
-
     </div>
 
     <!-- ══ CHART ══ -->
     <div class="card">
         <div class="section-header">
             <div class="section-header-left">
-                <div class="section-icon icon-purple">📊</div>
+                <div class="section-icon icon-purple"><i class="fa-solid fa-chart-column" style="color:#4f46e5;font-size:16px;"></i></div>
                 <h3>Attendance Analytics</h3>
             </div>
         </div>
@@ -479,59 +429,117 @@ body.dark .progress-track { background: rgba(99,102,241,0.15); }
         </div>
     </div>
 
-    <!-- ══ SUBJECT DETAILS ══ -->
+    <!-- ══ VIEW TOGGLE + SUBJECT DETAILS / CALENDAR ══ -->
     <div class="card">
         <div class="section-header">
             <div class="section-header-left">
-                <div class="section-icon icon-blue">📖</div>
+                <div class="section-icon icon-blue"><i class="fa-solid fa-book-bookmark" style="color:#0ea5e9;font-size:15px;"></i></div>
                 <h3>Subject Wise Attendance</h3>
             </div>
         </div>
 
-        <div class="subject-list">
-            {% for s in subjects %}
+        <!-- TOGGLE BUTTONS -->
+        <div class="view-toggle-wrap">
+            <div class="view-toggle">
+                <button class="toggle-btn active" id="btnList" onclick="switchView('list')">
+                    <div class="btn-icon"><i class="fa-solid fa-list-ul"></i></div>
+                    <span class="btn-label">List View</span>
+                </button>
+                <button class="toggle-btn" id="btnCalendar" onclick="switchView('calendar')">
+                    <div class="btn-icon"><i class="fa-regular fa-calendar-days"></i></div>
+                    <span class="btn-label">Calendar View</span>
+                </button>
+            </div>
+        </div>
 
-            {% if s.total > 0 %}{% widthratio s.present s.total 100 as spct %}{% else %}{% with spct=0 %}{% endwith %}{% endif %}
-
-            <div class="subject-row">
-
-                <div class="subject-left">
-                    <div class="subject-name">{{ s.name }}</div>
-                    <div class="subject-code-chip">{{ s.code }}</div>
-                    <div class="progress-track">
-                        <div class="progress-fill
-                            {% if s.total > 0 %}{% widthratio s.present s.total 100 as spct %}{% if spct < 75 %}warn{% endif %}{% endif %}"
-                            style="width:{% if s.total > 0 %}{% widthratio s.present s.total 100 %}{% else %}0{% endif %}%;">
+        <!-- ══ LIST VIEW ══ -->
+        <div id="listView">
+            <div class="subject-list">
+                {% for s in subjects %}
+                {% if s.total > 0 %}{% widthratio s.present s.total 100 as spct %}{% else %}{% with spct=0 %}{% endwith %}{% endif %}
+                <div class="subject-row">
+                    <div class="subject-left">
+                        <div class="subject-name">{{ s.name }}</div>
+                        <div class="subject-code-chip">{{ s.code }}</div>
+                        <div class="progress-track">
+                            <div class="progress-fill {% if s.total > 0 %}{% widthratio s.present s.total 100 as spct %}{% if spct < 75 %}warn{% endif %}{% endif %}"
+                                style="width:{% if s.total > 0 %}{% widthratio s.present s.total 100 %}{% else %}0{% endif %}%;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="subject-right">
+                        <div class="subject-fraction">{{ s.present }}/{{ s.total }}</div>
+                        <div class="subject-fraction-label">classes</div>
+                        <div class="pct-chip {% if s.total > 0 %}{% widthratio s.present s.total 100 as spct %}{% if spct >= 75 %}pct-good{% else %}pct-low{% endif %}{% else %}pct-low{% endif %}">
+                            {% if s.total > 0 %}{% widthratio s.present s.total 100 %}{% else %}0{% endif %}%
                         </div>
                     </div>
                 </div>
-
-                <div class="subject-right">
-                    <div class="subject-fraction">{{ s.present }}/{{ s.total }}</div>
-                    <div class="subject-fraction-label">classes</div>
-                    <div class="pct-chip
-                        {% if s.total > 0 %}{% widthratio s.present s.total 100 as spct %}{% if spct >= 75 %}pct-good{% else %}pct-low{% endif %}{% else %}pct-low{% endif %}">
-                        {% if s.total > 0 %}{% widthratio s.present s.total 100 %}{% else %}0{% endif %}%
-                    </div>
-                </div>
-
+                {% endfor %}
             </div>
-            {% endfor %}
         </div>
-    </div>
+
+        <!-- ══ CALENDAR VIEW ══ -->
+        <div id="calendarView">
+
+            <!-- Subject selector -->
+            <div class="cal-subject-wrap">
+                <div class="cal-subject-label">Choose Subject</div>
+                <div class="subject-pills" id="subjectPills">
+                    {% for s in subjects %}
+                    <div class="subject-pill {% if forloop.first %}selected{% endif %}"
+                         data-subject-id="{{ s.id }}"
+                         onclick="selectSubject(this)">
+                        {{ s.code }}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Calendar -->
+            <div class="calendar-frame">
+                <div class="cal-nav">
+                    <button class="cal-nav-btn" onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+                    <span class="cal-month-title" id="calMonthTitle"></span>
+                    <button class="cal-nav-btn" onclick="changeMonth(1)"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+                <div class="cal-dow">
+                    <span>Su</span><span>Mo</span><span>Tu</span>
+                    <span>We</span><span>Th</span><span>Fr</span>
+                    <span class="weekend">Sa</span>
+                </div>
+                <div class="cal-grid" id="calGrid"></div>
+                <div class="cal-legend">
+                    <div class="legend-item"><div class="legend-dot dot-today"></div>Today</div>
+                    <div class="legend-item"><div class="legend-dot dot-present"></div>Present</div>
+                    <div class="legend-item"><div class="legend-dot dot-absent"></div>Absent</div>
+                    <div class="legend-item"><div class="legend-dot dot-noclass"></div>No Class</div>
+                </div>
+            </div>
+
+            <!-- Day Detail Panel -->
+            <div class="card" id="dayDetailPanel">
+                <div class="day-detail-header">
+                    <span class="day-detail-date" id="dayDetailTitle"></span>
+                    <button class="day-detail-close" onclick="closeDayDetail()"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="detail-classes" id="dayDetailBody"></div>
+            </div>
+
+        </div><!-- /calendarView -->
+
+    </div><!-- /card -->
 
     <!-- ══ TODAY'S CLASSES ══ -->
     <div class="card">
         <div class="section-header">
             <div class="section-header-left">
-                <div class="section-icon icon-green">📅</div>
+                <div class="section-icon icon-green"><i class="fa-regular fa-calendar-check" style="color:#10b981;font-size:15px;"></i></div>
                 <h3>Today's Classes</h3>
             </div>
         </div>
-
         <div class="schedule-list">
             {% for t in today_timetable %}
-
             <div class="schedule-card">
                 <div class="time-block">
                     <span class="time-start">{{ t.start_time }}</span>
@@ -540,51 +548,51 @@ body.dark .progress-track { background: rgba(99,102,241,0.15); }
                 </div>
                 <div class="schedule-info">
                     <div class="schedule-name">{{ t.subject.name }}</div>
-                    <div class="schedule-meta">📍 Room {{ t.room|default:"TBA" }} &nbsp;·&nbsp; 📘 {{ t.subject.code }}</div>
+                    <div class="schedule-meta">
+                        <i class="fa-solid fa-location-dot" style="font-size:10px;"></i>
+                        Room {{ t.room|default:"TBA" }} &nbsp;·&nbsp;
+                        <i class="fa-solid fa-hashtag" style="font-size:10px;"></i>
+                        {{ t.subject.code }}
+                    </div>
                 </div>
             </div>
-
             {% empty %}
-
             <div class="empty-box">
-                <span class="empty-icon">🌤️</span>
+                <i class="fa-regular fa-sun empty-icon"></i>
                 <h3>No Classes Today</h3>
-                <p>Enjoy your free time — you've earned it! 😎</p>
+                <p>Enjoy your free time — you've earned it!</p>
             </div>
-
             {% endfor %}
         </div>
     </div>
 
-</div>
+</div><!-- /dashboard-container -->
 
 <script>
-/* ── COUNT UP ANIMATION ── */
+/* ══════════════════════════════════════
+   COUNT UP
+══════════════════════════════════════ */
 function animateCount(el) {
     const target = parseInt(el.dataset.target) || 0;
-    const duration = 1200;
     const start = performance.now();
-    function step(now) {
-        const elapsed = Math.min((now - start) / duration, 1);
-        const ease = 1 - Math.pow(1 - elapsed, 4);
-        el.textContent = Math.round(ease * target);
-        if (elapsed < 1) requestAnimationFrame(step);
-    }
-    requestAnimationFrame(step);
+    (function step(now) {
+        const p = Math.min((now - start) / 1200, 1);
+        el.textContent = Math.round((1 - Math.pow(1 - p, 4)) * target);
+        if (p < 1) requestAnimationFrame(step);
+    })(performance.now());
 }
-
 document.querySelectorAll('.stat-value[data-target]').forEach((el, i) => {
     setTimeout(() => animateCount(el), 200 + i * 80);
 });
 
-/* ── CHART ── */
+/* ══════════════════════════════════════
+   CHART
+══════════════════════════════════════ */
 const isDark = document.body.classList.contains('dark');
 const textColor = isDark ? '#94a3b8' : '#64748b';
 const gridColor = isDark ? 'rgba(99,102,241,0.08)' : 'rgba(148,163,184,0.15)';
 
-const ctx = document.getElementById('attendanceChart');
-
-new Chart(ctx, {
+new Chart(document.getElementById('attendanceChart'), {
     type: 'bar',
     data: {
         labels: [{% for s in subjects %}"{{ s.code }}",{% endfor %}],
@@ -592,80 +600,302 @@ new Chart(ctx, {
             {
                 label: 'Attended',
                 data: [{% for s in subjects %}{{ s.present }},{% endfor %}],
-                backgroundColor: [
-                    'rgba(79,70,229,0.85)',
-                    'rgba(124,58,237,0.85)',
-                    'rgba(14,165,233,0.85)',
-                    'rgba(16,185,129,0.85)',
-                    'rgba(245,158,11,0.85)',
-                ],
-                borderRadius: 10,
-                borderSkipped: false,
-                barPercentage: 0.55,
+                backgroundColor: ['rgba(79,70,229,0.85)','rgba(124,58,237,0.85)','rgba(14,165,233,0.85)','rgba(16,185,129,0.85)','rgba(245,158,11,0.85)'],
+                borderRadius: 10, borderSkipped: false, barPercentage: 0.55,
             },
             {
                 label: 'Total Classes',
                 data: [{% for s in subjects %}{{ s.total }},{% endfor %}],
                 backgroundColor: isDark ? 'rgba(99,102,241,0.12)' : 'rgba(203,213,225,0.45)',
-                borderRadius: 10,
-                borderSkipped: false,
-                barPercentage: 0.55,
+                borderRadius: 10, borderSkipped: false, barPercentage: 0.55,
             }
         ]
     },
     options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: {
-            duration: 1600,
-            easing: 'easeOutQuart',
-            delay: (ctx) => ctx.dataIndex * 80,
-        },
+        responsive: true, maintainAspectRatio: false,
+        animation: { duration: 1600, easing: 'easeOutQuart', delay: c => c.dataIndex * 80 },
         plugins: {
-            legend: {
-                position: 'bottom',
-                labels: {
-                    color: textColor,
-                    font: { family: 'Sora', size: 12, weight: '600' },
-                    padding: 20,
-                    usePointStyle: true,
-                    pointStyleWidth: 10,
-                }
-            },
-            tooltip: {
-                backgroundColor: isDark ? '#1e293b' : '#fff',
-                titleColor: isDark ? '#f1f5f9' : '#0f172a',
-                bodyColor: textColor,
-                borderColor: 'rgba(99,102,241,0.2)',
-                borderWidth: 1,
-                cornerRadius: 12,
-                padding: 12,
-                titleFont: { family: 'Sora', weight: '700', size: 13 },
-                bodyFont:  { family: 'Sora', size: 12 },
-            }
+            legend: { position: 'bottom', labels: { color: textColor, font: { family: 'Sora', size: 12, weight: '600' }, padding: 20, usePointStyle: true, pointStyleWidth: 10 } },
+            tooltip: { backgroundColor: isDark ? '#1e293b' : '#fff', titleColor: isDark ? '#f1f5f9' : '#0f172a', bodyColor: textColor, borderColor: 'rgba(99,102,241,0.2)', borderWidth: 1, cornerRadius: 12, padding: 12, titleFont: { family: 'Sora', weight: '700', size: 13 }, bodyFont: { family: 'Sora', size: 12 } }
         },
         scales: {
-            x: {
-                ticks: {
-                    color: textColor,
-                    font: { family: 'JetBrains Mono', size: 11, weight: '600' }
-                },
-                grid: { display: false },
-                border: { display: false }
-            },
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    color: textColor,
-                    font: { family: 'Sora', size: 11 },
-                    stepSize: 1,
-                },
-                grid: { color: gridColor },
-                border: { display: false }
-            }
+            x: { ticks: { color: textColor, font: { family: 'JetBrains Mono', size: 11, weight: '600' } }, grid: { display: false }, border: { display: false } },
+            y: { beginAtZero: true, ticks: { color: textColor, font: { family: 'Sora', size: 11 }, stepSize: 1 }, grid: { color: gridColor }, border: { display: false } }
         }
     }
 });
+
+/* ══════════════════════════════════════
+   VIEW TOGGLE
+══════════════════════════════════════ */
+function switchView(view) {
+    const isList = view === 'list';
+    document.getElementById('listView').style.display     = isList ? 'block' : 'none';
+    document.getElementById('calendarView').classList.toggle('active', !isList);
+    document.getElementById('btnList').classList.toggle('active', isList);
+    document.getElementById('btnCalendar').classList.toggle('active', !isList);
+    if (!isList && !calInitialized) initCalendar();
+}
+
+/* ══════════════════════════════════════
+   CALENDAR ENGINE
+══════════════════════════════════════ */
+let calYear, calMonth, selectedSubjectId, calInitialized = false, selectedDayCell = null;
+
+// Parse attendance data from Django
+let attendanceData = {};
+try {
+    const raw = JSON.parse(document.getElementById('attendanceData').textContent);
+    raw.subjects.forEach(s => {
+        attendanceData[s.id] = { name: s.name, code: s.code, records: {} };
+        s.records.forEach(r => {
+            attendanceData[s.id].records[r.date] = {
+
+                status: r.status,
+
+                present_count: r.present_count,
+
+                total_count: r.total_count,
+
+                classes: r.classes || []
+
+            };
+
+        });
+    });
+} catch(e) { console.log('Attendance data parse error:', e); }
+
+// Get first subject id
+const firstPill = document.querySelector('.subject-pill.selected');
+if (firstPill) selectedSubjectId = parseInt(firstPill.dataset.subjectId);
+
+function initCalendar() {
+    const now = new Date();
+    calYear = now.getFullYear();
+    calMonth = now.getMonth();
+    calInitialized = true;
+    renderCalendar();
+}
+
+function selectSubject(el) {
+    document.querySelectorAll('.subject-pill').forEach(p => p.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedSubjectId = parseInt(el.dataset.subjectId);
+    closeDayDetail();
+    renderCalendar();
+}
+
+function changeMonth(dir) {
+    calMonth += dir;
+    if (calMonth > 11) { calMonth = 0; calYear++; }
+    if (calMonth < 0)  { calMonth = 11; calYear--; }
+    closeDayDetail();
+    renderCalendar();
+}
+
+function renderCalendar() {
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    document.getElementById('calMonthTitle').textContent = months[calMonth] + ' ' + calYear;
+
+    const today = new Date();
+    const firstDay = new Date(calYear, calMonth, 1).getDay(); // 0=Sun
+    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+
+    const subjectRecords = (attendanceData[selectedSubjectId] || {}).records || {};
+
+    const grid = document.getElementById('calGrid');
+    grid.innerHTML = '';
+
+    // empty cells before first day
+    for (let i = 0; i < firstDay; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'cal-day empty';
+        cell.innerHTML = '<span></span>';
+        grid.appendChild(cell);
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = calYear + '-' + String(calMonth + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+        const isToday = (today.getFullYear() === calYear && today.getMonth() === calMonth && today.getDate() === d);
+        const record = subjectRecords[dateStr];
+
+        const cell = document.createElement('div');
+        let cls = 'cal-day';
+        if (isToday)       cls += ' today';
+        if (record !== undefined) {
+            if (record.status === 'present') {
+                cls += ' present';
+            }
+            else if (record.status === 'partial') {
+                cls += ' partial';
+            }
+            else {
+                cls += ' absent';
+            }
+        } else {
+            cls += ' no-class';
+        }
+
+        cell.className = cls;
+        cell.dataset.date = dateStr;
+        cell.innerHTML = '<span>' + d + '</span>';
+        cell.addEventListener('click', () => onDayClick(cell, dateStr, d));
+        grid.appendChild(cell);
+    }
+}
+
+function onDayClick(cell, dateStr, day) {
+    // Deselect previous
+    if (selectedDayCell) selectedDayCell.classList.remove('selected-day');
+    cell.classList.add('selected-day');
+    selectedDayCell = cell;
+
+    // Collect all classes for this date across subjects (or just selected)
+    // Show all subjects that had a class on this date
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const dt = new Date(dateStr + 'T00:00:00');
+    const label = dt.getDate() + ' ' + months[dt.getMonth()] + ' ' + dt.getFullYear();
+    document.getElementById('dayDetailTitle').textContent = label;
+
+    const body = document.getElementById('dayDetailBody');
+    body.innerHTML = '';
+
+    // If a subject is selected, show only that subject; else show all
+    let hasAny = false;
+    const s = attendanceData[selectedSubjectId];
+    if (!s) return;
+    const rec = s.records[dateStr];
+    if (!rec) {
+        body.innerHTML = `
+            <div class="no-class-msg">
+                <i class="fa-regular fa-calendar-xmark"></i>
+                No classes scheduled on this date.
+            </div>
+        `;
+        showPanel();
+        return;
+    }
+        hasAny = true;
+
+        rec.classes.forEach(clsData => {
+
+    const isPresent =
+        clsData.status === 'present';
+
+    let cardType =
+        isPresent
+        ? 'card-present'
+        : 'card-absent';
+
+    const card = document.createElement('div');
+
+    card.className =
+        'detail-class-card ' + cardType;
+
+    card.innerHTML = `
+
+        <div class="detail-card-inner">
+
+            <div class="detail-status-icon">
+
+                <i class="fa-solid ${
+                    isPresent
+                    ? 'fa-circle-check'
+                    : 'fa-circle-xmark'
+                }"></i>
+
+            </div>
+
+            <div class="detail-info">
+
+                <div class="detail-subject-name">
+
+                    ${esc(s.name)}
+
+                </div>
+
+                <div class="detail-meta">
+
+                    <span class="detail-chip chip-code">
+
+                        ${esc(s.code)}
+
+                    </span>
+
+                    <span class="detail-chip chip-time">
+
+                        QR:
+                        ${esc(clsData.created_at)}
+
+                    </span>
+
+                    ${
+                        clsData.start_time
+
+                        ?
+
+                        `<span class="detail-chip chip-time">
+
+                            ${esc(clsData.start_time)}
+                            -
+                            ${esc(clsData.end_time)}
+
+                        </span>`
+
+                        : ''
+                    }
+
+                </div>
+
+            </div>
+
+            <div class="detail-badge ${
+                isPresent
+                ? 'badge-present'
+                : 'badge-absent'
+            }">
+
+                ${
+                    isPresent
+                    ? 'Present'
+                    : 'Absent'
+                }
+
+            </div>
+
+        </div>
+
+    `;
+
+    body.appendChild(card);
+
+});
+
+    if (!hasAny) {
+        body.innerHTML = `<div class="no-class-msg"><i class="fa-regular fa-calendar-xmark"></i>No classes scheduled on this date.</div>`;
+    }
+
+    const panel = document.getElementById('dayDetailPanel');
+    panel.classList.remove('show');
+    void panel.offsetWidth; // reflow
+    panel.classList.add('show');
+    panel.style.display = 'block';
+    setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+}
+
+function closeDayDetail() {
+    const panel = document.getElementById('dayDetailPanel');
+    panel.style.display = 'none';
+    panel.classList.remove('show');
+    if (selectedDayCell) {
+        selectedDayCell.classList.remove('selected-day');
+        selectedDayCell = null;
+    }
+}
+
+function esc(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
 </script>
 
 {% endblock %}

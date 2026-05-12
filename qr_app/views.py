@@ -102,43 +102,114 @@ def student_dashboard(request):
 
     try:
         student = Student.objects.get(user=request.user)
+
     except Student.DoesNotExist:
         return redirect("student_signup")
-	
+
     subjects = student.subjects.all()
-    
+
     today = datetime.now().strftime("%a")
 
     today_timetable = TimeTable.objects.filter(
-         branch=student.branch,
-         semester=student.semester,
-         day=today
-)
+        branch=student.branch,
+        semester=student.semester,
+        day=today
+    )
 
     data = []
+
     total_present = 0
     total_classes = 0
 
     for subject in subjects:
-        total = QRSession.objects.filter(subject=subject).count()
+
+        total = QRSession.objects.filter(
+            subject=subject
+        ).count()
 
         present = Attendance.objects.filter(
             student=student,
             qr_session__subject=subject
         ).count()
+        # 🔥 attendance map
+        attendance_map = {}
+        sessions = QRSession.objects.filter(
+            subject=subject
+        ).order_by("created_at")
+        for session in sessions:
+            date_key = session.created_at.date()
 
+            if date_key not in attendance_map:
+
+                attendance_map[date_key] = {
+                    "total": 0,
+                    "present": 0,
+                    "classes": []
+                }
+
+            attendance_map[date_key]["total"] += 1
+            att = Attendance.objects.filter(
+                student=student,
+                qr_session=session
+            ).exists()
+            if att:
+                attendance_map[date_key]["present"] += 1
+            attendance_map[date_key]["classes"].append({
+                "present": att,
+                "status": (
+                    "present"
+                    if att
+                    else "absent"
+                ),
+                "created_at": timezone.localtime(
+                    session.created_at
+                ).strftime("%I:%M %p"),
+                "start_time": (
+                    session.timetable.start_time.strftime("%I:%M %p")
+                    if hasattr(session, "timetable")
+                    and session.timetable
+                    else ""
+                ),
+                "end_time": (
+                    session.timetable.end_time.strftime("%I:%M %p")
+                    if hasattr(session, "timetable")
+                    and session.timetable
+                    else ""
+                )
+            })
+
+        # 🔥 convert to list
+        attendance_records = []
+        for dt, info in attendance_map.items():
+            attendance_records.append({
+                "date": dt,
+                "present_count": info["present"],
+                "total_count": info["total"],
+                "status": (
+                    "present"
+                    if info["present"] == info["total"]
+                    else "partial"
+                    if info["present"] > 0
+                    else "absent"
+                ),
+                "classes": info["classes"]
+
+            })
+
+        # 🔥 ADD TO DATA
         data.append({
+            "id": subject.id,
             "name": subject.name,
             "code": subject.code,
             "present": present,
-            "total": total
+            "total": total,
+            "attendance_records": attendance_records
         })
 
         total_present += present
         total_classes += total
 
-        overall = total_present   # total attendance count
-           
+    overall = total_present
 
     return render(request, "qr_app/student_dashboard.html", {
         "student": student,
@@ -146,7 +217,8 @@ def student_dashboard(request):
         "overall": overall,
         "total_classes": total_classes,
         "today_timetable": today_timetable
-})
+
+    })
 
 
 
@@ -768,7 +840,7 @@ def attendance_form(request, token):
         "roll": student.roll_no,
         "subject": qr_session.subject.name,
         "teacher": qr_session.subject.teacher_name if hasattr(qr_session.subject, "teacher_name") else "Teacher",
-        "time": timezone.now().strftime("%I:%M %p")
+        "time": timezone.localtime().strftime("%I:%M %p")
     })
 
 

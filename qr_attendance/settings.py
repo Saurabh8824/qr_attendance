@@ -25,18 +25,8 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 
-NGROK_URL = os.environ.get("NGROK_URL")
-
-if NGROK_URL:
-    ALLOWED_HOSTS.append(
-        NGROK_URL.replace("https://", "")
-    )
-
-    CSRF_TRUSTED_ORIGINS = [NGROK_URL]
-
-
-CSRF_COOKIE_SECURE = False
-SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 
 INSTALLED_APPS = [
     'django.contrib.admin',

@@ -1,0 +1,671 @@
+{% extends 'qr_app/student_base.html' %}
+{% block content %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+/* ══ TOKENS ══ */
+:root {
+    --bg:           #f0f4ff;
+    --surface:      #ffffff;
+    --surface-2:    #f8faff;
+    --border:       rgba(99,102,241,0.11);
+    --text-primary: #0f172a;
+    --text-secondary:#475569;
+    --text-muted:   #94a3b8;
+    --accent:       #4f46e5;
+    --accent-2:     #7c3aed;
+    --accent-3:     #0ea5e9;
+    --success:      #10b981;
+    --warning:      #f59e0b;
+    --shadow-sm:    0 2px 8px rgba(79,70,229,0.07);
+    --shadow-md:    0 8px 28px rgba(79,70,229,0.12);
+    --shadow-lg:    0 20px 55px rgba(79,70,229,0.18);
+    --radius-sm:    10px;
+    --radius-md:    18px;
+    --radius-lg:    24px;
+    --radius-xl:    32px;
+}
+
+body.dark {
+    --bg:            #060a14;
+    --surface:       #0f1628;
+    --surface-2:     #141d35;
+    --border:        rgba(99,102,241,0.16);
+    --text-primary:  #f1f5f9;
+    --text-secondary:#94a3b8;
+    --text-muted:    #475569;
+    --shadow-sm:     0 2px 10px rgba(0,0,0,0.3);
+    --shadow-md:     0 8px 28px rgba(0,0,0,0.35);
+    --shadow-lg:     0 20px 55px rgba(0,0,0,0.45);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+body {
+    font-family: 'Sora', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+    transition: background 0.4s ease, color 0.4s ease;
+}
+
+/* ── BG ORBS ── */
+body::before {
+    content: '';
+    position: fixed;
+    top: -140px; right: -100px;
+    width: 460px; height: 460px;
+    background: radial-gradient(circle, rgba(79,70,229,0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none; z-index: 0;
+}
+body::after {
+    content: '';
+    position: fixed;
+    bottom: -80px; left: -80px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(14,165,233,0.08) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none; z-index: 0;
+}
+
+/* ══ CONTAINER ══ */
+.dashboard-container {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 20px 16px 110px;
+    position: relative; z-index: 1;
+}
+
+/* ══ HERO ══ */
+.hero-card {
+    background: linear-gradient(145deg, #4f46e5 0%, #7c3aed 52%, #0ea5e9 100%);
+    border-radius: var(--radius-xl);
+    padding: 30px 24px 26px;
+    margin-bottom: 18px;
+    position: relative; overflow: hidden;
+    box-shadow: var(--shadow-lg);
+    animation: slideDown 0.6s cubic-bezier(.22,.68,0,1.2) both;
+}
+.hero-card::before {
+    content: '';
+    position: absolute;
+    width: 320px; height: 320px; border-radius: 50%;
+    background: rgba(255,255,255,0.07);
+    top: -150px; right: -80px;
+}
+.hero-card::after {
+    content: '';
+    position: absolute;
+    width: 160px; height: 160px; border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+    bottom: -70px; left: -30px;
+}
+
+.hero-inner {
+    position: relative; z-index: 2;
+    display: flex; align-items: center; gap: 18px;
+}
+
+.hero-avatar {
+    width: 68px; height: 68px; border-radius: 50%;
+    background: rgba(255,255,255,0.16);
+    border: 2px solid rgba(255,255,255,0.32);
+    backdrop-filter: blur(10px);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; font-weight: 800; color: #fff;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    flex-shrink: 0;
+}
+
+.hero-text h2 {
+    font-size: 22px; font-weight: 800; color: #fff;
+    margin-bottom: 6px;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+
+.hero-tags {
+    display: flex; flex-wrap: wrap; gap: 7px;
+}
+
+.hero-tag {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    backdrop-filter: blur(8px);
+    border-radius: 100px;
+    padding: 4px 12px;
+    font-size: 11.5px; font-weight: 500;
+    color: rgba(255,255,255,0.95);
+}
+
+/* ══ STATS ROW ══ */
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.stat-card {
+    border-radius: var(--radius-lg);
+    padding: 20px 18px;
+    color: #fff;
+    position: relative; overflow: hidden;
+    box-shadow: var(--shadow-md);
+}
+.stat-card::before {
+    content: '';
+    position: absolute;
+    width: 130px; height: 130px; border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    top: -55px; right: -35px;
+}
+.stat-card::after {
+    content: '';
+    position: absolute;
+    width: 70px; height: 70px; border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    bottom: -25px; left: -15px;
+}
+
+.subject-card   { background: linear-gradient(135deg,#4f46e5,#7c3aed); }
+.attendance-card{ background: linear-gradient(135deg,#0ea5e9,#3b82f6); }
+.class-card     { background: linear-gradient(135deg,#10b981,#0284c7); }
+
+.stat-icon {
+    font-size: 20px; margin-bottom: 6px;
+    position: relative; z-index: 2;
+}
+.stat-label {
+    font-size: 10px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.07em;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 4px;
+    position: relative; z-index: 2;
+}
+.stat-value {
+    font-size: 36px; font-weight: 800; line-height: 1;
+    position: relative; z-index: 2;
+    counter-reset: num var(--n);
+}
+
+/* ══ CARD ══ */
+.card {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 22px 20px;
+    margin-bottom: 18px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    transition: background 0.4s, border-color 0.4s;
+}
+
+/* ══ SECTION HEADER ══ */
+.section-header {
+    display: flex; align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.section-header-left {
+    display: flex; align-items: center; gap: 10px;
+}
+
+.section-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px; flex-shrink: 0;
+}
+.icon-purple { background: #f5f3ff; }
+.icon-blue   { background: #eff6ff; }
+.icon-green  { background: #f0fdf4; }
+
+.section-header h3 {
+    font-size: 15px; font-weight: 700; color: var(--text-primary);
+}
+
+/* ══ CHART ══ */
+.chart-wrapper {
+    position: relative;
+    height: 300px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+/* ══ SUBJECT ROWS ══ */
+.subject-list { display: flex; flex-direction: column; gap: 0; }
+
+.subject-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 15px 0;
+    border-bottom: 1px solid rgba(148,163,184,0.1);
+    animation: fadeUp 0.5s ease both;
+}
+.subject-row:last-child { border-bottom: none; padding-bottom: 0; }
+.subject-row:nth-child(1){ animation-delay:.1s; }
+.subject-row:nth-child(2){ animation-delay:.15s; }
+.subject-row:nth-child(3){ animation-delay:.2s; }
+.subject-row:nth-child(4){ animation-delay:.25s; }
+.subject-row:nth-child(5){ animation-delay:.3s; }
+
+.subject-left { flex: 1; min-width: 0; }
+
+.subject-name {
+    font-size: 14px; font-weight: 700;
+    color: var(--text-primary); margin-bottom: 3px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.subject-code-chip {
+    display: inline-flex;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; font-weight: 600;
+    color: var(--accent);
+    background: #eef2ff;
+    border: 1px solid rgba(79,70,229,0.15);
+    padding: 2px 9px; border-radius: 100px;
+    margin-bottom: 8px;
+}
+body.dark .subject-code-chip {
+    background: rgba(79,70,229,0.15);
+    border-color: rgba(79,70,229,0.25);
+}
+
+.progress-track {
+    width: 100%; height: 7px;
+    background: #e8ecf8;
+    border-radius: 100px; overflow: hidden;
+}
+body.dark .progress-track { background: rgba(99,102,241,0.15); }
+
+.progress-fill {
+    height: 100%; border-radius: 100px;
+    background: linear-gradient(90deg, #4f46e5, #7c3aed);
+    animation: growBar 1.2s cubic-bezier(.4,0,.2,1) both;
+    animation-delay: 0.3s;
+}
+.progress-fill.warn { background: linear-gradient(90deg, #f43f5e, #fb923c); }
+
+.subject-right { flex-shrink: 0; text-align: right; }
+
+.subject-fraction {
+    font-size: 18px; font-weight: 800;
+    color: var(--text-primary);
+}
+.subject-fraction-label {
+    font-size: 10px; color: var(--text-muted); margin-top: 2px;
+}
+
+.pct-chip {
+    display: inline-block; margin-top: 5px;
+    font-size: 11px; font-weight: 700;
+    padding: 3px 10px; border-radius: 100px;
+}
+.pct-good { background: #d1fae5; color: #065f46; }
+.pct-low  { background: #ffe4e6; color: #9f1239; }
+
+/* ══ TODAY SCHEDULE ══ */
+.schedule-list { display: flex; flex-direction: column; gap: 12px; }
+
+.schedule-card {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 16px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    animation: fadeUp 0.5s ease both;
+    transition: background 0.4s;
+}
+.schedule-card:nth-child(1){ animation-delay:.1s; }
+.schedule-card:nth-child(2){ animation-delay:.17s; }
+.schedule-card:nth-child(3){ animation-delay:.24s; }
+
+.time-block {
+    min-width: 68px; height: 68px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: #fff;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 2px;
+    box-shadow: 0 8px 20px rgba(79,70,229,0.28);
+    flex-shrink: 0;
+}
+.time-start {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px; font-weight: 700;
+}
+.time-sep { font-size: 9px; opacity: 0.65; font-weight: 600; }
+.time-end {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; opacity: 0.82;
+}
+
+.schedule-info { flex: 1; min-width: 0; }
+.schedule-name {
+    font-size: 14px; font-weight: 700;
+    color: var(--text-primary); margin-bottom: 4px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.schedule-meta {
+    font-size: 12px; color: var(--text-muted); font-weight: 500;
+}
+
+/* ══ EMPTY STATE ══ */
+.empty-box {
+    text-align: center;
+    padding: 40px 20px;
+    border-radius: var(--radius-md);
+    border: 1.5px dashed rgba(99,102,241,0.18);
+}
+.empty-icon {
+    font-size: 44px; display: block; margin-bottom: 12px;
+    animation: float 3s ease-in-out infinite;
+}
+.empty-box h3 { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
+.empty-box p  { font-size: 13px; color: var(--text-muted); }
+
+/* ══ ANIMATIONS ══ */
+@keyframes slideDown {
+    from { opacity:0; transform:translateY(-22px); }
+    to   { opacity:1; transform:translateY(0); }
+}
+@keyframes fadeUp {
+    from { opacity:0; transform:translateY(16px); }
+    to   { opacity:1; transform:translateY(0); }
+}
+@keyframes growBar {
+    from { width:0 !important; }
+}
+@keyframes countUp {
+    from { opacity:0; transform:translateY(8px); }
+    to   { opacity:1; transform:translateY(0); }
+}
+@keyframes float {
+    0%,100% { transform:translateY(0); }
+    50%      { transform:translateY(-10px); }
+}
+
+/* stat card stagger */
+.stat-card:nth-child(1){ animation: fadeUp 0.5s 0.1s ease both; }
+.stat-card:nth-child(2){ animation: fadeUp 0.5s 0.18s ease both; }
+.stat-card:nth-child(3){ animation: fadeUp 0.5s 0.26s ease both; }
+
+/* card stagger */
+.card:nth-child(1){ animation: fadeUp 0.5s 0.12s ease both; }
+.card:nth-child(2){ animation: fadeUp 0.5s 0.22s ease both; }
+.card:nth-child(3){ animation: fadeUp 0.5s 0.32s ease both; }
+
+/* ══ MOBILE ══ */
+@media (max-width:600px) {
+    .dashboard-container { padding: 14px 12px 90px; }
+    .hero-inner { flex-direction: column; text-align: center; }
+    .hero-tags  { justify-content: center; }
+    .hero-text h2 { font-size: 19px; }
+    .hero-avatar { width: 60px; height: 60px; font-size: 22px; }
+
+    .stats-row { grid-template-columns: 1fr; gap: 10px; }
+    .stat-value { font-size: 30px; }
+
+    .subject-row { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .subject-right { width: 100%; text-align: left; }
+
+    .schedule-card { padding: 12px 14px; }
+    .time-block { min-width: 60px; height: 60px; border-radius: 14px; }
+}
+
+@media (max-width:380px) {
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .class-card { grid-column: span 2; }
+}
+</style>
+
+<div class="dashboard-container">
+
+    <!-- ══ HERO ══ -->
+    <div class="hero-card">
+        <div class="hero-inner">
+            <div class="hero-avatar">{{ student.name|slice:":1" }}</div>
+            <div class="hero-text">
+                <h2>👋 Welcome back, {{ student.name|truncatechars:16 }}!</h2>
+                <div class="hero-tags">
+                    <span class="hero-tag">🎓 {{ student.branch.name }}</span>
+                    <span class="hero-tag">📅 Sem {{ student.semester }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ STATS ══ -->
+    <div class="stats-row">
+
+        <div class="stat-card subject-card">
+            <div class="stat-icon">📘</div>
+            <div class="stat-label">Subjects</div>
+            <div class="stat-value" id="val-subjects" data-target="{{ subjects|length }}">0</div>
+        </div>
+
+        <div class="stat-card attendance-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-label">Attended</div>
+            <div class="stat-value" id="val-attended" data-target="{{ overall }}">0</div>
+        </div>
+
+        <div class="stat-card class-card">
+            <div class="stat-icon">📚</div>
+            <div class="stat-label">Total Classes</div>
+            <div class="stat-value" id="val-total" data-target="{{ total_classes }}">0</div>
+        </div>
+
+    </div>
+
+    <!-- ══ CHART ══ -->
+    <div class="card">
+        <div class="section-header">
+            <div class="section-header-left">
+                <div class="section-icon icon-purple">📊</div>
+                <h3>Attendance Analytics</h3>
+            </div>
+        </div>
+        <div class="chart-wrapper">
+            <canvas id="attendanceChart"></canvas>
+        </div>
+    </div>
+
+    <!-- ══ SUBJECT DETAILS ══ -->
+    <div class="card">
+        <div class="section-header">
+            <div class="section-header-left">
+                <div class="section-icon icon-blue">📖</div>
+                <h3>Subject Wise Attendance</h3>
+            </div>
+        </div>
+
+        <div class="subject-list">
+            {% for s in subjects %}
+
+            {% if s.total > 0 %}{% widthratio s.present s.total 100 as spct %}{% else %}{% with spct=0 %}{% endwith %}{% endif %}
+
+            <div class="subject-row">
+
+                <div class="subject-left">
+                    <div class="subject-name">{{ s.name }}</div>
+                    <div class="subject-code-chip">{{ s.code }}</div>
+                    <div class="progress-track">
+                        <div class="progress-fill
+                            {% if s.total > 0 %}{% widthratio s.present s.total 100 as spct %}{% if spct < 75 %}warn{% endif %}{% endif %}"
+                            style="width:{% if s.total > 0 %}{% widthratio s.present s.total 100 %}{% else %}0{% endif %}%;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="subject-right">
+                    <div class="subject-fraction">{{ s.present }}/{{ s.total }}</div>
+                    <div class="subject-fraction-label">classes</div>
+                    <div class="pct-chip
+                        {% if s.total > 0 %}{% widthratio s.present s.total 100 as spct %}{% if spct >= 75 %}pct-good{% else %}pct-low{% endif %}{% else %}pct-low{% endif %}">
+                        {% if s.total > 0 %}{% widthratio s.present s.total 100 %}{% else %}0{% endif %}%
+                    </div>
+                </div>
+
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- ══ TODAY'S CLASSES ══ -->
+    <div class="card">
+        <div class="section-header">
+            <div class="section-header-left">
+                <div class="section-icon icon-green">📅</div>
+                <h3>Today's Classes</h3>
+            </div>
+        </div>
+
+        <div class="schedule-list">
+            {% for t in today_timetable %}
+
+            <div class="schedule-card">
+                <div class="time-block">
+                    <span class="time-start">{{ t.start_time }}</span>
+                    <span class="time-sep">—</span>
+                    <span class="time-end">{{ t.end_time }}</span>
+                </div>
+                <div class="schedule-info">
+                    <div class="schedule-name">{{ t.subject.name }}</div>
+                    <div class="schedule-meta">📍 Room {{ t.room|default:"TBA" }} &nbsp;·&nbsp; 📘 {{ t.subject.code }}</div>
+                </div>
+            </div>
+
+            {% empty %}
+
+            <div class="empty-box">
+                <span class="empty-icon">🌤️</span>
+                <h3>No Classes Today</h3>
+                <p>Enjoy your free time — you've earned it! 😎</p>
+            </div>
+
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+
+<script>
+/* ── COUNT UP ANIMATION ── */
+function animateCount(el) {
+    const target = parseInt(el.dataset.target) || 0;
+    const duration = 1200;
+    const start = performance.now();
+    function step(now) {
+        const elapsed = Math.min((now - start) / duration, 1);
+        const ease = 1 - Math.pow(1 - elapsed, 4);
+        el.textContent = Math.round(ease * target);
+        if (elapsed < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+}
+
+document.querySelectorAll('.stat-value[data-target]').forEach((el, i) => {
+    setTimeout(() => animateCount(el), 200 + i * 80);
+});
+
+/* ── CHART ── */
+const isDark = document.body.classList.contains('dark');
+const textColor = isDark ? '#94a3b8' : '#64748b';
+const gridColor = isDark ? 'rgba(99,102,241,0.08)' : 'rgba(148,163,184,0.15)';
+
+const ctx = document.getElementById('attendanceChart');
+
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: [{% for s in subjects %}"{{ s.code }}",{% endfor %}],
+        datasets: [
+            {
+                label: 'Attended',
+                data: [{% for s in subjects %}{{ s.present }},{% endfor %}],
+                backgroundColor: [
+                    'rgba(79,70,229,0.85)',
+                    'rgba(124,58,237,0.85)',
+                    'rgba(14,165,233,0.85)',
+                    'rgba(16,185,129,0.85)',
+                    'rgba(245,158,11,0.85)',
+                ],
+                borderRadius: 10,
+                borderSkipped: false,
+                barPercentage: 0.55,
+            },
+            {
+                label: 'Total Classes',
+                data: [{% for s in subjects %}{{ s.total }},{% endfor %}],
+                backgroundColor: isDark ? 'rgba(99,102,241,0.12)' : 'rgba(203,213,225,0.45)',
+                borderRadius: 10,
+                borderSkipped: false,
+                barPercentage: 0.55,
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: {
+            duration: 1600,
+            easing: 'easeOutQuart',
+            delay: (ctx) => ctx.dataIndex * 80,
+        },
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    color: textColor,
+                    font: { family: 'Sora', size: 12, weight: '600' },
+                    padding: 20,
+                    usePointStyle: true,
+                    pointStyleWidth: 10,
+                }
+            },
+            tooltip: {
+                backgroundColor: isDark ? '#1e293b' : '#fff',
+                titleColor: isDark ? '#f1f5f9' : '#0f172a',
+                bodyColor: textColor,
+                borderColor: 'rgba(99,102,241,0.2)',
+                borderWidth: 1,
+                cornerRadius: 12,
+                padding: 12,
+                titleFont: { family: 'Sora', weight: '700', size: 13 },
+                bodyFont:  { family: 'Sora', size: 12 },
+            }
+        },
+        scales: {
+            x: {
+                ticks: {
+                    color: textColor,
+                    font: { family: 'JetBrains Mono', size: 11, weight: '600' }
+                },
+                grid: { display: false },
+                border: { display: false }
+            },
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    color: textColor,
+                    font: { family: 'Sora', size: 11 },
+                    stepSize: 1,
+                },
+                grid: { color: gridColor },
+                border: { display: false }
+            }
+        }
+    }
+});
+</script>
+
+{% endblock %}

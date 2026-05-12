@@ -1,0 +1,146 @@
+{% extends "qr_app/base.html" %}
+{% block content %}
+
+<style>
+body {
+    background: linear-gradient(135deg, #eef2ff, #f8fafc);
+}
+
+.container {
+    max-width: 900px;
+}
+
+.card {
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.form-control, .form-select {
+    border-radius: 10px;
+}
+
+.btn-primary {
+    background: linear-gradient(90deg, #6366f1, #9333ea);
+    border: none;
+}
+</style>
+
+<div class="container mt-4">
+
+<div class="card">
+
+<h3 class="text-center mb-4">📅 Add Timetable</h3>
+
+<form method="POST">
+    {% csrf_token %}
+
+    <div class="row g-3">
+
+        <!-- Branch -->
+        <div class="col-md-4">
+            <label>Branch</label>
+            <select name="branch" id="branch" class="form-select" required>
+                <option value="">Select Branch</option>
+                {% for b in branches %}
+                <option value="{{ b.id }}">{{ b.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Semester -->
+        <div class="col-md-4">
+            <label>Semester</label>
+            <select name="semester" id="semester" class="form-select" required>
+                <option value="">Select Semester</option>
+                <option value="1">Sem 1</option>
+                <option value="2">Sem 2</option>
+                <option value="3">Sem 3</option>
+                <option value="4">Sem 4</option>
+                <option value="5">Sem 5</option>
+                <option value="6">Sem 6</option>
+            </select>
+        </div>
+
+        <!-- Subject -->
+        <div class="col-md-4">
+            <label>Subject</label>
+            <select name="subject" id="subject" class="form-select" required>
+                <option value="">Select Subject</option>
+            </select>
+        </div>
+
+        <!-- Day -->
+        <div class="col-md-4">
+            <label>Day</label>
+            <select name="day" class="form-select">
+                <option value="Mon">Monday</option>
+                <option value="Tue">Tuesday</option>
+                <option value="Wed">Wednesday</option>
+                <option value="Thu">Thursday</option>
+                <option value="Fri">Friday</option>
+                <option value="Sat">Saturday</option>
+            </select>
+        </div>
+
+        <!-- Time -->
+        <div class="col-md-4">
+            <label>Start Time</label>
+            <input type="time" name="start_time" class="form-control" required>
+        </div>
+
+        <div class="col-md-4">
+            <label>End Time</label>
+            <input type="time" name="end_time" class="form-control" required>
+        </div>
+
+        <!-- Room -->
+        <div class="col-md-6">
+            <label>Room</label>
+            <input type="text" name="room" class="form-control" placeholder="Room No">
+        </div>
+
+        <!-- Teacher -->
+        <div class="col-md-6">
+            <label>Teacher Name</label>
+            <input type="text" name="teacher_name" class="form-control">
+        </div>
+
+    </div>
+
+    <div class="text-center mt-4">
+        <button class="btn btn-primary px-5">Save Timetable</button>
+    </div>
+
+</form>
+
+</div>
+</div>
+
+<!-- 🔥 AJAX SUBJECT FILTER -->
+<script>
+document.getElementById("branch").addEventListener("change", loadSubjects);
+document.getElementById("semester").addEventListener("change", loadSubjects);
+
+function loadSubjects() {
+    let branch = document.getElementById("branch").value;
+    let semester = document.getElementById("semester").value;
+
+    if (!branch || !semester) return;
+
+    fetch("{% url 'ajax_get_subjects' %}?branch=" + branch + "&semester=" + semester)
+        .then(res => res.json())
+        .then(data => {
+            let subjectSelect = document.getElementById("subject");
+            subjectSelect.innerHTML = "<option>Select Subject</option>";
+
+            data.results.forEach(sub => {
+                subjectSelect.innerHTML += `<option value="${sub.id}">${sub.name}</option>`;
+            });
+        });
+}
+</script>
+
+{% endblock %}

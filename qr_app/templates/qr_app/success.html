@@ -1,0 +1,56 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attendance Success</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #27ae60, #2ecc71);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    main {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .card {
+      width: 100%;
+      max-width: 450px;
+      border-radius: 15px;
+      box-shadow: 0px 4px 12px rgba(0,0,0,0.2);
+      padding: 25px;
+      text-align: center;
+      background: #fff;
+      border-left: 5px solid green;
+      border-right: 5px solid green
+    }
+    .team {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #bdc3c7;
+    }
+  </style>
+</head>
+<body>
+
+  <main>
+    <div class="card">
+      <h3 class="text-success">✅ Attendance Marked Successfully</h3>
+      <p class="mt-3">
+        Thank you <b>{{ student.name }}</b> (Roll No: {{ student.roll_no }})  
+        for attending <b>{{ subject.name }}</b> class.
+      </p>
+      <p style="color: gray; font-size: 14px;">
+        Your presence has been recorded at {{ now|date:"d-m-Y H:i" }}.
+      </p>
+    </div>
+  </main>
+</body>
+</html>

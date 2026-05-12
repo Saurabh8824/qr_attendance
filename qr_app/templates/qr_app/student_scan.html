@@ -1,0 +1,1049 @@
+{% extends 'qr_app/student_base.html' %}
+{% block content %}
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+
+/* ═══════════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════════ */
+:root {
+    --surface:       rgba(255,255,255,0.72);
+    --surface-2:     rgba(255,255,255,0.52);
+    --border:        rgba(255,255,255,0.80);
+    --border-2:      rgba(99,102,241,0.14);
+    --text-primary:  #0f172a;
+    --text-secondary:#475569;
+    --text-muted:    #94a3b8;
+    --accent:        #6366f1;
+    --accent-2:      #8b5cf6;
+    --accent-3:      #06b6d4;
+    --success:       #10b981;
+    --danger:        #f43f5e;
+    --glass-blur:    saturate(1.8) blur(24px);
+    --radius-sm:     14px;
+    --radius-md:     20px;
+    --radius-lg:     26px;
+    --radius-xl:     34px;
+    --spring:        cubic-bezier(0.34,1.56,0.64,1);
+    --ease-out:      cubic-bezier(0.22,0.68,0,1.2);
+}
+body.dark {
+    --surface:       rgba(15,23,42,0.65);
+    --surface-2:     rgba(15,23,42,0.45);
+    --border:        rgba(255,255,255,0.08);
+    --border-2:      rgba(99,102,241,0.22);
+    --text-primary:  #f1f5f9;
+    --text-secondary:#94a3b8;
+    --text-muted:    #475569;
+}
+
+/* ═══════════════════════════════════════════
+   BASE RESET
+═══════════════════════════════════════════ */
+*, *::before, *::after {
+    margin:0; padding:0; box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
+}
+body {
+    font-family:'Sora',sans-serif;
+    color:var(--text-primary);
+    overflow-x:hidden;
+}
+
+/* ═══════════════════════════════════════════
+   CONTAINER
+═══════════════════════════════════════════ */
+.scan-container {
+    max-width:520px;
+    margin:0 auto;
+    padding:16px 14px 110px;
+    position:relative; z-index:1;
+}
+
+/* ═══════════════════════════════════════════
+   HERO HEADER  — glass morphism style
+═══════════════════════════════════════════ */
+.scan-header {
+    background:linear-gradient(140deg,#4f46e5 0%,#7c3aed 52%,#06b6d4 100%);
+    border-radius:var(--radius-xl);
+    padding:26px 20px 22px;
+    margin-bottom:14px;
+    position:relative; overflow:hidden;
+    box-shadow:0 20px 55px rgba(99,102,241,0.30),
+               0 4px 12px rgba(0,0,0,0.10);
+    animation:slideDown 0.55s var(--ease-out) both;
+    border:1.5px solid rgba(255,255,255,0.22);
+}
+.scan-header::before {
+    content:'';
+    position:absolute;
+    width:300px; height:300px; border-radius:50%;
+    background:rgba(255,255,255,0.07);
+    top:-140px; right:-60px;
+}
+.scan-header::after {
+    content:'';
+    position:absolute;
+    width:140px; height:140px; border-radius:50%;
+    background:rgba(255,255,255,0.05);
+    bottom:-60px; left:-20px;
+}
+.scan-header-inner {
+    position:relative; z-index:2;
+    display:flex; align-items:center; gap:14px;
+}
+.header-icon-wrap {
+    width:56px; height:56px; border-radius:18px;
+    background:rgba(255,255,255,0.16);
+    border:1.5px solid rgba(255,255,255,0.30);
+    backdrop-filter:blur(10px);
+    display:flex; align-items:center; justify-content:center;
+    font-size:24px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.12),inset 0 1px 0 rgba(255,255,255,0.25);
+    flex-shrink:0;
+}
+.header-text h2 {
+    font-size:20px; font-weight:800; color:#fff;
+    margin-bottom:4px; letter-spacing:-0.3px;
+}
+.header-text p {
+    font-size:12px; color:rgba(255,255,255,0.72); font-weight:500;
+}
+
+/* ═══════════════════════════════════════════
+   GLASS CARD
+═══════════════════════════════════════════ */
+.glass-card {
+    background:var(--surface);
+    backdrop-filter:var(--glass-blur);
+    -webkit-backdrop-filter:var(--glass-blur);
+    border:1px solid var(--border);
+    border-radius:var(--radius-lg);
+    padding:18px;
+    margin-bottom:14px;
+    box-shadow:0 8px 32px rgba(0,0,0,0.08),
+               inset 0 1px 0 rgba(255,255,255,0.60);
+    background-image:linear-gradient(160deg,rgba(255,255,255,0.18) 0%,rgba(255,255,255,0.04) 100%);
+    animation:fadeUp 0.5s var(--ease-out) both;
+}
+.glass-card:nth-child(2){animation-delay:0.08s;}
+.glass-card:nth-child(3){animation-delay:0.16s;}
+body.dark .glass-card {
+    background-image:linear-gradient(160deg,rgba(255,255,255,0.06) 0%,rgba(255,255,255,0.01) 100%);
+    box-shadow:0 8px 32px rgba(0,0,0,0.30),
+               inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+/* ═══════════════════════════════════════════
+   STUDENT CARD
+═══════════════════════════════════════════ */
+.student-box {
+    display:flex; align-items:center; gap:14px;
+}
+.avatar-wrap {
+    width:56px; height:56px; border-radius:50%;
+    background:linear-gradient(135deg,#6366f1,#8b5cf6);
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-size:21px; font-weight:800;
+    box-shadow:0 8px 22px rgba(99,102,241,0.32);
+    flex-shrink:0;
+    border:2px solid rgba(255,255,255,0.35);
+}
+.student-info h3 {
+    font-size:15px; font-weight:700; color:var(--text-primary); margin-bottom:5px;
+}
+.enrollment-chip {
+    display:inline-flex; align-items:center; gap:5px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px; font-weight:600;
+    color:var(--accent);
+    background:rgba(99,102,241,0.10);
+    border:1px solid rgba(99,102,241,0.18);
+    padding:3px 10px; border-radius:100px;
+}
+
+/* ═══════════════════════════════════════════
+   SCANNER SECTION LABEL
+═══════════════════════════════════════════ */
+.scanner-label {
+    display:flex; align-items:center; gap:8px;
+    margin-bottom:14px;
+}
+.scanner-label-icon {
+    width:30px; height:30px; border-radius:10px;
+    background:rgba(99,102,241,0.12);
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px;
+}
+.scanner-label h3 {
+    font-size:13px; font-weight:700; color:var(--text-primary);
+}
+
+/* ═══════════════════════════════════════════
+   SCANNER WRAPPER — the main glass frame
+═══════════════════════════════════════════ */
+.scanner-wrapper {
+    position:relative;
+    border-radius:var(--radius-md);
+    overflow:hidden;
+    background:#080e1f;
+    /* Siri-style animated gradient border */
+    padding:3px;
+    box-shadow:0 0 0 1px rgba(99,102,241,0.15),
+               0 20px 50px rgba(0,0,0,0.25);
+}
+
+/* ── SIRI GLOW BORDER ── */
+.scanner-wrapper::before {
+    content:'';
+    position:absolute;
+    inset:-2px;
+    border-radius:calc(var(--radius-md) + 3px);
+    background:conic-gradient(
+        from var(--angle,0deg),
+        #6366f1 0%,
+        #8b5cf6 18%,
+        #06b6d4 36%,
+        #10b981 52%,
+        #f59e0b 68%,
+        #f43f5e 82%,
+        #6366f1 100%
+    );
+    opacity:0;
+    z-index:0;
+    transition:opacity 0.5s ease;
+    animation:rotateBorder 3s linear infinite;
+}
+
+/* active state — glow border on */
+.scanner-wrapper.active::before {
+    opacity:1;
+}
+
+@property --angle {
+    syntax:'<angle>';
+    initial-value:0deg;
+    inherits:false;
+}
+@keyframes rotateBorder {
+    to { --angle:360deg; }
+}
+
+.scanner-inner {
+    position:relative;
+    border-radius:calc(var(--radius-md) - 1px);
+    overflow:hidden;
+    background:#080e1f;
+    z-index:1;
+}
+
+#reader {
+    width:100%; min-height:290px;
+    border-radius:calc(var(--radius-md) - 1px);
+    overflow:hidden;
+}
+
+/* ── CORNER BRACKETS ── */
+.corner {
+    position:absolute;
+    width:38px; height:38px;
+    pointer-events:none; z-index:12;
+    transition:border-color 0.5s ease, box-shadow 0.5s ease;
+}
+.corner-tl { top:12px; left:12px; border-top:3px solid #6366f1; border-left:3px solid #6366f1; border-radius:6px 0 0 0; }
+.corner-tr { top:12px; right:12px; border-top:3px solid #6366f1; border-right:3px solid #6366f1; border-radius:0 6px 0 0; }
+.corner-bl { bottom:12px; left:12px; border-bottom:3px solid #6366f1; border-left:3px solid #6366f1; border-radius:0 0 0 6px; }
+.corner-br { bottom:12px; right:12px; border-bottom:3px solid #6366f1; border-right:3px solid #6366f1; border-radius:0 0 6px 0; }
+
+/* glow on active */
+.scanner-wrapper.active .corner {
+    border-color:#818cf8;
+    box-shadow:0 0 10px rgba(129,140,248,0.6);
+}
+.scanner-wrapper.success-state .corner {
+    border-color:#10b981;
+    box-shadow:0 0 12px rgba(16,185,129,0.7);
+    animation:cornerFlash 0.6s ease both;
+}
+.scanner-wrapper.error-state .corner {
+    border-color:#f43f5e;
+    box-shadow:0 0 12px rgba(244,63,94,0.7);
+    animation:cornerFlash 0.6s ease both;
+}
+@keyframes cornerFlash {
+    0%,100% { opacity:1; }
+    30% { opacity:0.2; }
+    60% { opacity:1; }
+}
+
+/* ── SCAN LINE ── */
+.scan-line {
+    position:absolute; left:0;
+    width:100%; height:2px;
+    background:linear-gradient(90deg,transparent 0%,#6366f1 25%,#8b5cf6 50%,#06b6d4 75%,transparent 100%);
+    box-shadow:0 0 18px #8b5cf6, 0 0 8px rgba(139,92,246,0.6);
+    z-index:11;
+    top:0%;
+    opacity:0;
+    transition:opacity 0.3s;
+}
+.scanner-wrapper.active .scan-line {
+    opacity:1;
+    animation:scanMove 2s ease-in-out infinite;
+}
+@keyframes scanMove {
+    0%  { top:8%;  opacity:0.5; }
+    50% { opacity:1; }
+    100%{ top:92%; opacity:0.5; }
+}
+
+/* ── WAVE RIPPLE on success ── */
+.wave-ring {
+    position:absolute;
+    inset:0;
+    border-radius:calc(var(--radius-md) - 1px);
+    pointer-events:none;
+    z-index:13;
+    display:none;
+}
+.wave-ring.play { display:block; }
+
+.wave-ring span {
+    position:absolute; inset:0;
+    border-radius:inherit;
+    background:rgba(16,185,129,0.25);
+    animation:waveExpand 0.9s ease-out both;
+}
+.wave-ring span:nth-child(2){ animation-delay:0.18s; background:rgba(16,185,129,0.15); }
+.wave-ring span:nth-child(3){ animation-delay:0.35s; background:rgba(16,185,129,0.08); }
+
+@keyframes waveExpand {
+    from { transform:scale(0.6); opacity:1; }
+    to   { transform:scale(1.08); opacity:0; }
+}
+
+/* Error shake on fail */
+.scanner-wrapper.shake {
+    animation:shakeErr 0.55s ease both;
+}
+@keyframes shakeErr {
+    0%,100%{ transform:translateX(0); }
+    18%    { transform:translateX(-7px); }
+    36%    { transform:translateX(7px); }
+    54%    { transform:translateX(-5px); }
+    72%    { transform:translateX(5px); }
+    88%    { transform:translateX(-2px); }
+}
+
+/* ── IDLE OVERLAY ── */
+.idle-overlay {
+    position:absolute; inset:0;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    background:linear-gradient(145deg,#080e1f,#1a1040);
+    border-radius:calc(var(--radius-md) - 1px);
+    z-index:5; gap:10px;
+    transition:opacity 0.4s ease;
+}
+.idle-overlay.hidden { opacity:0; pointer-events:none; }
+
+.idle-qr-icon {
+    font-size:50px;
+    animation:float 3s ease-in-out infinite;
+    filter:drop-shadow(0 0 18px rgba(99,102,241,0.4));
+}
+.idle-overlay p {
+    color:rgba(255,255,255,0.45);
+    font-size:12px; font-weight:500;
+}
+
+/* ─── tap-to-scan prompt ─── */
+.tap-hint {
+    display:flex; align-items:center; gap:6px;
+    margin-top:6px;
+    padding:6px 14px;
+    border-radius:100px;
+    background:rgba(99,102,241,0.18);
+    border:1px solid rgba(99,102,241,0.25);
+    color:rgba(200,200,255,0.80);
+    font-size:11px; font-weight:600;
+    animation:pulseFade 2s ease-in-out infinite;
+}
+@keyframes pulseFade {
+    0%,100%{ opacity:0.7; }
+    50%{ opacity:1; }
+}
+
+/* ═══════════════════════════════════════════
+   START BUTTON  — PhonePe-style full width FAB
+═══════════════════════════════════════════ */
+.start-scan-btn {
+    width:100%;
+    padding:16px;
+    margin-top:14px;
+    border:none;
+    border-radius:var(--radius-md);
+    background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 60%,#06b6d4 100%);
+    color:white;
+    font-family:'Sora',sans-serif;
+    font-size:15px; font-weight:700;
+    cursor:pointer;
+    box-shadow:0 12px 32px rgba(99,102,241,0.35),
+               inset 0 1px 0 rgba(255,255,255,0.22);
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    transition:transform 0.25s var(--spring),
+               box-shadow 0.25s ease;
+    position:relative; overflow:hidden;
+    letter-spacing:0.2px;
+}
+.start-scan-btn::after {
+    content:'';
+    position:absolute; inset:0;
+    background:linear-gradient(160deg,rgba(255,255,255,0.18) 0%,transparent 60%);
+    border-radius:inherit;
+}
+.start-scan-btn:hover {
+    transform:translateY(-2px) scale(1.01);
+    box-shadow:0 18px 42px rgba(99,102,241,0.42);
+}
+.start-scan-btn:active {
+    transform:scale(0.97);
+    box-shadow:0 6px 18px rgba(99,102,241,0.25);
+}
+.start-scan-btn.loading {
+    opacity:0.82;
+    pointer-events:none;
+}
+.btn-icon {
+    font-size:18px;
+    transition:transform 0.4s var(--spring);
+}
+.start-scan-btn:hover .btn-icon {
+    transform:scale(1.2) rotate(-6deg);
+}
+
+/* Ripple on click */
+.ripple-effect {
+    position:absolute;
+    border-radius:50%;
+    background:rgba(255,255,255,0.30);
+    width:8px; height:8px;
+    transform:scale(0);
+    animation:rippleAnim 0.55s ease-out both;
+    pointer-events:none;
+}
+@keyframes rippleAnim {
+    to { transform:scale(36); opacity:0; }
+}
+
+/* ═══════════════════════════════════════════
+   RESULT BOX
+═══════════════════════════════════════════ */
+.result-box {
+    margin-top:14px;
+    border-radius:var(--radius-lg);
+    overflow:hidden;
+    display:none;
+    animation:resultReveal 0.55s var(--ease-out) both;
+    backdrop-filter:var(--glass-blur);
+    -webkit-backdrop-filter:var(--glass-blur);
+}
+
+@keyframes resultReveal {
+    from { opacity:0; transform:translateY(20px) scale(0.96); }
+    to   { opacity:1; transform:translateY(0) scale(1); }
+}
+
+.result-box.success {
+    background:linear-gradient(145deg,rgba(240,253,244,0.92),rgba(220,252,231,0.88));
+    border:1.5px solid rgba(16,185,129,0.28);
+    box-shadow:0 16px 48px rgba(16,185,129,0.18);
+}
+.result-box.error {
+    background:linear-gradient(145deg,rgba(255,241,243,0.92),rgba(255,228,230,0.88));
+    border:1.5px solid rgba(244,63,94,0.22);
+    box-shadow:0 16px 48px rgba(244,63,94,0.14);
+}
+body.dark .result-box.success {
+    background:linear-gradient(145deg,rgba(6,78,59,0.55),rgba(5,46,22,0.45));
+    border-color:rgba(16,185,129,0.30);
+}
+body.dark .result-box.error {
+    background:linear-gradient(145deg,rgba(76,5,25,0.55),rgba(69,10,10,0.45));
+    border-color:rgba(244,63,94,0.28);
+}
+
+.result-inner {
+    padding:30px 20px 22px;
+    text-align:center;
+}
+
+/* ── Result status icon with ring ── */
+.result-icon-wrap {
+    position:relative;
+    display:inline-flex;
+    align-items:center; justify-content:center;
+    margin-bottom:16px;
+}
+.result-icon {
+    font-size:54px;
+    display:block;
+    position:relative; z-index:2;
+    animation:iconBounce 0.7s var(--spring) both;
+    filter:drop-shadow(0 4px 16px rgba(0,0,0,0.15));
+}
+@keyframes iconBounce {
+    from { transform:scale(0.3) rotate(-12deg); opacity:0; }
+    60%  { transform:scale(1.15) rotate(4deg); opacity:1; }
+    80%  { transform:scale(0.95) rotate(-2deg); }
+    to   { transform:scale(1) rotate(0); opacity:1; }
+}
+
+/* ring glow behind icon */
+.result-ring {
+    position:absolute;
+    width:90px; height:90px;
+    border-radius:50%;
+    opacity:0;
+    animation:ringGlow 0.9s 0.2s ease-out both;
+}
+.result-box.success .result-ring {
+    background:radial-gradient(circle,rgba(16,185,129,0.30) 0%,transparent 70%);
+}
+.result-box.error .result-ring {
+    background:radial-gradient(circle,rgba(244,63,94,0.25) 0%,transparent 70%);
+}
+@keyframes ringGlow {
+    from{ transform:scale(0.4); opacity:0; }
+    to  { transform:scale(2.2); opacity:1; }
+}
+
+.result-box h3 {
+    font-size:19px; font-weight:800;
+    margin-bottom:6px; letter-spacing:-0.3px;
+    animation:fadeUp 0.45s 0.18s ease both;
+}
+.result-box.success h3 { color:#065f46; }
+.result-box.error   h3 { color:#9f1239; }
+body.dark .result-box.success h3 { color:#6ee7b7; }
+body.dark .result-box.error   h3 { color:#fca5a5; }
+
+.result-subtitle {
+    font-size:12.5px; color:var(--text-muted); margin-bottom:16px;
+    animation:fadeUp 0.45s 0.26s ease both;
+}
+
+/* Meta info grid */
+.meta {
+    display:grid; gap:8px;
+    text-align:left;
+    margin-bottom:4px;
+    animation:fadeUp 0.45s 0.32s ease both;
+}
+.meta-box {
+    display:flex; align-items:center; gap:10px;
+    padding:10px 12px;
+    border-radius:var(--radius-sm);
+    background:rgba(255,255,255,0.72);
+    border:1px solid rgba(255,255,255,0.55);
+    backdrop-filter:blur(8px);
+    transition:transform 0.2s var(--spring);
+}
+.meta-box:hover { transform:translateX(3px); }
+body.dark .meta-box {
+    background:rgba(255,255,255,0.06);
+    border-color:rgba(255,255,255,0.08);
+}
+.meta-icon {
+    width:30px; height:30px; border-radius:9px;
+    background:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.08);
+    flex-shrink:0;
+}
+body.dark .meta-icon { background:rgba(255,255,255,0.10); }
+.meta-text {
+    font-size:12.5px; font-weight:600; color:var(--text-primary);
+}
+
+/* ── ACTION BUTTONS ── */
+.result-actions {
+    display:flex; gap:10px;
+    padding:14px 18px;
+    border-top:1px solid rgba(0,0,0,0.06);
+}
+body.dark .result-actions {
+    border-top-color:rgba(255,255,255,0.06);
+}
+
+.scan-again-btn {
+    flex:1;
+    padding:13px;
+    border:none;
+    border-radius:var(--radius-md);
+    background:linear-gradient(135deg,#6366f1,#8b5cf6);
+    color:white;
+    font-family:'Sora',sans-serif;
+    font-size:13.5px; font-weight:700;
+    cursor:pointer;
+    box-shadow:0 8px 22px rgba(99,102,241,0.28),
+               inset 0 1px 0 rgba(255,255,255,0.20);
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    transition:transform 0.2s var(--spring), box-shadow 0.2s ease;
+    position:relative; overflow:hidden;
+}
+.scan-again-btn::after {
+    content:'';
+    position:absolute; inset:0;
+    background:linear-gradient(160deg,rgba(255,255,255,0.15) 0%,transparent 60%);
+}
+.scan-again-btn:hover {
+    transform:translateY(-2px);
+    box-shadow:0 14px 32px rgba(99,102,241,0.38);
+}
+.scan-again-btn:active { transform:scale(0.96); }
+
+/* ═══════════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════════ */
+@keyframes slideDown {
+    from{ opacity:0; transform:translateY(-22px); }
+    to  { opacity:1; transform:translateY(0); }
+}
+@keyframes fadeUp {
+    from{ opacity:0; transform:translateY(16px); }
+    to  { opacity:1; transform:translateY(0); }
+}
+@keyframes float {
+    0%,100%{ transform:translateY(0); }
+    50%     { transform:translateY(-10px); }
+}
+
+/* ── html5-qrcode override ── */
+#reader video { border-radius:calc(var(--radius-md) - 2px) !important; }
+#reader__scan_region { border:none !important; }
+#reader__dashboard { display:none !important; }
+#reader__status_span { display:none !important; }
+#reader img { display:none !important; }
+#reader__filescan_input { display:none !important; }
+#reader select { display:none !important; }
+#reader__header_message { display:none !important; }
+
+/* ═══════════════════════════════════════════
+   MOBILE
+═══════════════════════════════════════════ */
+@media(max-width:600px){
+    .scan-container{ padding:12px 11px 100px; }
+    .scan-header{ padding:20px 16px 18px; }
+    .header-text h2{ font-size:17px; }
+    .avatar-wrap{ width:50px; height:50px; font-size:18px; }
+    .result-icon{ font-size:48px; }
+}
+
+</style>
+
+<!-- ════════════ PAGE ════════════ -->
+<div class="scan-container">
+
+    <!-- HERO HEADER -->
+    <div class="scan-header">
+        <div class="scan-header-inner">
+            <div class="header-icon-wrap">📷</div>
+            <div class="header-text">
+                <h2>Smart Scanner</h2>
+                <p>Scan QR code &amp; mark attendance instantly</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- STUDENT CARD -->
+    <div class="glass-card">
+        <div class="student-box">
+            <div class="avatar-wrap">{{ student.name|slice:":1" }}</div>
+            <div class="student-info">
+                <h3>{{ student.name }}</h3>
+                <div class="enrollment-chip">
+                    <i class="fa-solid fa-hashtag" style="font-size:9px;"></i>
+                    {{ student.enrollment_no }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCANNER CARD -->
+    <div class="glass-card">
+
+        <div class="scanner-label">
+            <div class="scanner-label-icon">🎯</div>
+            <h3>Point camera at QR code</h3>
+        </div>
+
+        <!-- ── SCANNER WRAPPER ── -->
+        <div class="scanner-wrapper" id="scannerWrapper">
+
+            <!-- Siri glow border is the ::before pseudo -->
+
+            <div class="scanner-inner">
+
+                <!-- IDLE OVERLAY -->
+                <div class="idle-overlay" id="idleOverlay">
+                    <span class="idle-qr-icon">⬛</span>
+                    <p>Tap below to open camera</p>
+                    <div class="tap-hint">
+                        <i class="fa-solid fa-camera" style="font-size:10px;"></i>
+                        Tap "Open Scanner"
+                    </div>
+                </div>
+
+                <!-- QR READER -->
+                <div id="reader"></div>
+
+                <!-- CORNER BRACKETS -->
+                <div class="corner corner-tl"></div>
+                <div class="corner corner-tr"></div>
+                <div class="corner corner-bl"></div>
+                <div class="corner corner-br"></div>
+
+                <!-- SCAN LINE -->
+                <div class="scan-line" id="scanLine"></div>
+
+                <!-- WAVE RINGS (success) -->
+                <div class="wave-ring" id="waveRing">
+                    <span></span><span></span><span></span>
+                </div>
+
+            </div><!-- /scanner-inner -->
+        </div><!-- /scanner-wrapper -->
+
+        <!-- START BUTTON -->
+        <button class="start-scan-btn" id="startBtn" onclick="startScanner(event)">
+            <span class="btn-icon">📷</span>
+            <span id="btnLabel">Open Scanner</span>
+        </button>
+
+        <!-- ══ RESULT BOX ══ -->
+        <div class="result-box" id="resultBox">
+
+            <div class="result-inner">
+                <div id="resultContent"></div>
+            </div>
+
+            <div class="result-actions">
+                <button class="scan-again-btn" onclick="scanAgain()">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    Scan Again
+                </button>
+            </div>
+
+        </div>
+
+    </div><!-- /glass-card -->
+
+</div><!-- /scan-container -->
+
+<!-- ════════════════════════════════════
+     AUDIO (WebAudio for success / error)
+════════════════════════════════════ -->
+<script>
+
+/* ─── Audio context tones ─── */
+let audioCtx = null;
+function getAudioCtx() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    return audioCtx;
+}
+
+function playSuccess() {
+    try {
+        const ctx = getAudioCtx();
+        const freqs = [523.25, 659.25, 783.99]; // C5 E5 G5 — cheerful chord
+        freqs.forEach((f, i) => {
+            const osc  = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(f, ctx.currentTime + i * 0.08);
+            gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.08);
+            gain.gain.linearRampToValueAtTime(0.22, ctx.currentTime + i * 0.08 + 0.03);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.08 + 0.45);
+            osc.start(ctx.currentTime + i * 0.08);
+            osc.stop(ctx.currentTime + i * 0.08 + 0.5);
+        });
+    } catch(e){}
+}
+
+function playError() {
+    try {
+        const ctx = getAudioCtx();
+        [220, 196].forEach((f, i) => {
+            const osc  = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(f, ctx.currentTime + i * 0.18);
+            gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.18);
+            gain.gain.linearRampToValueAtTime(0.18, ctx.currentTime + i * 0.18 + 0.04);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.18 + 0.4);
+            osc.start(ctx.currentTime + i * 0.18);
+            osc.stop(ctx.currentTime + i * 0.18 + 0.42);
+        });
+    } catch(e){}
+}
+
+/* ─── Vibration ─── */
+function vibrateSuccess() { if(navigator.vibrate) navigator.vibrate([60,40,80]); }
+function vibrateError()   { if(navigator.vibrate) navigator.vibrate([120,60,120]); }
+
+/* ═══ SCANNER STATE ═══ */
+let scanner       = null;
+let scanProcessing = false;
+
+/* ─── Helper refs ─── */
+const wrapper    = document.getElementById('scannerWrapper');
+const idleOverlay = document.getElementById('idleOverlay');
+const startBtn   = document.getElementById('startBtn');
+const btnLabel   = document.getElementById('btnLabel');
+const resultBox  = document.getElementById('resultBox');
+const waveRing   = document.getElementById('waveRing');
+
+/* ── Button ripple ── */
+startBtn.addEventListener('pointerdown', e => {
+    const r = document.createElement('span');
+    r.className = 'ripple-effect';
+    const rect = startBtn.getBoundingClientRect();
+    r.style.left = (e.clientX - rect.left - 4) + 'px';
+    r.style.top  = (e.clientY - rect.top  - 4) + 'px';
+    startBtn.appendChild(r);
+    setTimeout(() => r.remove(), 600);
+});
+
+/* ═══════════════════════════════════
+   START SCANNER — opens camera directly
+═══════════════════════════════════ */
+async function startScanner(e) {
+    if (scanner || scanProcessing) return;
+
+    /* hide result if showing */
+    resultBox.style.display = 'none';
+
+    /* activate UI */
+    idleOverlay.classList.add('hidden');
+    wrapper.classList.add('active');
+    setBtnState('scanning', '📸 Scanning…');
+
+    try {
+        scanner = new Html5Qrcode("reader");
+
+        await scanner.start(
+            { facingMode: "environment" },
+            { fps: 12, qrbox: { width: 220, height: 220 }, disableFlip: false },
+            async (decodedText) => {
+                if (scanProcessing) return;
+                scanProcessing = true;
+                await stopScanner();
+                await processQR(decodedText);
+            },
+            () => {} /* ignore per-frame errors */
+        );
+
+    } catch(err) {
+        console.error(err);
+        await stopScanner();
+        showError("Camera Error", "Camera permission denied or unavailable.");
+    }
+}
+
+/* ═══════════════════════════════════
+   STOP SCANNER
+═══════════════════════════════════ */
+async function stopScanner() {
+    try {
+        if (scanner) {
+            if (scanner.isScanning) await scanner.stop();
+            await scanner.clear();
+        }
+    } catch(e) { console.log(e); }
+    scanner = null;
+
+    wrapper.classList.remove('active');
+    idleOverlay.classList.remove('hidden');
+    setBtnState('idle', 'Open Scanner');
+}
+
+/* ═══════════════════════════════════
+   PROCESS DECODED QR
+═══════════════════════════════════ */
+async function processQR(decodedText) {
+    try {
+        setBtnState('loading', 'Marking attendance…');
+        const url  = decodedText + "?enrollment={{ student.enrollment_no }}";
+        const resp = await fetch(url);
+        const data = await resp.json();
+        showResult(data);
+    } catch(err) {
+        console.error(err);
+        showError("Network Error", "Could not reach the server. Please try again.");
+    } finally {
+        scanProcessing = false;
+        setBtnState('idle', 'Open Scanner');
+    }
+}
+
+/* ═══════════════════════════════════
+   SHOW RESULT
+═══════════════════════════════════ */
+function showResult(data) {
+    if (data.status === "success") {
+        /* 1 — success visual state on wrapper */
+        wrapper.classList.add('success-state');
+        setTimeout(() => wrapper.classList.remove('success-state'), 1600);
+
+        /* 2 — wave ripple inside scanner */
+        triggerWave();
+
+        /* 3 — sound + vibration */
+        playSuccess();
+        vibrateSuccess();
+
+        /* 4 — render result card */
+        resultBox.className = "result-box success";
+        document.getElementById('resultContent').innerHTML = `
+            <div class="result-icon-wrap">
+                <div class="result-ring"></div>
+                <span class="result-icon">✅</span>
+            </div>
+            <h3>Attendance Marked!</h3>
+            <p class="result-subtitle">Recorded successfully.</p>
+            <div class="meta">
+                <div class="meta-box">
+                    <div class="meta-icon">👤</div>
+                    <span class="meta-text">${escHtml(data.student)}</span>
+                </div>
+                <div class="meta-box">
+                    <div class="meta-icon">📘</div>
+                    <span class="meta-text">${escHtml(data.subject)}</span>
+                </div>
+                <div class="meta-box">
+                    <div class="meta-icon">👨‍🏫</div>
+                    <span class="meta-text">${escHtml(data.teacher)}</span>
+                </div>
+                <div class="meta-box">
+                    <div class="meta-icon">⏰</div>
+                    <span class="meta-text">${escHtml(data.time)}</span>
+                </div>
+            </div>
+        `;
+
+    } else {
+        /* error visual */
+        wrapper.classList.add('error-state','shake');
+        setTimeout(() => wrapper.classList.remove('error-state','shake'), 1400);
+
+        playError();
+        vibrateError();
+
+        resultBox.className = "result-box error";
+        document.getElementById('resultContent').innerHTML = `
+            <div class="result-icon-wrap">
+                <div class="result-ring"></div>
+                <span class="result-icon">❌</span>
+            </div>
+            <h3>Attendance Failed</h3>
+            <p class="result-subtitle">${escHtml(data.message || 'Something went wrong.')}</p>
+        `;
+    }
+
+    resultBox.style.display = "block";
+    /* scroll result into view */
+    setTimeout(() => resultBox.scrollIntoView({ behavior:'smooth', block:'nearest' }), 120);
+}
+
+/* ═══════════════════════════════════
+   SHOW ERROR
+═══════════════════════════════════ */
+function showError(title, message) {
+    wrapper.classList.add('error-state','shake');
+    setTimeout(() => wrapper.classList.remove('error-state','shake'), 1400);
+    playError();
+    vibrateError();
+
+    resultBox.className = "result-box error";
+    document.getElementById('resultContent').innerHTML = `
+        <div class="result-icon-wrap">
+            <div class="result-ring"></div>
+            <span class="result-icon">⚠️</span>
+        </div>
+        <h3>${escHtml(title)}</h3>
+        <p class="result-subtitle">${escHtml(message)}</p>
+    `;
+    resultBox.style.display = "block";
+}
+
+/* ═══════════════════════════════════
+   SCAN AGAIN — no page reload
+═══════════════════════════════════ */
+async function scanAgain() {
+    /* hide result with a smooth exit */
+    resultBox.style.animation = 'none';
+    resultBox.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+    resultBox.style.opacity = '0';
+    resultBox.style.transform = 'translateY(10px)';
+    await sleep(260);
+    resultBox.style.display = 'none';
+    resultBox.style.opacity = '';
+    resultBox.style.transform = '';
+    resultBox.style.transition = '';
+    resultBox.style.animation = '';
+    document.getElementById('resultContent').innerHTML = '';
+
+    /* reopen camera */
+    await startScanner();
+}
+
+/* ═══════════════════════════════════
+   HELPERS
+═══════════════════════════════════ */
+function setBtnState(state, label) {
+    btnLabel.textContent = label;
+    if(state === 'scanning') {
+        startBtn.classList.add('loading');
+        startBtn.querySelector('.btn-icon').textContent = '📸';
+    } else if(state === 'loading') {
+        startBtn.classList.add('loading');
+        startBtn.querySelector('.btn-icon').textContent = '⏳';
+    } else {
+        startBtn.classList.remove('loading');
+        startBtn.querySelector('.btn-icon').textContent = '📷';
+    }
+}
+
+function triggerWave() {
+    waveRing.classList.remove('play');
+    void waveRing.offsetWidth; /* reflow */
+    waveRing.classList.add('play');
+    setTimeout(() => waveRing.classList.remove('play'), 1100);
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function escHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;');
+}
+
+/* unlock AudioContext on first user touch (iOS) */
+document.addEventListener('touchstart', () => {
+    if (!audioCtx) getAudioCtx();
+}, { once:true, passive:true });
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,147 @@
+{% extends "qr_app/base.html" %}
+
+{% block content %}
+
+<style>
+
+/* 🔥 Page Background */
+.page-bg {
+    background: linear-gradient(135deg, #eef2ff, #f8fafc);
+    min-height: 100vh;
+    padding: 30px;
+}
+
+/* 🔥 Card */
+.form-card {
+    max-width: 600px;
+    margin: auto;
+    background: white;
+    padding: 25px;
+    border-radius: 18px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    animation: fadeIn 0.4s ease;
+}
+
+/* 🔥 Header */
+.form-title {
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.form-subtitle {
+    font-size: 13px;
+    color: #7f8c8d;
+}
+
+/* 🔥 Inputs */
+.form-control, .form-select {
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 14px;
+}
+
+.form-control:focus, .form-select:focus {
+    box-shadow: 0 0 0 2px rgba(99,102,241,0.2);
+    border-color: #6366f1;
+}
+
+/* 🔥 Button */
+.btn-submit {
+    background: linear-gradient(90deg, #6366f1, #8b5cf6);
+    border: none;
+    border-radius: 10px;
+    padding: 10px;
+    color: white;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    background: linear-gradient(90deg, #4f46e5, #7c3aed);
+}
+
+/* 🔥 Animation */
+@keyframes fadeIn {
+    from {opacity:0; transform: translateY(10px);}
+    to {opacity:1; transform: translateY(0);}
+}
+
+</style>
+
+<div class="page-bg">
+
+    <div class="form-card">
+
+        <!-- 🔥 Header -->
+        <div class="mb-4">
+            <h3 class="form-title">📢 Create Alert</h3>
+            <p class="form-subtitle">Send notifications to students easily</p>
+        </div>
+
+        <!-- 🔥 Form -->
+        <form method="POST">
+            {% csrf_token %}
+            
+            <!-- Title -->
+            <div class="mb-3">
+                <label class="form-label">Alert Title</label>
+                <input type="text" name="title" placeholder="Enter alert title"
+                    class="form-control" required>
+            </div>
+
+            <!-- Message -->
+            <div class="mb-3">
+                <label class="form-label">Message</label>
+                <textarea name="message" rows="3"
+                    placeholder="Enter alert message"
+                    class="form-control" required></textarea>
+            </div>
+
+            <!-- Branch -->
+            <div class="mb-3">
+                <label class="form-label">Branch</label>
+                <select name="branch" class="form-select">
+                    <option value="">All Branches</option>
+                    {% for b in branches %}
+                    <option value="{{ b.id }}">{{ b.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Semester -->
+            <div class="mb-3">
+                <label class="form-label">Semester</label>
+                <select name="semester" class="form-select">
+                    <option value="">All Semester</option>
+                    <option value="1">Sem 1</option>
+                    <option value="2">Sem 2</option>
+                    <option value="3">Sem 3</option>
+                    <option value="4">Sem 4</option>
+                    <option value="5">Sem 5</option>
+                    <option value="6">Sem 6</option>
+                </select>
+            </div>
+
+            <!-- Priority -->
+            <div class="mb-4">
+                <label class="form-label">Priority</label>
+                <select name="priority" class="form-select">
+                    <option value="normal">Normal</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                </select>
+            </div>
+
+            <!-- Button -->
+            <button class="btn-submit w-100">
+                🚀 Send Alert
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

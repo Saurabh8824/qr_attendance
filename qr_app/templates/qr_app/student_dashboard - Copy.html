@@ -1,0 +1,145 @@
+{% block content %}
+
+<style>
+
+/* 🔹 Container */
+.dashboard {
+    padding: 20px;
+}
+
+/* 🔹 Cards */
+.card {
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    transition: 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+/* 🔹 Grid */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+/* 🔹 Header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+/* 🔹 Chart Bars */
+.bar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    height: 160px;
+    padding: 10px;
+}
+
+.bar {
+    width: 20px;
+    background: linear-gradient(180deg, #6366f1, #9333ea);
+    border-radius: 6px;
+    transition: 0.3s;
+}
+
+.bar:hover {
+    transform: scale(1.1);
+}
+
+/* 🔹 Details Row */
+.row {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+}
+
+/* 🔹 Status Badge */
+.badge {
+    padding: 4px 10px;
+    border-radius: 8px;
+    color: white;
+    font-size: 12px;
+}
+
+.low { background: #ef4444; }
+.good { background: #22c55e; }
+
+</style>
+
+<div class="dashboard">
+
+    <!-- HEADER -->
+    <div class="header">
+        <div>
+            <h2>Dashboard</h2>
+            <p style="color:gray;">Welcome back, {{ student.name }} 👋</p>
+        </div>
+    </div>
+
+    <!-- TOP CARDS -->
+    <div class="grid">
+
+        <div class="card">
+            <p>Overall</p>
+            <h2>{{ overall }}%</h2>
+        </div>
+
+        <div class="card">
+            <p>Status</p>
+            <span class="badge {% if status == 'Low' %}low{% else %}good{% endif %}">
+                {{ status }}
+            </span>
+        </div>
+
+    </div>
+
+    <!-- CHART -->
+    <div class="card" style="margin-top:20px;">
+        <h4>📊 Subject-wise Attendance</h4>
+
+        <div class="bar-container">
+
+            {% for s in subjects %}
+            <div style="text-align:center;">
+                <div class="bar" style="height: {{ s.percentage }}px;"></div>
+                <small>{{ s.code }}</small>
+            </div>
+            {% endfor %}
+
+        </div>
+    </div>
+
+    <!-- DETAILS -->
+    <div class="card" style="margin-top:20px;">
+        <h4>📖 Attendance Details</h4>
+
+        {% for s in subjects %}
+        <div class="row">
+
+            <div>
+                <b>{{ s.name }}</b><br>
+                <small style="color:gray;">{{ s.code }}</small>
+            </div>
+
+            <div style="text-align:right;">
+                <b>{{ s.percentage }}%</b><br>
+                <small style="color:gray;">{{ s.present }}/{{ s.total }}</small>
+            </div>
+
+        </div>
+        {% endfor %}
+
+    </div>
+
+</div>
+
+{% endblock %}

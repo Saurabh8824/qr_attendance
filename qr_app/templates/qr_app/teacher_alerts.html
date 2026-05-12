@@ -1,0 +1,165 @@
+{% extends "qr_app/base.html" %}
+
+{% block content %}
+
+<style>
+
+/* 🔥 Page */
+.page-container {
+    max-width: 900px;
+    margin: auto;
+}
+
+/* 🔥 Header */
+.page-header h2 {
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.page-header p {
+    color: #7f8c8d;
+}
+
+/* 🔥 Filter Card */
+.filter-card {
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+}
+
+/* 🔥 Card */
+.alert-card {
+    background: white;
+    padding: 15px;
+    border-radius: 14px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+    margin-bottom: 15px;
+    transition: 0.3s;
+    border-left: 5px solid transparent;
+}
+
+.alert-card:hover {
+    transform: translateY(-3px);
+}
+
+/* 🔥 Border Colors */
+.high-border { border-left: 5px solid #ef4444; }
+.medium-border { border-left: 5px solid #facc15; }
+.normal-border { border-left: 5px solid #3b82f6; }
+}
+
+
+/* 🔥 Content */
+.alert-content {
+    flex: 1;
+}
+
+/* 🔥 Title */
+.alert-title {
+    font-weight: 600;
+    font-size: 15px;
+}
+
+/* 🔥 Message */
+.alert-msg {
+    font-size: 13px;
+    color: #555;
+    margin-top: 5px;
+}
+
+/* 🔥 Footer */
+.alert-meta {
+    font-size: 11px;
+    color: #999;
+    margin-top: 8px;
+}
+
+/* 🔥 Badge */
+.badge-priority {
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    color: white;
+}
+
+.badge-high { background: #e74c3c; }
+.badge-medium { background: #f1c40f; color:black; }
+.badge-normal { background: #3498db; }
+
+</style>
+
+<div class="page-container">
+
+    <!-- 🔥 HEADER -->
+    <div class="page-header mb-4">
+        <h2>📢 My Alerts</h2>
+        <p>View and filter your alerts</p>
+    </div>
+
+    <!-- 🔥 FILTER -->
+    <form method="GET" class="filter-card d-flex gap-2">
+
+        <select name="branch" class="form-select">
+            <option value="">All Branch</option>
+            {% for b in branches %}
+            <option value="{{ b.id }}" {% if selected_branch == b.id|stringformat:"s" %}selected{% endif %}>
+                {{ b.name }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <select name="semester" class="form-select">
+            <option value="">All Semester</option>
+            {% for i in "123456" %}
+            <option value="{{ i }}" {% if selected_semester == i %}selected{% endif %}>
+                Sem {{ i }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <button class="btn btn-primary">Filter</button>
+
+    </form>
+
+    <!-- 🔥 ALERT LIST -->
+
+{% for a in alerts %}
+<div class="alert-card 
+    {% if a.priority == 'high' %}high-border
+    {% elif a.priority == 'medium' %}medium-border
+    {% else %}normal-border
+    {% endif %}">
+
+    <div class="alert-content">
+
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="alert-title">{{ a.title }}</div>
+
+            <span class="badge-priority
+                {% if a.priority == 'high' %}badge-high
+                {% elif a.priority == 'medium' %}badge-medium
+                {% else %}badge-normal
+                {% endif %}">
+                {{ a.priority }}
+            </span>
+        </div>
+
+        <div class="alert-msg">{{ a.message }}</div>
+
+        <div class="alert-meta">
+            📅 {{ a.created_at|date:"d M Y H:i" }}
+        </div>
+
+    </div>
+
+</div>
+
+{% empty %}
+<p class="text-center text-muted">No alerts found</p>
+{% endfor %}
+
+</div>
+
+{% endblock %}

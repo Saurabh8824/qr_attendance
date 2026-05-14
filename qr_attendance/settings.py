@@ -29,6 +29,7 @@ CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -102,6 +103,54 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
+JAZZMIN_SETTINGS = {
+    # Title of the browser window
+    "site_title": "QR Attendance",
+    
+    # Title on the login screen
+    "site_header": "QR Attendance System Admin Login",
+    
+    # Logo text on the top left navigation bar
+    "site_brand": "QR Attendance Admin",
+    
+    # Path to your custom logo file (placed inside your static folder)
+    "site_logo": "images/logo.png",
+    
+    # Welcome text on the login screen
+    "welcome_sign": "Welcome back! Please sign in to manage the system.",
+    
+    # Copyright text in the footer
+    "copyright": "QR Attendance System Ltd",
+    
+    # Field name to use for searching users from the global search bar
+    "search_model": "auth.User",
+    
+    # Side Navigation Menu Customization
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    "hide_apps": [],
+    "hide_models": [],
+    
+    # App Icons (Uses FontAwesome 5 Free icons)
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "auth.Group": "fas fa-users",
+    },
+}
+
+JAZZMIN_UI_TWEAKS = {
+    # Choose from standard Bootswatch themes (e.g., flatly, darkly, slate, luxury)
+    "theme": "luxury",
+    
+    # Dark mode toggle button in the navbar
+    "dark_mode_theme": "darkly",
+    
+    # Navbar and sidebar styling controls
+    "navbar": "navbar-dark navbar-navy",
+    "sidebar": "sidebar-dark-navy",
+    "sidebar_nav_child_indent": True,
+}
 
 
 

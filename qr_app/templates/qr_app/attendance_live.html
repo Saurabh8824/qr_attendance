@@ -1,135 +1,564 @@
-{% extends "base.html" %}
+{% extends "qr_app/base.html" %}
 {% load static %}
 
 {% block content %}
-<h2 style="text-align:center;">🔐 Generate QR (Branch → Semester → Subject)</h2>
 
-<div class="card" style="max-width:900px;margin:auto;padding:20px;">
-  {% if error %}
-    <div style="color:#c0392b; font-weight:600; margin-bottom:10px;">{{ error }}</div>
-  {% endif %}
+<!-- Font Awesome 6 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<!-- Google Fonts: DM Sans + DM Mono -->
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-  <form method="post" id="qrForm">
-    {% csrf_token %}
-    <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center;">
-      <div>
-        <label>Branch</label><br>
-        <select id="id_branch" name="branch">
-          <option value="">-- Select Branch --</option>
-          {% for b in branches %}<option value="{{ b.id }}" {% if b.id|stringformat:"s" == selected_branch_id %}selected{% endif %}>{{ b.name }}</option>{% endfor %}
-        </select>
+<style>
+  /* ── CSS Variables ── */
+  :root {
+    --bg:          #f5f5f3;
+    --surface:     #ffffff;
+    --surface-2:   #f0f0ee;
+    --border:      #e2e2df;
+    --text:        #1a1a18;
+    --text-muted:  #7a7a75;
+    --accent:      #2563eb;
+    --accent-dim:  #eff4ff;
+    --accent-hover:#1d4ed8;
+    --error-bg:    #fff1f1;
+    --error-text:  #b91c1c;
+    --shadow-sm:   0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.05);
+    --shadow-md:   0 4px 16px rgba(0,0,0,.08), 0 1px 3px rgba(0,0,0,.05);
+    --radius:      12px;
+    --radius-sm:   8px;
+    --transition:  all .18s cubic-bezier(.4,0,.2,1);
+  }
+
+  [data-theme="dark"], html.dark, body.dark, .dark {
+    --bg:          #111110;
+    --surface:     #1c1c1a;
+    --surface-2:   #252523;
+    --border:      #2e2e2b;
+    --text:        #e8e8e3;
+    --text-muted:  #6b6b65;
+    --accent:      #3b82f6;
+    --accent-dim:  #1e2d4a;
+    --accent-hover:#60a5fa;
+    --error-bg:    #2a1515;
+    --error-text:  #f87171;
+    --shadow-sm:   0 1px 3px rgba(0,0,0,.3);
+    --shadow-md:   0 4px 16px rgba(0,0,0,.35);
+  }
+
+  /* ── Reset / Base ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background .25s ease, color .25s ease;
+  }
+
+  /* ── Page Wrapper ── */
+  .qr-page {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 48px 20px 80px;
+  }
+
+  /* ── Header ── */
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 36px;
+  }
+
+  .page-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .page-title .icon-wrap {
+    width: 42px; height: 42px;
+    background: var(--accent-dim);
+    color: var(--accent);
+    border-radius: var(--radius-sm);
+    display: grid; place-items: center;
+    font-size: 18px;
+    transition: var(--transition);
+  }
+
+  .page-title h2 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -.3px;
+    color: var(--text);
+  }
+
+  .page-title p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 2px;
+    font-weight: 400;
+  }
+
+  /* ── Card ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+  }
+
+  .card-body { padding: 28px; }
+
+  /* ── Error ── */
+  .error-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--error-bg);
+    color: var(--error-text);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 22px;
+    border: 1px solid currentColor;
+    opacity: .9;
+  }
+
+  /* ── Form Grid ── */
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+    align-items: end;
+  }
+
+  .field-group { display: flex; flex-direction: column; gap: 6px; }
+
+  .field-group label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .4px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .field-group label i { font-size: 11px; }
+
+  .field-group select,
+  .field-group input[type="number"] {
+    appearance: none;
+    -webkit-appearance: none;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--text);
+    width: 100%;
+    outline: none;
+    transition: var(--transition);
+    cursor: pointer;
+  }
+
+  .select-wrap {
+    position: relative;
+  }
+  .select-wrap::after {
+    content: '\f078';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    font-size: 10px;
+    color: var(--text-muted);
+    position: absolute;
+    right: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    transition: var(--transition);
+  }
+
+  .field-group select:focus,
+  .field-group input[type="number"]:focus {
+    border-color: var(--accent);
+    background: var(--surface);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent);
+  }
+
+  .field-group select:hover,
+  .field-group input[type="number"]:hover {
+    border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  }
+
+  /* ── Submit Button ── */
+  .btn-generate {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+    width: 100%;
+    justify-content: center;
+    letter-spacing: .1px;
+  }
+
+  .btn-generate:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 35%, transparent);
+  }
+
+  .btn-generate:active { transform: translateY(0); }
+
+  /* ── Divider ── */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 24px 0;
+  }
+
+  /* ── QR Result ── */
+  .qr-result {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 8px 0 4px;
+    animation: fadeUp .35s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .qr-image-wrap {
+    position: relative;
+    display: inline-block;
+  }
+
+  .qr-image-wrap img {
+    width: 220px; height: 220px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 12px;
+    background: #fff;
+    box-shadow: var(--shadow-md);
+    display: block;
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+
+  .qr-image-wrap img:hover {
+    transform: scale(1.02);
+    box-shadow: 0 8px 32px rgba(0,0,0,.13);
+  }
+
+  .qr-badge {
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 12px;
+    border-radius: 99px;
+    white-space: nowrap;
+    letter-spacing: .3px;
+  }
+
+  .qr-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    max-width: 360px;
+  }
+
+  .qr-url-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    width: 100%;
+    font-size: 13px;
+  }
+
+  .qr-url-box i { color: var(--accent); font-size: 13px; flex-shrink: 0; }
+
+  .qr-url-box a {
+    color: var(--accent);
+    text-decoration: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    transition: var(--transition);
+  }
+
+  .qr-url-box a:hover { text-decoration: underline; }
+
+  .qr-copy-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 13px;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: var(--transition);
+    flex-shrink: 0;
+  }
+  .qr-copy-btn:hover { color: var(--accent); }
+
+  .qr-expiry {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12.5px;
+    color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .qr-expiry i { color: var(--accent); font-size: 12px; }
+
+  /* ── Responsive ── */
+  @media (max-width: 520px) {
+    .qr-page { padding: 28px 14px 60px; }
+    .form-grid { grid-template-columns: 1fr 1fr; }
+    .page-title h2 { font-size: 18px; }
+  }
+</style>
+
+<div class="qr-page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="page-title">
+      <div class="icon-wrap">
+        <i class="fa-solid fa-qrcode"></i>
       </div>
-
       <div>
-        <label>Year</label><br>
-        <select id="id_year" name="year">
-          <option value="">-- Select Year --</option>
-          <option value="1">1st Year</option>
-          <option value="2">2nd Year</option>
-          <option value="3">3rd Year</option>
-        </select>
-      </div>
-
-      <div>
-        <label>Semester</label><br>
-        <select id="id_semester" name="semester">
-          <option value="">-- Select Semester --</option>
-          <!-- JS will populate semester options based on year -->
-        </select>
-      </div>
-
-      <div>
-        <label>Subject</label><br>
-        <select id="id_subject" name="subject">
-          <option value="">-- Select Subject --</option>
-          {% for s in subjects %}
-            <option value="{{ s.id }}">{{ s.code }} - {{ s.name }}</option>
-          {% endfor %}
-        </select>
-      </div>
-
-      <div>
-        <label>Expiry (minutes)</label><br>
-        <input type="number" name="duration" min="1" max="120" value="5">
-      </div>
-
-      <div style="align-self:flex-end;">
-        <button type="submit" class="btn btn-primary">Generate QR</button>
+        <h2>Generate QR Code</h2>
+        <p>Branch &rarr; Semester &rarr; Subject</p>
       </div>
     </div>
-  </form>
-
-  <hr style="margin:18px 0;">
-
-  <!-- Show QR and link -->
-  {% if qr_code %}
-  <div style="text-align:center;">
-    <h3>QR Code</h3>
-    <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" style="width:240px;height:240px;border:1px solid #ddd;padding:8px;background:white;">
-    <div style="margin-top:12px;">
-      <a href="{{ qr_url }}" target="_blank">{{ qr_url }}</a>
-    </div>
-    <div style="color:gray; margin-top:8px; font-size:14px;">
-  {% if qr_session %}
-    Expires at: {{ qr_session.expires_at }}
-  {% else %}
-    Expires at: —
-  {% endif %}
-</div>
-
   </div>
-  {% endif %}
+
+  <!-- Card -->
+  <div class="card">
+    <div class="card-body">
+
+      <!-- Error -->
+      {% if error %}
+      <div class="error-banner">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        {{ error }}
+      </div>
+      {% endif %}
+
+      <!-- Form -->
+      <form method="post" id="qrForm">
+        {% csrf_token %}
+        <div class="form-grid">
+
+          <!-- Branch -->
+          <div class="field-group">
+            <label><i class="fa-solid fa-code-branch"></i> Branch</label>
+            <div class="select-wrap">
+              <select id="id_branch" name="branch">
+                <option value="">Select branch</option>
+                {% for b in branches %}
+                  <option value="{{ b.id }}" {% if b.id|stringformat:"s" == selected_branch_id %}selected{% endif %}>{{ b.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <!-- Year -->
+          <div class="field-group">
+            <label><i class="fa-solid fa-calendar"></i> Year</label>
+            <div class="select-wrap">
+              <select id="id_year" name="year">
+                <option value="">Select year</option>
+                <option value="1">1st Year</option>
+                <option value="2">2nd Year</option>
+                <option value="3">3rd Year</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Semester -->
+          <div class="field-group">
+            <label><i class="fa-solid fa-layer-group"></i> Semester</label>
+            <div class="select-wrap">
+              <select id="id_semester" name="semester">
+                <option value="">Select semester</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Subject -->
+          <div class="field-group">
+            <label><i class="fa-solid fa-book-open"></i> Subject</label>
+            <div class="select-wrap">
+              <select id="id_subject" name="subject">
+                <option value="">Select subject</option>
+                {% for s in subjects %}
+                  <option value="{{ s.id }}">{{ s.code }} – {{ s.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <!-- Expiry -->
+          <div class="field-group">
+            <label><i class="fa-regular fa-clock"></i> Expiry (min)</label>
+            <input type="number" name="duration" min="1" max="120" value="5">
+          </div>
+
+          <!-- Submit -->
+          <div class="field-group">
+            <label style="visibility:hidden;">Action</label>
+            <button type="submit" class="btn-generate">
+              <i class="fa-solid fa-bolt"></i> Generate QR
+            </button>
+          </div>
+
+        </div>
+      </form>
+
+      <!-- QR Result -->
+      {% if qr_code %}
+      <div class="divider"></div>
+      <div class="qr-result">
+
+        <div class="qr-image-wrap">
+          <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code">
+          <span class="qr-badge"><i class="fa-solid fa-check" style="font-size:9px;margin-right:4px;"></i>Active</span>
+        </div>
+
+        <div class="qr-meta" style="margin-top:14px;">
+          <div class="qr-url-box">
+            <i class="fa-solid fa-link"></i>
+            <a href="{{ qr_url }}" target="_blank" id="qrUrlText">{{ qr_url }}</a>
+            <button class="qr-copy-btn" onclick="copyUrl()" title="Copy link" type="button">
+              <i class="fa-regular fa-copy" id="copyIcon"></i>
+            </button>
+          </div>
+
+          <div class="qr-expiry">
+            <i class="fa-regular fa-hourglass-half"></i>
+            {% if qr_session %}
+              Expires {{ qr_session.expires_at }}
+            {% else %}
+              —
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
 </div>
 
 <script>
-/* semester population based on year */
+/* ── Semester population ── */
 function populateSemester() {
-    const year = document.getElementById("id_year").value;
-    const semEl = document.getElementById("id_semester");
-    semEl.innerHTML = "<option value=''>-- Select Semester --</option>";
-    if (year == "1") { semEl.innerHTML += "<option value='1'>Sem 1</option><option value='2'>Sem 2</option>"; }
-    else if (year == "2") { semEl.innerHTML += "<option value='3'>Sem 3</option><option value='4'>Sem 4</option>"; }
-    else if (year == "3") { semEl.innerHTML += "<option value='5'>Sem 5</option><option value='6'>Sem 6</option>"; }
-    // trigger subjects reload
-    loadSubjects();
+  const year = document.getElementById('id_year').value;
+  const semEl = document.getElementById('id_semester');
+  semEl.innerHTML = "<option value=''>Select semester</option>";
+  if (year === '1') {
+    semEl.innerHTML += "<option value='1'>Sem 1</option><option value='2'>Sem 2</option>";
+  } else if (year === '2') {
+    semEl.innerHTML += "<option value='3'>Sem 3</option><option value='4'>Sem 4</option>";
+  } else if (year === '3') {
+    semEl.innerHTML += "<option value='5'>Sem 5</option><option value='6'>Sem 6</option>";
+  }
+  loadSubjects();
 }
 
-/* Load subjects via ajax (endpoint: ajax_get_subjects) */
+/* ── Load subjects via AJAX ── */
 async function loadSubjects() {
-    const branch = document.getElementById("id_branch").value;
-    const semester = document.getElementById("id_semester").value;
-    const subjectEl = document.getElementById("id_subject");
-    subjectEl.innerHTML = "<option value=''>Loading...</option>";
+  const branch   = document.getElementById('id_branch').value;
+  const semester = document.getElementById('id_semester').value;
+  const subjectEl = document.getElementById('id_subject');
+  subjectEl.innerHTML = "<option value=''>Loading…</option>";
 
-    if (!branch || !semester) {
-        subjectEl.innerHTML = "<option value=''>-- Select Branch & Semester --</option>";
-        return;
-    }
+  if (!branch || !semester) {
+    subjectEl.innerHTML = "<option value=''>Select branch & semester first</option>";
+    return;
+  }
+
+  try {
     const resp = await fetch("{% url 'ajax_get_subjects' %}?branch=" + branch + "&semester=" + semester);
     const data = await resp.json();
-    if (!data.results.length) {
-        subjectEl.innerHTML = "<option value=''>No subjects found</option>";
-        return;
+    if (!data.results || !data.results.length) {
+      subjectEl.innerHTML = "<option value=''>No subjects found</option>";
+      return;
     }
-    let html = "<option value=''>-- Select Subject --</option>";
+    let html = "<option value=''>Select subject</option>";
     data.results.forEach(s => {
-        html += `<option value="${s.id}">${s.name}</option>`;
+      html += `<option value="${s.id}">${s.name}</option>`;
     });
     subjectEl.innerHTML = html;
+  } catch (e) {
+    subjectEl.innerHTML = "<option value=''>Failed to load subjects</option>";
+  }
 }
 
-/* attach listeners */
-document.addEventListener("DOMContentLoaded", function(){
-    const yearEl = document.getElementById("id_year");
-    const branchEl = document.getElementById("id_branch");
-    const semEl = document.getElementById("id_semester");
+/* ── Copy URL ── */
+function copyUrl() {
+  const url = document.getElementById('qrUrlText')?.href;
+  if (!url) return;
+  navigator.clipboard.writeText(url).then(() => {
+    const icon = document.getElementById('copyIcon');
+    icon.className = 'fa-solid fa-check';
+    icon.style.color = 'var(--accent)';
+    setTimeout(() => {
+      icon.className = 'fa-regular fa-copy';
+      icon.style.color = '';
+    }, 1800);
+  });
+}
 
-    if (yearEl) yearEl.addEventListener("change", populateSemester);
-    if (branchEl) branchEl.addEventListener("change", loadSubjects);
-    if (semEl) semEl.addEventListener("change", loadSubjects);
+/* ── Attach listeners ── */
+document.addEventListener('DOMContentLoaded', function () {
+  const yearEl   = document.getElementById('id_year');
+  const branchEl = document.getElementById('id_branch');
+  const semEl    = document.getElementById('id_semester');
 
-    // populate semester if page had preselected year (optional)
-    if (yearEl && yearEl.value) populateSemester();
+  if (yearEl)   yearEl.addEventListener('change', populateSemester);
+  if (branchEl) branchEl.addEventListener('change', loadSubjects);
+  if (semEl)    semEl.addEventListener('change', loadSubjects);
+
+  if (yearEl && yearEl.value) populateSemester();
 });
 </script>
+
 {% endblock %}

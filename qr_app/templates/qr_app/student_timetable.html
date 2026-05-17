@@ -1,145 +1,164 @@
 {% extends 'qr_app/student_base.html' %}
 {% block content %}
 
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-
 <style>
 /* ══ THEME TOKENS ══ */
 :root {
     --bg:            #f0f4ff;
     --surface:       #ffffff;
-    --surface-2:     #f8faff;
+    --surface-2:     #f5f7ff;
     --border:        rgba(99,102,241,0.11);
     --text-primary:  #0f172a;
     --text-secondary:#475569;
     --text-muted:    #94a3b8;
     --accent:        #4f46e5;
     --accent-2:      #7c3aed;
-    --accent-3:      #0ea5e9;
-    --shadow-sm:     0 2px 8px rgba(79,70,229,0.07);
-    --shadow-md:     0 8px 28px rgba(79,70,229,0.12);
-    --shadow-lg:     0 20px 55px rgba(79,70,229,0.18);
+    --shadow-sm:     0 1px 6px rgba(79,70,229,0.07);
+    --shadow-md:     0 6px 22px rgba(79,70,229,0.11);
     --radius-sm:     10px;
-    --radius-md:     18px;
-    --radius-lg:     24px;
-    --radius-xl:     32px;
+    --radius-md:     16px;
+    --radius-lg:     20px;
+    --radius-xl:     28px;
+    --t:             0.18s ease; /* base transition */
 
-    /* slot colours */
-    --c1: #4f46e5; --c1-bg: #eef2ff; --c1-soft: rgba(79,70,229,0.12);
-    --c2: #10b981; --c2-bg: #f0fdf4; --c2-soft: rgba(16,185,129,0.12);
-    --c3: #f59e0b; --c3-bg: #fffbeb; --c3-soft: rgba(245,158,11,0.12);
-    --c4: #f43f5e; --c4-bg: #fff1f3; --c4-soft: rgba(244,63,94,0.12);
-    --c5: #8b5cf6; --c5-bg: #f5f3ff; --c5-soft: rgba(139,92,246,0.12);
+    --c1:#4f46e5; --c1-bg:rgba(79,70,229,0.08);   --c1-soft:rgba(79,70,229,0.12);
+    --c2:#10b981; --c2-bg:rgba(16,185,129,0.08);   --c2-soft:rgba(16,185,129,0.12);
+    --c3:#f59e0b; --c3-bg:rgba(245,158,11,0.08);   --c3-soft:rgba(245,158,11,0.12);
+    --c4:#f43f5e; --c4-bg:rgba(244,63,94,0.08);    --c4-soft:rgba(244,63,94,0.12);
+    --c5:#8b5cf6; --c5-bg:rgba(139,92,246,0.08);   --c5-soft:rgba(139,92,246,0.12);
 }
 
-/* ── DARK MODE ── */
 body.dark {
-    --bg:            #060a14;
-    --surface:       #0f1628;
-    --surface-2:     #141d35;
-    --border:        rgba(99,102,241,0.16);
-    --text-primary:  #f1f5f9;
+    --bg:            #070c18;
+    --surface:       #0e1528;
+    --surface-2:     #131d38;
+    --border:        rgba(99,102,241,0.14);
+    --text-primary:  #eef2ff;
     --text-secondary:#94a3b8;
-    --text-muted:    #475569;
-    --shadow-sm:     0 2px 10px rgba(0,0,0,0.3);
-    --shadow-md:     0 8px 28px rgba(0,0,0,0.35);
-    --shadow-lg:     0 20px 55px rgba(0,0,0,0.45);
+    --text-muted:    #4b5563;
+    --shadow-sm:     0 1px 6px rgba(0,0,0,0.28);
+    --shadow-md:     0 6px 22px rgba(0,0,0,0.36);
 
-    --c1-bg: rgba(79,70,229,0.15);   --c1-soft: rgba(79,70,229,0.18);
-    --c2-bg: rgba(16,185,129,0.14);  --c2-soft: rgba(16,185,129,0.18);
-    --c3-bg: rgba(245,158,11,0.13);  --c3-soft: rgba(245,158,11,0.18);
-    --c4-bg: rgba(244,63,94,0.13);   --c4-soft: rgba(244,63,94,0.18);
-    --c5-bg: rgba(139,92,246,0.14);  --c5-soft: rgba(139,92,246,0.18);
+    --c1-bg:rgba(79,70,229,0.14);  --c1-soft:rgba(79,70,229,0.18);
+    --c2-bg:rgba(16,185,129,0.12); --c2-soft:rgba(16,185,129,0.18);
+    --c3-bg:rgba(245,158,11,0.11); --c3-soft:rgba(245,158,11,0.18);
+    --c4-bg:rgba(244,63,94,0.11);  --c4-soft:rgba(244,63,94,0.18);
+    --c5-bg:rgba(139,92,246,0.12); --c5-soft:rgba(139,92,246,0.18);
 }
 
-* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+/* ── RESET ── */
+*, *::before, *::after {
+    margin: 0; padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
 
+/* No transition on theme swap — use JS class for that */
 body {
-    font-family: 'Sora', sans-serif;
+    font-family: 'Inter', 'Sora', sans-serif;
     background: var(--bg);
     color: var(--text-primary);
     min-height: 100vh;
     overflow-x: hidden;
-    transition: background 0.4s ease, color 0.4s ease;
 }
 
-/* ── BG ORBS ── */
-body::before {
-    content: '';
-    position: fixed;
-    top: -140px; right: -100px;
-    width: 440px; height: 440px;
-    background: radial-gradient(circle, rgba(79,70,229,0.1) 0%, transparent 70%);
-    border-radius: 50%;
-    pointer-events: none; z-index: 0;
+body.theme-ready {
+    transition: background var(--t), color var(--t);
 }
-body::after {
-    content: '';
+
+/* Ambient glow — static, no animation */
+.bg-glow {
     position: fixed;
-    bottom: -80px; left: -80px;
-    width: 300px; height: 300px;
-    background: radial-gradient(circle, rgba(14,165,233,0.08) 0%, transparent 70%);
     border-radius: 50%;
-    pointer-events: none; z-index: 0;
+    pointer-events: none;
+    z-index: 0;
+}
+.bg-glow-1 {
+    top: -120px; right: -80px;
+    width: 360px; height: 360px;
+    background: radial-gradient(circle, rgba(79,70,229,0.07) 0%, transparent 70%);
+}
+.bg-glow-2 {
+    bottom: -60px; left: -60px;
+    width: 260px; height: 260px;
+    background: radial-gradient(circle, rgba(14,165,233,0.06) 0%, transparent 70%);
 }
 
 /* ── CONTAINER ── */
 .tt-container {
-    max-width: 720px;
+    max-width: 700px;
     margin: 0 auto;
-    padding: 20px 16px 100px;
-    position: relative; z-index: 1;
+    padding: 18px 14px 100px;
+    position: relative;
+    z-index: 1;
 }
 
 /* ══ HERO HEADER ══ */
 .tt-header {
-    background: linear-gradient(145deg, #4f46e5 0%, #7c3aed 52%, #0ea5e9 100%);
+    background: linear-gradient(140deg, #4f46e5 0%, #7c3aed 55%, #0ea5e9 100%);
     border-radius: var(--radius-xl);
-    padding: 28px 22px 24px;
-    margin-bottom: 18px;
-    position: relative; overflow: hidden;
-    box-shadow: var(--shadow-lg);
-    animation: slideDown 0.55s cubic-bezier(.22,.68,0,1.2) both;
+    padding: 24px 20px;
+    margin-bottom: 14px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 12px 36px rgba(79,70,229,0.22);
+    animation: slideDown 0.4s cubic-bezier(.22,.68,0,1.1) both;
 }
+
+/* subtle decorative circles — static */
 .tt-header::before {
     content: '';
     position: absolute;
-    width: 300px; height: 300px; border-radius: 50%;
-    background: rgba(255,255,255,0.07);
-    top: -140px; right: -70px;
+    width: 260px; height: 260px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    top: -120px; right: -50px;
+    pointer-events: none;
 }
 .tt-header::after {
     content: '';
     position: absolute;
-    width: 140px; height: 140px; border-radius: 50%;
-    background: rgba(255,255,255,0.05);
-    bottom: -60px; left: -30px;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+    bottom: -50px; left: -20px;
+    pointer-events: none;
 }
 
 .tt-header-inner {
-    position: relative; z-index: 2;
-    display: flex; align-items: center; gap: 16px;
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 14px;
 }
 
 .header-icon {
-    width: 58px; height: 58px;
-    border-radius: 18px;
+    width: 52px; height: 52px;
+    border-radius: 16px;
     background: rgba(255,255,255,0.15);
-    border: 1.5px solid rgba(255,255,255,0.28);
-    backdrop-filter: blur(10px);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 26px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+    border: 1.5px solid rgba(255,255,255,0.25);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: #fff;
     flex-shrink: 0;
 }
 
 .header-text h2 {
-    font-size: 21px; font-weight: 800; color: #fff;
-    margin-bottom: 5px;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    font-size: 20px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 4px;
+    letter-spacing: -0.3px;
 }
 .header-text p {
-    font-size: 12px; color: rgba(255,255,255,0.74); font-weight: 500;
+    font-size: 12px;
+    color: rgba(255,255,255,0.70);
+    font-weight: 500;
 }
 
 /* ══ DATE NAV ══ */
@@ -147,36 +166,75 @@ body::after {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    padding: 14px 18px;
-    margin-bottom: 16px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     box-shadow: var(--shadow-sm);
-    animation: fadeUp 0.5s 0.1s ease both;
-    transition: background 0.4s, border-color 0.4s;
+    animation: fadeUp 0.35s 0.07s ease both;
+    transition: background var(--t), border-color var(--t);
 }
 
+/* Arrow buttons — contain the date label */
 .arrow-btn {
-    width: 42px; height: 42px;
-    border-radius: 50%;
-    border: none;
-    background: linear-gradient(135deg, var(--accent), var(--accent-2));
-    color: #fff;
-    font-size: 17px;
+    min-width: 68px;
+    height: 48px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text-secondary);
     cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 6px 18px rgba(79,70,229,0.28);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
     flex-shrink: 0;
+    transition: background var(--t), border-color var(--t), color var(--t);
+    padding: 0 8px;
 }
-.arrow-btn:active { transform: scale(0.9); }
 
-.date-center { text-align: center; flex: 1; }
+.arrow-btn:hover {
+    background: var(--surface);
+    border-color: rgba(99,102,241,0.25);
+    color: var(--accent);
+}
+
+.arrow-btn:active {
+    transform: scale(0.96);
+}
+
+.arrow-btn i {
+    font-size: 13px;
+    transition: color var(--t);
+}
+
+.arrow-btn .btn-day {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    opacity: 0.9;
+    line-height: 1;
+}
+
+.arrow-btn .btn-date {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--accent);
+    line-height: 1;
+}
+
+.date-center {
+    text-align: center;
+    flex: 1;
+    min-width: 0;
+}
 
 .date-label {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.08em;
@@ -185,14 +243,15 @@ body::after {
 }
 
 .date-value {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 800;
     color: var(--text-primary);
     line-height: 1.2;
+    transition: color var(--t);
 }
 
 .date-weekday {
-    font-size: 12px;
+    font-size: 11.5px;
     color: var(--accent);
     font-weight: 600;
     margin-top: 2px;
@@ -201,96 +260,105 @@ body::after {
 /* ══ DAY TABS ══ */
 .day-tabs {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     flex-wrap: nowrap;
     overflow-x: auto;
-    padding-bottom: 4px;
-    margin-bottom: 20px;
+    padding-bottom: 3px;
+    margin-bottom: 18px;
     scrollbar-width: none;
-    animation: fadeUp 0.5s 0.15s ease both;
+    animation: fadeUp 0.35s 0.12s ease both;
     -webkit-overflow-scrolling: touch;
 }
 .day-tabs::-webkit-scrollbar { display: none; }
 
 .day-btn {
-    padding: 9px 18px;
+    padding: 7px 15px;
     border-radius: 100px;
     text-decoration: none;
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 600;
     white-space: nowrap;
     color: var(--text-secondary);
     background: var(--surface);
     border: 1px solid var(--border);
     box-shadow: var(--shadow-sm);
-    transition: all 0.2s ease;
+    transition: background var(--t), color var(--t), border-color var(--t), box-shadow var(--t);
     flex-shrink: 0;
 }
 
-.day-btn:active { transform: scale(0.95); }
+.day-btn:hover {
+    color: var(--accent);
+    border-color: rgba(99,102,241,0.22);
+    background: var(--surface-2);
+}
+
+.day-btn:active { transform: scale(0.96); }
 
 .active-day {
     background: linear-gradient(135deg, var(--accent), var(--accent-2)) !important;
     color: #fff !important;
     border-color: transparent !important;
-    box-shadow: 0 8px 22px rgba(79,70,229,0.3) !important;
-    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(79,70,229,0.26) !important;
 }
 
 /* ══ SECTION LABEL ══ */
 .section-label {
-    font-size: 11px;
+    font-size: 10.5px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.09em;
     color: var(--text-muted);
-    margin-bottom: 12px;
-    padding-left: 4px;
-    animation: fadeUp 0.5s 0.2s ease both;
+    margin-bottom: 10px;
+    padding-left: 3px;
+    animation: fadeUp 0.35s 0.17s ease both;
 }
 
 /* ══ TIMETABLE CARDS ══ */
 #timetableContainer {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 11px;
 }
 
 .tt-card {
     background: var(--surface);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-md);
     border: 1px solid var(--border);
     overflow: hidden;
     display: flex;
     align-items: stretch;
     box-shadow: var(--shadow-sm);
-    animation: fadeUp 0.5s ease both;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.4s;
+    animation: fadeUp 0.35s ease both;
+    transition: background var(--t), border-color var(--t), box-shadow var(--t);
 }
+
+.tt-card:hover {
+    box-shadow: var(--shadow-md);
+    border-color: rgba(99,102,241,0.18);
+}
+
 .tt-card:active { transform: scale(0.99); }
 
-/* colour stripe */
-.tt-stripe {
-    width: 5px;
-    flex-shrink: 0;
-}
+/* Colour stripe */
+.tt-stripe { width: 4px; flex-shrink: 0; }
 .color1 .tt-stripe { background: var(--c1); }
 .color2 .tt-stripe { background: var(--c2); }
 .color3 .tt-stripe { background: var(--c3); }
 .color4 .tt-stripe { background: var(--c4); }
 .color5 .tt-stripe { background: var(--c5); }
 
-/* time block */
+/* Time block */
 .time-block {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 18px 16px;
-    gap: 4px;
-    min-width: 80px;
+    padding: 16px 14px;
+    gap: 3px;
+    min-width: 76px;
     flex-shrink: 0;
     border-right: 1px solid var(--border);
+    transition: background var(--t);
 }
 
 .color1 .time-block { background: var(--c1-bg); }
@@ -300,8 +368,9 @@ body::after {
 .color5 .time-block { background: var(--c5-bg); }
 
 .time-start {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 14px; font-weight: 700;
+    font-size: 13.5px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
 }
 .color1 .time-start { color: var(--c1); }
 .color2 .time-start { color: var(--c2); }
@@ -310,29 +379,34 @@ body::after {
 .color5 .time-start { color: var(--c5); }
 
 .time-sep {
-    font-size: 10px;
+    font-size: 9.5px;
     color: var(--text-muted);
     font-weight: 500;
 }
 
 .time-end {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px; font-weight: 600;
+    font-size: 11.5px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
     color: var(--text-muted);
 }
 
-/* subject info */
+/* Subject info */
 .subject-info {
     flex: 1;
-    padding: 16px 18px;
+    padding: 14px 16px;
     min-width: 0;
 }
 
 .subject-name {
-    font-size: 15px; font-weight: 700;
+    font-size: 14.5px;
+    font-weight: 700;
     color: var(--text-primary);
-    margin-bottom: 8px;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    margin-bottom: 7px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color var(--t);
 }
 
 .subject-meta {
@@ -344,79 +418,93 @@ body::after {
 .meta-row {
     display: flex;
     align-items: center;
-    gap: 7px;
-    font-size: 12px;
+    gap: 6px;
+    font-size: 11.5px;
     color: var(--text-secondary);
     font-weight: 500;
+    transition: color var(--t);
 }
 
-.meta-dot {
-    width: 6px; height: 6px; border-radius: 50%;
+.meta-row i {
+    font-size: 10.5px;
+    width: 14px;
+    text-align: center;
     flex-shrink: 0;
 }
-.color1 .meta-dot { background: var(--c1); }
-.color2 .meta-dot { background: var(--c2); }
-.color3 .meta-dot { background: var(--c3); }
-.color4 .meta-dot { background: var(--c4); }
-.color5 .meta-dot { background: var(--c5); }
 
-/* subject code chip */
+.color1 .meta-row i { color: var(--c1); }
+.color2 .meta-row i { color: var(--c2); }
+.color3 .meta-row i { color: var(--c3); }
+.color4 .meta-row i { color: var(--c4); }
+.color5 .meta-row i { color: var(--c5); }
+
+/* Code chip */
 .code-chip {
-    margin-top: 10px;
+    margin-top: 8px;
     display: inline-flex;
     align-items: center;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10.5px; font-weight: 600;
-    padding: 3px 10px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 2px 9px;
     border-radius: 100px;
     border: 1px solid transparent;
+    font-variant-numeric: tabular-nums;
 }
-.color1 .code-chip { background: var(--c1-soft); color: var(--c1); border-color: rgba(79,70,229,0.2); }
-.color2 .code-chip { background: var(--c2-soft); color: var(--c2); border-color: rgba(16,185,129,0.2); }
-.color3 .code-chip { background: var(--c3-soft); color: #92400e; border-color: rgba(245,158,11,0.2); }
-.color4 .code-chip { background: var(--c4-soft); color: var(--c4); border-color: rgba(244,63,94,0.2); }
-.color5 .code-chip { background: var(--c5-soft); color: var(--c5); border-color: rgba(139,92,246,0.2); }
+.color1 .code-chip { background: var(--c1-soft); color: var(--c1); border-color: rgba(79,70,229,0.18); }
+.color2 .code-chip { background: var(--c2-soft); color: var(--c2); border-color: rgba(16,185,129,0.18); }
+.color3 .code-chip { background: var(--c3-soft); color: #92400e; border-color: rgba(245,158,11,0.18); }
+.color4 .code-chip { background: var(--c4-soft); color: var(--c4); border-color: rgba(244,63,94,0.18); }
+.color5 .code-chip { background: var(--c5-soft); color: var(--c5); border-color: rgba(139,92,246,0.18); }
 
 /* ══ EMPTY STATE ══ */
 .empty-box {
     background: var(--surface);
-    border: 1.5px dashed rgba(99,102,241,0.2);
+    border: 1.5px dashed rgba(99,102,241,0.18);
     border-radius: var(--radius-lg);
-    padding: 52px 20px;
+    padding: 44px 20px;
     text-align: center;
-    animation: fadeUp 0.5s 0.2s ease both;
-    transition: background 0.4s;
-}
-.empty-icon {
-    font-size: 52px;
-    display: block; margin-bottom: 14px;
-    animation: float 3s ease-in-out infinite;
-}
-.empty-box h3 {
-    font-size: 18px; font-weight: 700;
-    color: var(--text-primary); margin-bottom: 7px;
-}
-.empty-box p {
-    font-size: 13px; color: var(--text-muted); font-weight: 500;
+    animation: fadeUp 0.35s ease both;
+    transition: background var(--t);
 }
 
-/* ══ LOADING STATE ══ */
+.empty-icon {
+    font-size: 36px;
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 12px;
+}
+
+.empty-box h3 {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+}
+.empty-box p {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* ══ SKELETON LOADER ══ */
 .skeleton {
     background: var(--surface);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-md);
     border: 1px solid var(--border);
-    height: 96px;
+    height: 88px;
     overflow: hidden;
     position: relative;
 }
 .skeleton::after {
     content: '';
-    position: absolute; inset: 0;
+    position: absolute;
+    inset: 0;
     background: linear-gradient(90deg,
         transparent 0%,
-        rgba(99,102,241,0.07) 50%,
+        rgba(99,102,241,0.06) 50%,
         transparent 100%);
-    animation: shimmer 1.4s infinite;
+    animation: shimmer 1.2s infinite;
 }
 @keyframes shimmer {
     from { transform: translateX(-100%); }
@@ -425,41 +513,45 @@ body::after {
 
 /* ══ ANIMATIONS ══ */
 @keyframes slideDown {
-    from { opacity:0; transform:translateY(-20px); }
-    to   { opacity:1; transform:translateY(0); }
+    from { opacity: 0; transform: translateY(-16px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes fadeUp {
-    from { opacity:0; transform:translateY(14px); }
-    to   { opacity:1; transform:translateY(0); }
-}
-@keyframes float {
-    0%,100% { transform:translateY(0); }
-    50%      { transform:translateY(-10px); }
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ══ ANDROID / MOBILE ══ */
+/* ══ MOBILE ══ */
 @media (max-width: 600px) {
-    .tt-container  { padding: 14px 12px 90px; }
-    .tt-header     { padding: 22px 16px 20px; }
+    .tt-container  { padding: 12px 10px 88px; }
+    .tt-header     { padding: 20px 16px; }
     .header-text h2{ font-size: 18px; }
-    .date-value    { font-size: 16px; }
-    .time-block    { min-width: 70px; padding: 14px 12px; }
-    .time-start    { font-size: 13px; }
-    .subject-name  { font-size: 14px; }
-    .subject-info  { padding: 13px 14px; }
+    .arrow-btn     { min-width: 58px; height: 44px; }
+    .btn-date      { display: none; }
+    .time-block    { min-width: 68px; padding: 14px 10px; }
+    .time-start    { font-size: 12.5px; }
+    .subject-info  { padding: 12px 13px; }
+    .subject-name  { font-size: 13.5px; }
 }
 
-@media (max-width: 380px) {
-    .time-block { min-width: 62px; padding: 12px 10px; }
+@media (max-width: 360px) {
+    .time-block  { min-width: 60px; padding: 12px 8px; }
+    .arrow-btn   { min-width: 50px; }
 }
 </style>
+
+<!-- Static bg glows (no animation) -->
+<div class="bg-glow bg-glow-1"></div>
+<div class="bg-glow bg-glow-2"></div>
 
 <div class="tt-container">
 
     <!-- ══ HERO ══ -->
     <div class="tt-header">
         <div class="tt-header-inner">
-            <div class="header-icon">📅</div>
+            <div class="header-icon">
+                <i class="fa-solid fa-calendar-days"></i>
+            </div>
             <div class="header-text">
                 <h2>Timetable</h2>
                 <p>Your daily class schedule</p>
@@ -470,28 +562,36 @@ body::after {
     <!-- ══ DATE NAV ══ -->
     <div class="date-nav">
 
-        <button class="arrow-btn" onclick="changeDate(-1)" aria-label="Previous day">&#8592;</button>
+        <!-- PREV button — shows prev day name + date -->
+        <button class="arrow-btn" id="prevBtn" onclick="changeDate(-1)" aria-label="Previous day">
+            <i class="fa-solid fa-chevron-left"></i>
+            <span class="btn-day" id="prevDay">—</span>
+            <span class="btn-date" id="prevDate">—</span>
+        </button>
 
         <div class="date-center">
-            <div class="date-label">Showing schedule for</div>
+            <div class="date-label">Schedule for</div>
             <div class="date-value" id="dateText"></div>
             <div class="date-weekday" id="dateWeekday"></div>
         </div>
 
-        <button class="arrow-btn" onclick="changeDate(1)" aria-label="Next day">&#8594;</button>
+        <!-- NEXT button — shows next day name + date -->
+        <button class="arrow-btn" id="nextBtn" onclick="changeDate(1)" aria-label="Next day">
+            <i class="fa-solid fa-chevron-right"></i>
+            <span class="btn-day" id="nextDay">—</span>
+            <span class="btn-date" id="nextDate">—</span>
+        </button>
 
     </div>
 
     <!-- ══ DAY TABS ══ -->
     <div class="day-tabs">
-
         {% for d in days %}
         <a href="?day={{ d }}"
            class="day-btn {% if selected_day == d %}active-day{% endif %}">
             {{ d }}
         </a>
         {% endfor %}
-
     </div>
 
     <!-- ══ SECTION LABEL ══ -->
@@ -499,82 +599,115 @@ body::after {
 
     <!-- ══ TIMETABLE ══ -->
     <div id="timetableContainer">
-        <!-- skeleton loaders -->
         <div class="skeleton"></div>
-        <div class="skeleton" style="animation-delay:0.1s;opacity:0.7;"></div>
-        <div class="skeleton" style="animation-delay:0.2s;opacity:0.5;"></div>
+        <div class="skeleton" style="opacity:.7;"></div>
+        <div class="skeleton" style="opacity:.45;"></div>
     </div>
 
 </div>
 
 <script>
+/* ── State ── */
 let currentDate = new Date();
 
 const COLORS = ['color1','color2','color3','color4','color5'];
 
-function formatDate(date) {
-    return date.toISOString().split('T')[0];
+const DAYS_SHORT  = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const DAYS_FULL   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MONTHS_SHORT= ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+/* ── Helpers ── */
+function formatISO(d) {
+    const y  = d.getFullYear();
+    const mo = String(d.getMonth()+1).padStart(2,'0');
+    const dy = String(d.getDate()).padStart(2,'0');
+    return `${y}-${mo}-${dy}`;
 }
 
+function shortLabel(d) {
+    return DAYS_SHORT[d.getDay()];
+}
+
+function shortDate(d) {
+    return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`;
+}
+
+function offsetDate(base, delta) {
+    const d = new Date(base);
+    d.setDate(d.getDate() + delta);
+    return d;
+}
+
+/* ── UI update ── */
 function updateDateUI() {
-    const opts = { day: 'numeric', month: 'short', year: 'numeric' };
-    document.getElementById('dateText').innerText =
+    /* Centre display */
+    const opts   = { day:'numeric', month:'short', year:'numeric' };
+    const dayFull = DAYS_FULL[currentDate.getDay()];
+
+    document.getElementById('dateText').textContent    =
         currentDate.toLocaleDateString('en-IN', opts);
+    document.getElementById('dateWeekday').textContent = dayFull;
 
-    const weekday = currentDate.toLocaleString('en-US', { weekday: 'long' });
-    document.getElementById('dateWeekday').innerText = weekday;
+    /* Prev / Next button labels */
+    const prev = offsetDate(currentDate, -1);
+    const next = offsetDate(currentDate,  1);
 
-    const dayShort = currentDate.toLocaleString('en-US', { weekday: 'short' });
+    document.getElementById('prevDay').textContent  = shortLabel(prev);
+    document.getElementById('prevDate').textContent = shortDate(prev);
+    document.getElementById('nextDay').textContent  = shortLabel(next);
+    document.getElementById('nextDate').textContent = shortDate(next);
 
+    /* Day tabs highlight */
     document.querySelectorAll('.day-btn').forEach(btn => {
-        btn.classList.remove('active-day');
-        if (btn.innerText.trim() === dayShort) btn.classList.add('active-day');
+        const match = btn.textContent.trim() === shortLabel(currentDate);
+        btn.classList.toggle('active-day', match);
     });
 
-    const isToday = formatDate(currentDate) === formatDate(new Date());
-    document.getElementById('sectionLabel').innerText =
-        isToday ? "Today's Classes" : weekday + "'s Classes";
+    /* Section label */
+    const isToday = formatISO(currentDate) === formatISO(new Date());
+    document.getElementById('sectionLabel').textContent =
+        isToday ? "Today's Classes" : dayFull + "'s Classes";
 
     loadTimetable();
 }
 
-function changeDate(value) {
-    currentDate.setDate(currentDate.getDate() + value);
+/* ── Date navigation ── */
+function changeDate(delta) {
+    currentDate.setDate(currentDate.getDate() + delta);
     updateDateUI();
 }
 
+/* ── Fetch & render ── */
 function loadTimetable() {
-    const date = formatDate(currentDate);
+    const date      = formatISO(currentDate);
     const container = document.getElementById('timetableContainer');
 
-    // show skeletons
     container.innerHTML = `
         <div class="skeleton"></div>
-        <div class="skeleton" style="opacity:0.7;margin-top:14px;"></div>
-        <div class="skeleton" style="opacity:0.5;margin-top:14px;"></div>
+        <div class="skeleton" style="opacity:.7;margin-top:11px;"></div>
+        <div class="skeleton" style="opacity:.45;margin-top:11px;"></div>
     `;
 
     fetch(`/attendance/student/timetable/ajax/?date=${date}`)
-        .then(res => res.json())
+        .then(r => r.json())
         .then(data => {
             container.innerHTML = '';
 
-            if (!data.timetable || data.timetable.length === 0) {
+            if (!data.timetable || !data.timetable.length) {
                 container.innerHTML = `
                     <div class="empty-box">
-                        <span class="empty-icon">🌤️</span>
-                        <h3>No Classes Today</h3>
-                        <p>Enjoy your free day — well deserved! 😎</p>
-                    </div>
-                `;
+                        <span class="empty-icon"><i class="fa-regular fa-calendar-xmark"></i></span>
+                        <h3>No Classes</h3>
+                        <p>Nothing scheduled for this day.</p>
+                    </div>`;
                 return;
             }
 
             data.timetable.forEach((t, i) => {
                 const color = COLORS[i % COLORS.length];
-                const card = document.createElement('div');
+                const card  = document.createElement('div');
                 card.className = `tt-card ${color}`;
-                card.style.animationDelay = `${0.1 + i * 0.07}s`;
+                card.style.animationDelay = `${i * 0.06}s`;
                 card.innerHTML = `
                     <div class="tt-stripe"></div>
                     <div class="time-block">
@@ -586,32 +719,38 @@ function loadTimetable() {
                         <div class="subject-name">${t.subject}</div>
                         <div class="subject-meta">
                             <div class="meta-row">
-                                <span class="meta-dot"></span>
-                                <span>📍 ${t.room}</span>
+                                <i class="fa-solid fa-location-dot"></i>
+                                <span>${t.room}</span>
                             </div>
                             <div class="meta-row">
-                                <span class="meta-dot"></span>
-                                <span>👨‍🏫 ${t.teacher}</span>
+                                <i class="fa-solid fa-chalkboard-user"></i>
+                                <span>${t.teacher}</span>
                             </div>
                         </div>
                         <div class="code-chip">${t.code}</div>
-                    </div>
-                `;
+                    </div>`;
                 container.appendChild(card);
             });
         })
         .catch(() => {
             container.innerHTML = `
                 <div class="empty-box">
-                    <span class="empty-icon">⚠️</span>
+                    <span class="empty-icon"><i class="fa-solid fa-triangle-exclamation"></i></span>
                     <h3>Connection Error</h3>
                     <p>Could not load timetable. Please try again.</p>
-                </div>
-            `;
+                </div>`;
         });
 }
 
-updateDateUI();
+/* ── Boot: add transition class after first paint so theme swap is instant on load ── */
+document.addEventListener('DOMContentLoaded', () => {
+    updateDateUI();
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            document.body.classList.add('theme-ready');
+        });
+    });
+});
 </script>
 
 {% endblock %}

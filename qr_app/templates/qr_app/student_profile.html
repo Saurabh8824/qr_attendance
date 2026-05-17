@@ -1,123 +1,141 @@
 {% extends 'qr_app/student_base.html' %}
 {% block content %}
 
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-
 <style>
+/* ══════════════════════════════════════
+   TOKENS — Light
+══════════════════════════════════════ */
 :root {
-    --bg:           #f0f4ff;
+    --bg:           #f1f4fb;
     --surface:      #ffffff;
-    --surface-2:    #f8faff;
-    --border:       rgba(99,102,241,0.12);
-    --text-primary: #0f172a;
-    --text-secondary:#475569;
-    --text-muted:   #94a3b8;
+    --surface-2:    #f6f8fe;
+    --surface-3:    #eef1f9;
+    --border:       rgba(79,70,229,0.09);
+    --border-soft:  rgba(79,70,229,0.05);
+
+    --t1:           #0d1117;
+    --t2:           #374060;
+    --t3:           #7880a0;
+    --t4:           #b0b8cc;
+
     --accent:       #4f46e5;
     --accent-2:     #7c3aed;
     --accent-3:     #0ea5e9;
     --success:      #10b981;
     --danger:       #f43f5e;
     --gold:         #f59e0b;
-    --shadow-sm:    0 2px 8px rgba(79,70,229,0.08);
-    --shadow-md:    0 8px 30px rgba(79,70,229,0.12);
-    --shadow-lg:    0 20px 60px rgba(79,70,229,0.18);
-    --radius-sm:    12px;
-    --radius-md:    20px;
-    --radius-lg:    28px;
-    --radius-xl:    36px;
+
+    --shadow-xs:    0 1px 4px rgba(15,18,50,0.06);
+    --shadow-sm:    0 2px 10px rgba(15,18,50,0.08);
+    --shadow-md:    0 6px 24px rgba(15,18,50,0.10);
+
+    --r-sm:         10px;
+    --r-md:         16px;
+    --r-lg:         20px;
+    --r-xl:         26px;
+    --r-hero:       28px;
+
+    --t: 0.15s ease;
 }
 
+/* ══════════════════════════════════════
+   TOKENS — Dark
+══════════════════════════════════════ */
 body.dark {
-    --bg:            #060a14;
-    --surface:       #0f1628;
-    --surface-2:     #141d35;
-    --border:        rgba(99,102,241,0.16);
-    --text-primary:  #f1f5f9;
-    --text-secondary:#94a3b8;
-    --text-muted:    #475569;
-    --shadow-sm:     0 2px 10px rgba(0,0,0,0.3);
-    --shadow-md:     0 8px 28px rgba(0,0,0,0.35);
-    --shadow-lg:     0 20px 55px rgba(0,0,0,0.45);
+    --bg:           #07090f;
+    --surface:      #0e1120;
+    --surface-2:    #131828;
+    --surface-3:    #181d30;
+    --border:       rgba(99,102,241,0.12);
+    --border-soft:  rgba(99,102,241,0.06);
+
+    --t1:           #edf0fa;
+    --t2:           #8892b0;
+    --t3:           #454d68;
+    --t4:           #252c42;
+
+    --shadow-xs:    0 1px 4px rgba(0,0,0,0.30);
+    --shadow-sm:    0 2px 10px rgba(0,0,0,0.38);
+    --shadow-md:    0 6px 24px rgba(0,0,0,0.46);
 }
 
-
-* {
-    margin: 0;
-    padding: 0;
+/* ══════════════════════════════════════
+   BASE
+══════════════════════════════════════ */
+*, *::before, *::after {
+    margin: 0; padding: 0;
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
 }
 
 body {
-    font-family: 'Sora', sans-serif;
+    font-family: 'Sora', system-ui, sans-serif;
     background: var(--bg);
-    color: var(--text-primary);
+    color: var(--t1);
     min-height: 100vh;
     overflow-x: hidden;
 }
 
-/* ── BG DECORATION ── */
-body::before {
-    content: '';
-    position: fixed;
-    top: -120px;
-    right: -120px;
-    width: 420px;
-    height: 420px;
-    background: radial-gradient(circle, rgba(79,70,229,0.12) 0%, transparent 70%);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 0;
-}
-body::after {
-    content: '';
-    position: fixed;
-    bottom: -80px;
-    left: -80px;
-    width: 300px;
-    height: 300px;
-    background: radial-gradient(circle, rgba(14,165,233,0.1) 0%, transparent 70%);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 0;
+/* Transitions only after first paint — no load flash */
+body.theme-ready {
+    transition: background var(--t), color var(--t);
 }
 
-/* ── WRAPPER ── */
+/* Static ambient glows */
+.bg-glow { position: fixed; border-radius: 50%; pointer-events: none; z-index: 0; }
+.bg-glow-a {
+    top: -110px; right: -90px;
+    width: 360px; height: 360px;
+    background: radial-gradient(circle, rgba(79,70,229,0.09) 0%, transparent 70%);
+}
+.bg-glow-b {
+    bottom: -70px; left: -60px;
+    width: 260px; height: 260px;
+    background: radial-gradient(circle, rgba(14,165,233,0.07) 0%, transparent 70%);
+}
+
+/* ══════════════════════════════════════
+   WRAPPER
+══════════════════════════════════════ */
 .profile-wrapper {
     max-width: 680px;
     margin: 0 auto;
-    padding: 20px 16px 100px;
+    padding: 18px 14px 104px;
     position: relative;
     z-index: 1;
 }
 
-/* ── HERO CARD ── */
+/* ══════════════════════════════════════
+   HERO CARD
+══════════════════════════════════════ */
 .hero-card {
-    background: linear-gradient(145deg, #4f46e5 0%, #7c3aed 50%, #0ea5e9 100%);
-    border-radius: var(--radius-xl);
-    padding: 32px 24px 28px;
+    background: linear-gradient(142deg, #4f46e5 0%, #7c3aed 52%, #0ea5e9 100%);
+    border-radius: var(--r-hero);
+    padding: 26px 20px 22px;
     position: relative;
     overflow: hidden;
-    margin-bottom: 20px;
-    box-shadow: var(--shadow-lg);
-    animation: slideDown 0.55s cubic-bezier(.22,.68,0,1.2) both;
+    margin-bottom: 14px;
+    box-shadow: 0 10px 36px rgba(79,70,229,0.24);
+    animation: slideDown 0.38s cubic-bezier(.22,.68,0,1.1) both;
 }
 
 .hero-card::before {
     content: '';
     position: absolute;
-    width: 300px; height: 300px;
+    width: 260px; height: 260px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.07);
-    top: -130px; right: -80px;
+    background: rgba(255,255,255,0.06);
+    top: -120px; right: -70px;
+    pointer-events: none;
 }
 .hero-card::after {
     content: '';
     position: absolute;
-    width: 180px; height: 180px;
+    width: 150px; height: 150px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.05);
-    bottom: -80px; left: -40px;
+    background: rgba(255,255,255,0.04);
+    bottom: -70px; left: -35px;
+    pointer-events: none;
 }
 
 .hero-inner {
@@ -125,45 +143,47 @@ body::after {
     z-index: 2;
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 18px;
 }
 
-/* ── AVATAR ── */
+/* Avatar */
 .avatar-ring {
     flex-shrink: 0;
-    width: 88px; height: 88px;
+    width: 80px; height: 80px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.15);
-    border: 2.5px solid rgba(255,255,255,0.35);
-    backdrop-filter: blur(12px);
+    background: rgba(255,255,255,0.14);
+    border: 2px solid rgba(255,255,255,0.32);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.3);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.16), inset 0 1px 0 rgba(255,255,255,0.28);
 }
 
 .avatar-letter {
-    font-size: 34px;
+    font-size: 30px;
     font-weight: 800;
     color: #fff;
     line-height: 1;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    text-shadow: 0 2px 6px rgba(0,0,0,0.18);
+    text-transform: uppercase;
 }
 
-/* ── HERO INFO ── */
+/* Hero info */
 .hero-info h1 {
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 700;
     color: #fff;
-    line-height: 1.2;
-    margin-bottom: 7px;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    line-height: 1.25;
+    margin-bottom: 8px;
+    letter-spacing: -0.2px;
 }
 
 .hero-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 7px;
+    gap: 6px;
     margin-bottom: 8px;
 }
 
@@ -171,325 +191,399 @@ body::after {
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    background: rgba(255,255,255,0.15);
-    border: 1px solid rgba(255,255,255,0.25);
-    backdrop-filter: blur(8px);
+    background: rgba(255,255,255,0.14);
+    border: 1px solid rgba(255,255,255,0.22);
     border-radius: 100px;
-    padding: 4px 12px;
-    font-size: 11.5px;
+    padding: 4px 11px;
+    font-size: 11px;
     font-weight: 500;
-    color: rgba(255,255,255,0.95);
+    color: rgba(255,255,255,0.92);
 }
 
-.enrollment-row {
+.hero-tag i { font-size: 10px; opacity: 0.85; }
+
+.enroll-row {
     display: flex;
     align-items: center;
-    gap: 7px;
-    margin-top: 2px;
+    gap: 8px;
 }
 
-.enrollment-label {
-    font-size: 10px;
-    color: rgba(255,255,255,0.65);
-    font-weight: 500;
+.enroll-label {
+    font-size: 9.5px;
+    color: rgba(255,255,255,0.60);
+    font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
 }
 
-.enrollment-value {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
+.enroll-chip {
+    font-size: 12px;
     font-weight: 600;
-    color: rgba(255,255,255,0.95);
+    color: rgba(255,255,255,0.94);
     background: rgba(255,255,255,0.12);
     padding: 3px 10px;
     border-radius: 8px;
     border: 1px solid rgba(255,255,255,0.18);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
 }
 
-/* ── SECTION HEADER ── */
-.section-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 18px;
-}
-
-.section-icon {
-    width: 36px; height: 36px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 17px;
-    flex-shrink: 0;
-}
-
-.icon-blue   { background: #eff6ff; }
-.icon-purple { background: #f5f3ff; }
-.icon-teal   { background: #f0fdfa; }
-
-.section-header h3 {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--text-primary);
-}
-
-/* ── CARD ── */
-.card {
-    background: var(--surface);
-    border-radius: var(--radius-lg);
-    padding: 22px 20px;
-    margin-bottom: 16px;
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow-sm);
-}
-
-.card:nth-child(2) { animation: fadeUp 0.5s 0.1s ease both; }
-.card:nth-child(3) { animation: fadeUp 0.5s 0.2s ease both; }
-.card:nth-child(4) { animation: fadeUp 0.5s 0.3s ease both; }
-
-/* ── DETAILS GRID ── */
-.details-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
-    gap: 12px;
-}
-
-.detail-item {
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 14px 16px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.detail-item:active {
-    transform: scale(0.98);
-}
-
-.detail-label {
-    font-size: 10px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--text-muted);
-    margin-bottom: 6px;
-}
-
-.detail-value {
-    font-size: 13.5px;
-    font-weight: 600;
-    color: var(--text-primary);
-    word-break: break-word;
-}
-
-/* ── STAT CARDS ── */
+/* ══════════════════════════════════════
+   STAT CARDS ROW
+══════════════════════════════════════ */
 .stats-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 14px;
-    margin-bottom: 16px;
-    animation: fadeUp 0.5s 0.2s ease both;
+    gap: 12px;
+    margin-bottom: 14px;
+    animation: fadeUp 0.34s 0.08s ease both;
 }
 
 .stat-card {
-    border-radius: var(--radius-lg);
-    padding: 22px 18px;
+    border-radius: var(--r-lg);
+    padding: 20px 16px;
     position: relative;
     overflow: hidden;
     color: #fff;
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-sm);
 }
 
 .stat-card::before {
     content: '';
     position: absolute;
-    width: 140px; height: 140px;
+    width: 120px; height: 120px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.1);
-    top: -60px; right: -40px;
+    background: rgba(255,255,255,0.08);
+    top: -50px; right: -34px;
+    pointer-events: none;
 }
 .stat-card::after {
     content: '';
     position: absolute;
-    width: 80px; height: 80px;
+    width: 70px; height: 70px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.06);
-    bottom: -30px; left: -20px;
+    background: rgba(255,255,255,0.05);
+    bottom: -26px; left: -16px;
+    pointer-events: none;
 }
 
-.stat-card-attend {
-    background: linear-gradient(135deg, #0ea5e9 0%, #4f46e5 100%);
-}
-
-.stat-card-status {
-    background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
-}
+.stat-card-attend { background: linear-gradient(135deg, #0ea5e9, #4f46e5); }
+.stat-card-status { background: linear-gradient(135deg, #7c3aed, #ec4899); }
 
 .stat-label {
-    font-size: 10px;
-    font-weight: 600;
+    font-size: 9.5px;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: rgba(255,255,255,0.7);
-    margin-bottom: 6px;
-    position: relative;
-    z-index: 2;
+    color: rgba(255,255,255,0.68);
+    margin-bottom: 5px;
+    position: relative; z-index: 2;
 }
 
 .stat-value {
-    font-size: 34px;
+    font-size: 32px;
     font-weight: 800;
     line-height: 1;
     color: #fff;
-    position: relative;
-    z-index: 2;
-    margin-bottom: 4px;
+    position: relative; z-index: 2;
+    margin-bottom: 3px;
+    letter-spacing: -1px;
 }
 
 .stat-desc {
-    font-size: 11.5px;
-    color: rgba(255,255,255,0.75);
-    position: relative;
-    z-index: 2;
+    font-size: 11px;
+    color: rgba(255,255,255,0.72);
+    position: relative; z-index: 2;
     font-weight: 500;
 }
 
-/* STATUS BADGE inside stat */
 .status-badge {
-    display: inline-block;
-    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
     font-weight: 700;
-    padding: 4px 14px;
+    padding: 4px 12px;
     border-radius: 100px;
-    margin-top: 6px;
-    position: relative;
-    z-index: 2;
+    margin-top: 5px;
+    position: relative; z-index: 2;
+}
+.status-badge i { font-size: 10px; }
+
+.status-good { background: rgba(16,185,129,0.28); border: 1px solid rgba(16,185,129,0.45); }
+.status-low  { background: rgba(244,63,94,0.32);  border: 1px solid rgba(244,63,94,0.50); }
+
+/* ══════════════════════════════════════
+   SECTION CARDS
+══════════════════════════════════════ */
+.card {
+    background: var(--surface);
+    border-radius: var(--r-lg);
+    padding: 20px 18px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-xs);
+    transition: background var(--t), border-color var(--t);
 }
 
-.status-good  { background: rgba(16,185,129,0.3); border: 1px solid rgba(16,185,129,0.5); }
-.status-low   { background: rgba(244,63,94,0.35); border: 1px solid rgba(244,63,94,0.5); }
+.card:nth-child(1) { animation: fadeUp 0.34s 0.10s ease both; }
+.card:nth-child(2) { animation: fadeUp 0.34s 0.16s ease both; }
+.card:nth-child(3) { animation: fadeUp 0.34s 0.22s ease both; }
 
-/* ── SUBJECTS ── */
+/* Section header */
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.section-icon {
+    width: 34px; height: 34px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+    transition: background var(--t);
+}
+
+.icon-blue   { background: rgba(14,165,233,0.10); color: #0ea5e9; }
+.icon-purple { background: rgba(124,58,237,0.10); color: #7c3aed; }
+.icon-teal   { background: rgba(16,185,129,0.10); color: #10b981; }
+
+body.dark .icon-blue   { background: rgba(14,165,233,0.12); }
+body.dark .icon-purple { background: rgba(124,58,237,0.13); }
+body.dark .icon-teal   { background: rgba(16,185,129,0.12); }
+
+.section-header h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--t1);
+    transition: color var(--t);
+}
+
+/* ══════════════════════════════════════
+   DETAILS GRID
+══════════════════════════════════════ */
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+}
+
+.detail-item {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 12px 14px;
+    transition: background var(--t), border-color var(--t);
+}
+
+.detail-item:active { transform: scale(0.98); }
+
+.detail-label {
+    font-size: 9.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--t3);
+    margin-bottom: 5px;
+    transition: color var(--t);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.detail-label i { font-size: 9px; }
+
+.detail-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--t1);
+    word-break: break-word;
+    transition: color var(--t);
+}
+
+/* ══════════════════════════════════════
+   SUBJECT ATTENDANCE LIST
+══════════════════════════════════════ */
 .subject-list {
     display: flex;
     flex-direction: column;
-    gap: 0;
 }
 
 .subject-row {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
-    gap: 14px;
-    padding: 15px 0;
-    border-bottom: 1px solid rgba(148,163,184,0.1);
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border-soft);
+    transition: border-color var(--t);
 }
 
-.subject-row:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
-}
+.subject-row:first-child { padding-top: 0; }
+.subject-row:last-child  { border-bottom: none; padding-bottom: 0; }
 
+/* Left: name, code, progress */
 .subject-left {
     flex: 1;
     min-width: 0;
 }
 
 .subject-name {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-primary);
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--t1);
     margin-bottom: 2px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    transition: color var(--t);
 }
 
 .subject-code {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10.5px;
-    color: var(--text-muted);
-    font-weight: 500;
-    margin-bottom: 8px;
+    font-size: 10px;
+    color: var(--t3);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
+    margin-bottom: 9px;
+    transition: color var(--t);
 }
 
-/* Progress bar */
+/* ── Progress bar track ── */
 .progress-track {
     width: 100%;
-    height: 6px;
-    background: #e8ecf8;
+    height: 5px;
+    background: var(--surface-3);
     border-radius: 100px;
     overflow: hidden;
+    position: relative;
+    transition: background var(--t);
 }
 
+/* Percentage label above bar */
+.progress-wrap {
+    position: relative;
+}
+
+.progress-pct {
+    position: absolute;
+    right: 0;
+    top: -18px;
+    font-size: 9.5px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    transition: color var(--t);
+}
+
+/* Fill — animated via CSS custom property trick */
 .progress-fill {
     height: 100%;
     border-radius: 100px;
-    background: linear-gradient(90deg, #4f46e5, #7c3aed);
-    animation: growBar 1s cubic-bezier(.4,0,.2,1) both;
-    animation-delay: 0.3s;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    transform-origin: left;
+    animation: growBar 0.7s cubic-bezier(.4,0,.2,1) both;
 }
 
-.progress-fill.low-fill {
-    background: linear-gradient(90deg, #f43f5e, #fb923c);
-}
+.progress-fill.warn  { background: linear-gradient(90deg, #f43f5e, #fb923c); }
+.progress-fill.ok    { background: linear-gradient(90deg, #10b981, #0ea5e9); }
 
-/* Right side */
+/* Percentage text colour matches fill */
+.progress-pct.warn-txt { color: #f43f5e; }
+.progress-pct.ok-txt   { color: #10b981; }
+.progress-pct.def-txt  { color: var(--accent); }
+
+/* Right: fraction + chip */
 .subject-right {
     flex-shrink: 0;
     text-align: right;
+    padding-top: 1px;
 }
 
 .subject-fraction {
     font-size: 15px;
-    font-weight: 700;
-    color: var(--text-primary);
+    font-weight: 800;
+    color: var(--t1);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    transition: color var(--t);
 }
 
 .subject-fraction-label {
-    font-size: 10px;
-    color: var(--text-muted);
+    font-size: 9px;
+    color: var(--t3);
     margin-top: 2px;
+    font-weight: 500;
+    transition: color var(--t);
 }
 
-.attendance-chip {
-    display: inline-block;
-    margin-top: 4px;
+.att-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    margin-top: 5px;
     font-size: 10px;
     font-weight: 700;
-    padding: 3px 9px;
+    padding: 2px 8px;
     border-radius: 100px;
+    font-variant-numeric: tabular-nums;
+    transition: background var(--t), color var(--t);
 }
+
+.att-chip i { font-size: 8px; }
 
 .chip-good {
-    background: #d1fae5;
-    color: #065f46;
+    background: rgba(16,185,129,0.10);
+    color: #059669;
+    border: 1px solid rgba(16,185,129,0.20);
 }
 .chip-low {
-    background: #ffe4e6;
-    color: #9f1239;
+    background: rgba(244,63,94,0.09);
+    color: #e11d48;
+    border: 1px solid rgba(244,63,94,0.18);
+}
+.chip-zero {
+    background: rgba(148,163,184,0.10);
+    color: var(--t3);
+    border: 1px solid rgba(148,163,184,0.15);
 }
 
-/* ── FOOTER DECORATION ── */
+body.dark .chip-good { color: #34d399; }
+body.dark .chip-low  { color: #fb7185; }
+
+/* ══════════════════════════════════════
+   FOOTER NOTE
+══════════════════════════════════════ */
 .profile-footer {
     text-align: center;
-    padding: 10px 0;
-    font-size: 11px;
-    color: var(--text-muted);
+    padding: 8px 0 2px;
+    font-size: 10.5px;
+    color: var(--t4);
     font-weight: 500;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.03em;
+    transition: color var(--t);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
 }
 
-/* ── ANIMATIONS ── */
+.profile-footer i { font-size: 9px; }
+
+/* ══════════════════════════════════════
+   ANIMATIONS
+══════════════════════════════════════ */
 @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-20px); }
+    from { opacity: 0; transform: translateY(-14px); }
     to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(16px); }
+    from { opacity: 0; transform: translateY(10px); }
     to   { opacity: 1; transform: translateY(0); }
 }
 
@@ -497,31 +591,32 @@ body::after {
     from { width: 0 !important; }
 }
 
-/* ── ANDROID / MOBILE ── */
+/* ══════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════ */
 @media (max-width: 600px) {
-    .profile-wrapper { padding: 14px 12px 90px; }
-
-    .hero-inner { flex-direction: column; text-align: center; }
-    .hero-tags  { justify-content: center; }
-    .enrollment-row { justify-content: center; }
-
-    .hero-info h1 { font-size: 20px; }
-
-    .stats-row { grid-template-columns: 1fr 1fr; gap: 10px; }
-    .stat-value { font-size: 28px; }
-
-    .details-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-
-    .card { padding: 18px 16px; }
-    .avatar-ring { width: 80px; height: 80px; }
-    .avatar-letter { font-size: 30px; }
+    .profile-wrapper  { padding: 12px 10px 90px; }
+    .hero-inner       { flex-direction: column; text-align: center; align-items: center; }
+    .hero-tags        { justify-content: center; }
+    .enroll-row       { justify-content: center; }
+    .hero-info h1     { font-size: 18px; }
+    .stats-row        { gap: 10px; }
+    .stat-value       { font-size: 27px; }
+    .details-grid     { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .card             { padding: 16px 14px; }
+    .avatar-ring      { width: 72px; height: 72px; }
+    .avatar-letter    { font-size: 26px; }
 }
 
 @media (max-width: 360px) {
-    .stats-row { grid-template-columns: 1fr; }
+    .stats-row    { grid-template-columns: 1fr; }
     .details-grid { grid-template-columns: 1fr; }
 }
 </style>
+
+<!-- Static ambient glows — no animation -->
+<div class="bg-glow bg-glow-a"></div>
+<div class="bg-glow bg-glow-b"></div>
 
 <div class="profile-wrapper">
 
@@ -537,13 +632,19 @@ body::after {
                 <h1>{{ student.name }}</h1>
 
                 <div class="hero-tags">
-                    <span class="hero-tag">🎓 {{ student.branch.name }}</span>
-                    <span class="hero-tag">📅 Sem {{ student.semester }}</span>
+                    <span class="hero-tag">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                        {{ student.branch.name }}
+                    </span>
+                    <span class="hero-tag">
+                        <i class="fa-solid fa-layer-group"></i>
+                        Sem {{ student.semester }}
+                    </span>
                 </div>
 
-                <div class="enrollment-row">
-                    <span class="enrollment-label">Enrollment</span>
-                    <span class="enrollment-value">{{ student.enrollment_no }}</span>
+                <div class="enroll-row">
+                    <span class="enroll-label">Enrollment</span>
+                    <span class="enroll-chip">{{ student.enrollment_no }}</span>
                 </div>
             </div>
 
@@ -561,13 +662,15 @@ body::after {
 
         <div class="stat-card stat-card-status">
             <div class="stat-label">Status</div>
-            <div class="stat-value" style="font-size:22px; margin-top:4px;">
-                {% if status == "Low" %}⚠️{% else %}✅{% endif %}
-            </div>
             <div class="status-badge {% if status == 'Low' %}status-low{% else %}status-good{% endif %}">
+                {% if status == "Low" %}
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                {% else %}
+                    <i class="fa-solid fa-circle-check"></i>
+                {% endif %}
                 {{ status }}
             </div>
-            <div class="stat-desc" style="margin-top:6px;">
+            <div class="stat-desc" style="margin-top: 8px;">
                 {% if status == "Low" %}Needs Improvement{% else %}Great Performance{% endif %}
             </div>
         </div>
@@ -578,39 +681,59 @@ body::after {
     <div class="card">
 
         <div class="section-header">
-            <div class="section-icon icon-blue">📋</div>
+            <div class="section-icon icon-blue">
+                <i class="fa-solid fa-id-card"></i>
+            </div>
             <h3>Student Details</h3>
         </div>
 
         <div class="details-grid">
 
             <div class="detail-item">
-                <div class="detail-label">Roll Number</div>
+                <div class="detail-label">
+                    <i class="fa-solid fa-hashtag"></i>
+                    Roll Number
+                </div>
                 <div class="detail-value">{{ student.roll_no }}</div>
             </div>
 
             <div class="detail-item">
-                <div class="detail-label">Email</div>
-                <div class="detail-value" style="font-size:12px;">{{ student.email }}</div>
+                <div class="detail-label">
+                    <i class="fa-regular fa-envelope"></i>
+                    Email
+                </div>
+                <div class="detail-value" style="font-size:11.5px;">{{ student.email }}</div>
             </div>
 
             <div class="detail-item">
-                <div class="detail-label">Mobile</div>
+                <div class="detail-label">
+                    <i class="fa-solid fa-phone"></i>
+                    Mobile
+                </div>
                 <div class="detail-value">{{ student.mobile }}</div>
             </div>
 
             <div class="detail-item">
-                <div class="detail-label">Father's Name</div>
+                <div class="detail-label">
+                    <i class="fa-solid fa-person"></i>
+                    Father's Name
+                </div>
                 <div class="detail-value">{{ student.father_name }}</div>
             </div>
 
             <div class="detail-item">
-                <div class="detail-label">Mother's Name</div>
+                <div class="detail-label">
+                    <i class="fa-solid fa-person-dress"></i>
+                    Mother's Name
+                </div>
                 <div class="detail-value">{{ student.mother_name }}</div>
             </div>
 
             <div class="detail-item">
-                <div class="detail-label">Date of Birth</div>
+                <div class="detail-label">
+                    <i class="fa-regular fa-calendar"></i>
+                    Date of Birth
+                </div>
                 <div class="detail-value">{{ student.dob }}</div>
             </div>
 
@@ -622,7 +745,9 @@ body::after {
     <div class="card">
 
         <div class="section-header">
-            <div class="section-icon icon-purple">📊</div>
+            <div class="section-icon icon-purple">
+                <i class="fa-solid fa-chart-bar"></i>
+            </div>
             <h3>Subject Attendance</h3>
         </div>
 
@@ -642,18 +767,25 @@ body::after {
                     <div class="subject-name">{{ s.name }}</div>
                     <div class="subject-code">{{ s.code }}</div>
 
-                    <div class="progress-track">
-                        <div class="progress-fill
-                            {% if s.total > 0 %}
-                                {% widthratio s.present s.total 100 as pct %}
-                                {% if pct|add:"0" < 75 %}low-fill{% endif %}
-                            {% endif %}"
-                            style="width:
+                    <div class="progress-wrap">
+                        {% if s.total > 0 %}
+                            {% widthratio s.present s.total 100 as pct %}
+                            <span class="progress-pct
+                                {% if pct|add:0 < 75 %}warn-txt{% elif pct|add:0 >= 85 %}ok-txt{% else %}def-txt{% endif %}">
+                                {{ pct }}%
+                            </span>
+                        {% else %}
+                            <span class="progress-pct def-txt">0%</span>
+                        {% endif %}
+
+                        <div class="progress-track">
+                            <div class="progress-fill
                                 {% if s.total > 0 %}
-                                    {% widthratio s.present s.total 100 %}
-                                {% else %}
-                                    0
-                                {% endif %}%;">
+                                    {% widthratio s.present s.total 100 as pct %}
+                                    {% if pct|add:0 < 75 %}warn{% elif pct|add:0 >= 85 %}ok{% endif %}
+                                {% endif %}"
+                                style="width: {% if s.total > 0 %}{% widthratio s.present s.total 100 %}{% else %}0{% endif %}%;">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -661,21 +793,33 @@ body::after {
                 <div class="subject-right">
                     <div class="subject-fraction">{{ s.present }}/{{ s.total }}</div>
                     <div class="subject-fraction-label">classes</div>
-                    <div class="attendance-chip
-                        {% if s.total > 0 %}
+
+                    <div class="att-chip
+                        {% if s.total == 0 %}chip-zero
+                        {% else %}
                             {% widthratio s.present s.total 100 as spct %}
                             {% if spct >= 75 %}chip-good{% else %}chip-low{% endif %}
-                        {% else %}
-                            chip-low
                         {% endif %}">
-                        {% if s.total > 0 %}
-                            {% widthratio s.present s.total 100 %}%
+                        {% if s.total == 0 %}
+                            <i class="fa-solid fa-minus"></i> N/A
                         {% else %}
-                            0%
+                            {% widthratio s.present s.total 100 as spct %}
+                            {% if spct >= 75 %}
+                                <i class="fa-solid fa-circle-check"></i>
+                            {% else %}
+                                <i class="fa-solid fa-circle-exclamation"></i>
+                            {% endif %}
+                            {{ spct }}%
                         {% endif %}
                     </div>
                 </div>
 
+            </div>
+
+            {% empty %}
+            <div style="text-align:center; padding: 28px 0; color: var(--t3); font-size:13px;">
+                <i class="fa-regular fa-folder-open" style="font-size:24px; display:block; margin-bottom:8px;"></i>
+                No subjects enrolled yet.
             </div>
             {% endfor %}
 
@@ -683,8 +827,20 @@ body::after {
 
     </div>
 
-    <div class="profile-footer">Student Portal · Powered by QR Attendance</div>
+    <div class="profile-footer">
+        <i class="fa-solid fa-shield-halved"></i>
+        Student Portal &nbsp;·&nbsp; QR Attendance System
+    </div>
 
 </div>
+
+<script>
+/* Enable transitions only after first paint — prevents theme flash on load */
+requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+        document.body.classList.add('theme-ready');
+    });
+});
+</script>
 
 {% endblock %}

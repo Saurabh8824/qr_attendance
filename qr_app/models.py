@@ -46,7 +46,7 @@ class Student(models.Model):
 
     enrollment_no = models.CharField(max_length=30, unique=True, null=True, blank=True)
     
-    roll_no = models.CharField(max_length=20, unique=True)
+    roll_no = models.CharField(max_length=2)
     name = models.CharField(max_length=100)
     father_name = models.CharField(max_length=100, blank=True, null=True)
     mother_name = models.CharField(max_length=100, blank=True, null=True)
@@ -64,6 +64,14 @@ class Student(models.Model):
     email = models.EmailField(blank=True, null=True)
 
     subjects = models.ManyToManyField(Subject, blank=True)
+    
+    class Meta:
+	    constraints = [
+		  models.UniqueConstraint(
+		    fields=['roll_no','semester','branch'],
+		    name='unique_roll_branch_sem'
+		  )
+		]
 
     def __str__(self):
         return f"{self.roll_no} - {self.name}"

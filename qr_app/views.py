@@ -17,6 +17,8 @@ from django.db.models import Q
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.urls import reverse
+from .decorators import teacher_required, student_required
+from django.views.decorators.cache import never_cache
 
 
 
@@ -25,12 +27,15 @@ def get_user_role(user):
     
 
 # 🏠 Home Page
+@never_cache
 @login_required
+@teacher_required
 def home(request):
     return render(request, "qr_app/home.html")
 
-
+@never_cache
 @login_required
+@student_required
 def student_dashboard(request):
     return render(request, "qr_app/student_dashboard.html")
 
@@ -40,61 +45,124 @@ def student_signup(request):
     from django.contrib.auth.models import User
     from django.contrib.auth import login
     from django.contrib import messages
+    from django.db import IntegrityError
+
     from .models import Student, Subject, Branch
 
     branches = Branch.objects.all()
 
     if request.method == "POST":
+
         username = request.POST.get("username")
         password1 = request.POST.get("password1")
         password2 = request.POST.get("password2")
 
+        enrollment = request.POST.get("enrollment")
+        roll = request.POST.get("roll")
+        semester = request.POST.get("semester")
+        branch_id = request.POST.get("branch")
+
+        # ✅ password check
         if password1 != password2:
             messages.error(request, "Passwords do not match")
             return redirect("student_signup")
 
+        # ✅ username duplicate check
         if User.objects.filter(username=username).exists():
             messages.error(request, "Username already exists")
             return redirect("student_signup")
 
-        user = User.objects.create_user(
-            username=username,
-            password=password1
-        )
-        
-        
-        student = Student.objects.create(
-            user=user,
-            enrollment_no=request.POST.get("enrollment"),
-            roll_no=request.POST.get("roll"),
-            name=request.POST.get("name"),
-            father_name=request.POST.get("father"),
-            mother_name=request.POST.get("mother"),
-            dob=request.POST.get("dob"),
-            year=request.POST.get("year"),
-            semester=request.POST.get("semester"),
-            branch_id=request.POST.get("branch"),
-            email=request.POST.get("email"),
-            mobile=request.POST.get("mobile"),
-        )
+        # ✅ enrollment duplicate check
+        if enrollment:
+            if Student.objects.filter(enrollment_no=enrollment).exists():
+                messages.error(request, "Enrollment number already exists")
+                return redirect("student_signup")
 
-        # 🔥 auto subject assign
-        subjects = Subject.objects.filter(
-            branch=student.branch,
-            semester=student.semester
-        )
-        student.subjects.set(subjects)
+        # ✅ roll + sem + branch duplicate check
+        if Student.objects.filter(
+            roll_no=roll,
+            semester=semester,
+            branch_id=branch_id
+        ).exists():
 
-        login(request, user)
+            messages.error(
+                request,
+                "Student with this Roll Number already exists in this Branch and Semester."
+            )
 
-        return redirect("student_dashboard")
+            return redirect("student_signup")
+
+        try:
+
+            # ✅ create user
+            user = User.objects.create_user(
+                username=username,
+                password=password1
+            )
+            
+            UserProfile.objects.update_or_create(
+                user=user,
+                defaults={
+                    "role": "student"
+                }
+            )
+
+            # ✅ create student
+            student = Student.objects.create(
+                user=user,
+                enrollment_no=enrollment,
+                roll_no=roll,
+                name=request.POST.get("name"),
+                father_name=request.POST.get("father"),
+                mother_name=request.POST.get("mother"),
+                dob=request.POST.get("dob"),
+                year=request.POST.get("year"),
+                semester=semester,
+                branch_id=branch_id,
+                email=request.POST.get("email"),
+                mobile=request.POST.get("mobile"),
+            )
+
+            # ✅ auto subject assign
+            subjects = Subject.objects.filter(
+                branch=student.branch,
+                semester=student.semester
+            )
+
+            student.subjects.set(subjects)
+
+            # ✅ login
+            login(request, user)
+
+            messages.success(request, "Registration Successful")
+
+            return redirect("student_dashboard")
+
+        except IntegrityError:
+
+            messages.error(
+                request,
+                "Duplicate student data found."
+            )
+
+            return redirect("student_signup")
+
+        except Exception as e:
+
+            messages.error(
+                request,
+                f"Error: {str(e)}"
+            )
+
+            return redirect("student_signup")
 
     return render(request, "qr_app/student_signup.html", {
         "branches": branches
     })
 
-
+@never_cache
 @login_required
+@student_required
 def student_dashboard(request):
 
     if request.user.userprofile.role != "student":
@@ -131,12 +199,16 @@ def student_dashboard(request):
             student=student,
             qr_session__subject=subject
         ).count()
+
         # 🔥 attendance map
         attendance_map = {}
+
         sessions = QRSession.objects.filter(
             subject=subject
         ).order_by("created_at")
+
         for session in sessions:
+
             date_key = session.created_at.date()
 
             if date_key not in attendance_map:
@@ -148,43 +220,58 @@ def student_dashboard(request):
                 }
 
             attendance_map[date_key]["total"] += 1
+
             att = Attendance.objects.filter(
                 student=student,
                 qr_session=session
             ).exists()
+
             if att:
                 attendance_map[date_key]["present"] += 1
+
             attendance_map[date_key]["classes"].append({
+
                 "present": att,
+
                 "status": (
                     "present"
                     if att
                     else "absent"
                 ),
+
                 "created_at": timezone.localtime(
                     session.created_at
                 ).strftime("%I:%M %p"),
+
                 "start_time": (
                     session.timetable.start_time.strftime("%I:%M %p")
                     if hasattr(session, "timetable")
                     and session.timetable
                     else ""
                 ),
+
                 "end_time": (
                     session.timetable.end_time.strftime("%I:%M %p")
                     if hasattr(session, "timetable")
                     and session.timetable
                     else ""
                 )
+
             })
 
         # 🔥 convert to list
         attendance_records = []
+
         for dt, info in attendance_map.items():
+
             attendance_records.append({
+
                 "date": dt,
+
                 "present_count": info["present"],
+
                 "total_count": info["total"],
+
                 "status": (
                     "present"
                     if info["present"] == info["total"]
@@ -192,18 +279,26 @@ def student_dashboard(request):
                     if info["present"] > 0
                     else "absent"
                 ),
+
                 "classes": info["classes"]
 
             })
 
         # 🔥 ADD TO DATA
         data.append({
+
             "id": subject.id,
+
             "name": subject.name,
+
             "code": subject.code,
+
             "present": present,
+
             "total": total,
+
             "attendance_records": attendance_records
+
         })
 
         total_present += present
@@ -212,10 +307,15 @@ def student_dashboard(request):
     overall = total_present
 
     return render(request, "qr_app/student_dashboard.html", {
+
         "student": student,
+
         "subjects": data,
+
         "overall": overall,
+
         "total_classes": total_classes,
+
         "today_timetable": today_timetable
 
     })
@@ -224,7 +324,9 @@ def student_dashboard(request):
 
 
 # 📊 Dashboard (overall view)
+@never_cache
 @login_required
+@teacher_required
 def dashboard(request):
     from .models import Student, Subject, Attendance
     from django.utils.timezone import now
@@ -245,8 +347,9 @@ def dashboard(request):
     })
 
 
-
+@never_cache
 @login_required
+@teacher_required
 def add_timetable(request):
     
 
@@ -272,8 +375,9 @@ def add_timetable(request):
     })
 
 
-
+@never_cache
 @login_required
+@teacher_required
 def view_timetable(request):
 
     branches = Branch.objects.all()
@@ -306,8 +410,9 @@ def view_timetable(request):
  })
 
 
-
+@never_cache
 @login_required
+@student_required
 def student_timetable(request):
 
     student = Student.objects.get(user=request.user)
@@ -358,8 +463,9 @@ def get_timetable_ajax(request):
 
     return JsonResponse({"timetable": data, "day": day})
 
-
+@never_cache
 @login_required
+@student_required
 def student_scan(request):
     student = Student.objects.get(user=request.user)
 
@@ -367,8 +473,9 @@ def student_scan(request):
         "student": student
     })
 
-
+@never_cache
 @login_required
+@student_required
 def student_alerts(request):
 
     student = Student.objects.get(user=request.user)
@@ -390,8 +497,9 @@ def student_alerts(request):
         "today": today
     })
 
-
+@never_cache
 @login_required
+@student_required
 def student_profile(request):
 
     student = Student.objects.get(user=request.user)
@@ -438,8 +546,9 @@ def student_profile(request):
         "status": status
     })
 
-
+@never_cache
 @login_required
+@teacher_required
 def create_alert(request):
 
     branches = Branch.objects.all()
@@ -466,8 +575,9 @@ def create_alert(request):
         "branches": branches
     })
 
-
+@never_cache
 @login_required
+@teacher_required
 def teacher_alerts(request):
 
     branches = Branch.objects.all()
@@ -492,8 +602,10 @@ def teacher_alerts(request):
         "selected_branch": branch_id,
         "selected_semester": semester
     })
-
+    
+@never_cache
 @login_required
+@teacher_required
 def attendance_faculty(request):
     today = localdate()
     subjects = Subject.objects.all()
@@ -586,7 +698,9 @@ def attendance_faculty(request):
 
 
 # 👨‍🎓 Add Student (NEW FORM)
+@never_cache
 @login_required
+@teacher_required
 def add_student(request):
     if request.method == "POST":
         form = StudentForm(request.POST)
@@ -603,7 +717,9 @@ def add_student(request):
 
 
 # 👨‍🎓 Student List
+@never_cache
 @login_required
+@teacher_required
 def student_list(request):
     students = Student.objects.all().order_by("roll_no")
     branches = Branch.objects.all()
@@ -634,7 +750,9 @@ def student_list(request):
 
 
 # 📖 Add Subject
+@never_cache
 @login_required
+@teacher_required
 def add_subject(request):
     if request.method == "POST":
         form = SubjectForm(request.POST)
@@ -649,7 +767,9 @@ def add_subject(request):
 
 
 # 📖 Subject List
+@never_cache
 @login_required
+@teacher_required
 def subject_list(request):
     subjects = Subject.objects.all().order_by("code")
     branches = Branch.objects.all()
@@ -685,7 +805,9 @@ def ajax_get_subjects(request):
 
 
 # 🧾 Generate QR (Teacher side)
+@never_cache
 @login_required
+@teacher_required
 def generate_qr(request):
 
     branches = Branch.objects.all().order_by("name")
@@ -732,14 +854,14 @@ def generate_qr(request):
                 expires_at=expires_at
             )
 
-            # 🔥 NGROK URL
-            QR_URL = "https://qrattendance-production-9015.up.railway.app"
+            qr_url = request.build_absolute_uri(
+            
+                reverse(
+                   "attendance_form",
+                    args=[token]
+                 )
 
-            # 🔥 Attendance path
-            qr_path = reverse("attendance_form", args=[token])
-
-            # 🔥 FINAL QR URL
-            qr_url = f"{QR_URL}{qr_path}"
+            )
 
             # QR generate
             qr_img = qrcode.make(qr_url)
@@ -778,6 +900,7 @@ def scan_form(request, token):
 from datetime import datetime
 
 
+@never_cache
 @login_required
 def attendance_form(request, token):
 
@@ -846,7 +969,9 @@ def attendance_form(request, token):
 
 
 # 📊 Attendance Dashboard
+@never_cache
 @login_required
+@teacher_required
 def attendance_dashboard(request):
     today = timezone.now().date()
     subjects = Subject.objects.all()
@@ -940,7 +1065,7 @@ def attendance_dashboard(request):
         "present_ids": present_ids,
     })
 
-
+@never_cache
 @login_required
 def mark_attendance(request):
 
@@ -973,7 +1098,9 @@ def mark_attendance(request):
         return JsonResponse({"error": "Invalid QR"})
 
 
+@never_cache
 @login_required
+@teacher_required
 def attendance_qrlive(request):
     subjects = Subject.objects.all()
     qr_code = None
@@ -1027,7 +1154,9 @@ def session_attendance_api(request, session_id):
 
 
 # 📡 Live Attendance
+@never_cache
 @login_required
+@student_required
 def attendance_stu(request):
     today = timezone.now().date()
     roll_no = request.session.get("student_roll")  # session se roll no lo
@@ -1061,7 +1190,9 @@ def attendance_stu(request):
 
 
 # 📑 Attendance Report
+@never_cache
 @login_required
+@teacher_required
 def report(request):
     attendance = Attendance.objects.all().order_by("qr_session__subject", "student")
     return render(request, "qr_app/report.html", {"attendance": attendance})

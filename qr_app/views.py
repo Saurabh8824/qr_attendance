@@ -33,6 +33,7 @@ def get_user_role(user):
 def home(request):
     return render(request, "qr_app/home.html")
 
+
 @never_cache
 @login_required
 @student_required
@@ -160,6 +161,7 @@ def student_signup(request):
         "branches": branches
     })
 
+
 @never_cache
 @login_required
 @student_required
@@ -199,16 +201,12 @@ def student_dashboard(request):
             student=student,
             qr_session__subject=subject
         ).count()
-
         # 🔥 attendance map
         attendance_map = {}
-
         sessions = QRSession.objects.filter(
             subject=subject
         ).order_by("created_at")
-
         for session in sessions:
-
             date_key = session.created_at.date()
 
             if date_key not in attendance_map:
@@ -220,58 +218,43 @@ def student_dashboard(request):
                 }
 
             attendance_map[date_key]["total"] += 1
-
             att = Attendance.objects.filter(
                 student=student,
                 qr_session=session
             ).exists()
-
             if att:
                 attendance_map[date_key]["present"] += 1
-
             attendance_map[date_key]["classes"].append({
-
                 "present": att,
-
                 "status": (
                     "present"
                     if att
                     else "absent"
                 ),
-
                 "created_at": timezone.localtime(
                     session.created_at
                 ).strftime("%I:%M %p"),
-
                 "start_time": (
                     session.timetable.start_time.strftime("%I:%M %p")
                     if hasattr(session, "timetable")
                     and session.timetable
                     else ""
                 ),
-
                 "end_time": (
                     session.timetable.end_time.strftime("%I:%M %p")
                     if hasattr(session, "timetable")
                     and session.timetable
                     else ""
                 )
-
             })
 
         # 🔥 convert to list
         attendance_records = []
-
         for dt, info in attendance_map.items():
-
             attendance_records.append({
-
                 "date": dt,
-
                 "present_count": info["present"],
-
                 "total_count": info["total"],
-
                 "status": (
                     "present"
                     if info["present"] == info["total"]
@@ -279,26 +262,18 @@ def student_dashboard(request):
                     if info["present"] > 0
                     else "absent"
                 ),
-
                 "classes": info["classes"]
 
             })
 
         # 🔥 ADD TO DATA
         data.append({
-
             "id": subject.id,
-
             "name": subject.name,
-
             "code": subject.code,
-
             "present": present,
-
             "total": total,
-
             "attendance_records": attendance_records
-
         })
 
         total_present += present
@@ -307,15 +282,10 @@ def student_dashboard(request):
     overall = total_present
 
     return render(request, "qr_app/student_dashboard.html", {
-
         "student": student,
-
         "subjects": data,
-
         "overall": overall,
-
         "total_classes": total_classes,
-
         "today_timetable": today_timetable
 
     })
@@ -347,6 +317,7 @@ def dashboard(request):
     })
 
 
+
 @never_cache
 @login_required
 @teacher_required
@@ -373,6 +344,7 @@ def add_timetable(request):
         "subjects": subjects,
         "branches": branches
     })
+
 
 
 @never_cache
@@ -408,6 +380,7 @@ def view_timetable(request):
         "selected_day": selected_day,
         "days": days
  })
+
 
 
 @never_cache
@@ -463,6 +436,7 @@ def get_timetable_ajax(request):
 
     return JsonResponse({"timetable": data, "day": day})
 
+
 @never_cache
 @login_required
 @student_required
@@ -472,6 +446,7 @@ def student_scan(request):
     return render(request, "qr_app/student_scan.html", {
         "student": student
     })
+
 
 @never_cache
 @login_required
@@ -496,6 +471,7 @@ def student_alerts(request):
         "high": high,
         "today": today
     })
+
 
 @never_cache
 @login_required
@@ -546,6 +522,7 @@ def student_profile(request):
         "status": status
     })
 
+
 @never_cache
 @login_required
 @teacher_required
@@ -575,6 +552,7 @@ def create_alert(request):
         "branches": branches
     })
 
+
 @never_cache
 @login_required
 @teacher_required
@@ -602,7 +580,7 @@ def teacher_alerts(request):
         "selected_branch": branch_id,
         "selected_semester": semester
     })
-    
+
 @never_cache
 @login_required
 @teacher_required
@@ -854,14 +832,14 @@ def generate_qr(request):
                 expires_at=expires_at
             )
 
-            qr_url = request.build_absolute_uri(
-            
-                reverse(
-                   "attendance_form",
-                    args=[token]
-                 )
+            # 🔥 NGROK URL
+            QR_URL = "https://qrattendance-production-9015.up.railway.app"
 
-            )
+            # 🔥 Attendance path
+            qr_path = reverse("attendance_form", args=[token])
+
+            # 🔥 FINAL QR URL
+            qr_url = f"{QR_URL}{qr_path}"
 
             # QR generate
             qr_img = qrcode.make(qr_url)
@@ -888,10 +866,15 @@ def generate_qr(request):
 
 
 # 📷 QR Scan Page (student side)
+@never_cache
+@login_required
+@teacher_required
 def scan_qr(request):
     return render(request, "qr_app/scan.html")
 
-
+@never_cache
+@login_required
+@teacher_required
 def scan_form(request, token):
     return render(request, "qr_app/scan_form.html", {"token": token})
 
@@ -900,7 +883,6 @@ def scan_form(request, token):
 from datetime import datetime
 
 
-@never_cache
 @login_required
 def attendance_form(request, token):
 
@@ -1065,7 +1047,7 @@ def attendance_dashboard(request):
         "present_ids": present_ids,
     })
 
-@never_cache
+
 @login_required
 def mark_attendance(request):
 
@@ -1199,12 +1181,16 @@ def report(request):
 
 
 # ✅ Success Page
+@never_cache
 @login_required
+@student_required
 def success(request):
     return render(request, "qr_app/success.html")
 
 
 # ❌ Error Page
+@never_cache
 @login_required
+@student_required
 def error(request):
     return render(request, "qr_app/error.html")

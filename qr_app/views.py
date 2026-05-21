@@ -294,27 +294,144 @@ def student_dashboard(request):
 
 
 # 📊 Dashboard (overall view)
+import json as _json
+from django.db.models import Count, Q
+from django.utils import timezone
+from datetime import time
+import json
+from django.db.models import Count
+from django.utils import timezone
+from datetime import time, timedelta
+from .models import Student, Subject, QRSession, Attendance, Branch
+
 @never_cache
 @login_required
 @teacher_required
 def dashboard(request):
-    from .models import Student, Subject, Attendance
-    from django.utils.timezone import now
+    today_start = timezone.make_aware(
+        timezone.datetime.combine(timezone.localtime().date(), time.min)
+    )
+    branch_id = request.GET.get("branch")
+    selected_sem = request.GET.get("semester")
+    
+    branches = Branch.objects.all()
+    semester_choices = Student._meta.get_field("semester").choices
 
-    students_count = Student.objects.count()
-    subjects_count = Subject.objects.count()
-    todays_attendance_count = Attendance.objects.filter(timestamp__date=now().date()).count()
-    reports_count = Attendance.objects.values("qr_session__subject").distinct().count()
+    # Base Queries initialization
+    students_qs = Student.objects.all()
+    subjects_qs = Subject.objects.all()
+    attendance_today_qs = Attendance.objects.filter(timestamp__gte=today_start)
+    reports_qs = QRSession.objects.all()
+    recent_qs = Attendance.objects.select_related('student', 'qr_session__subject').order_by("-timestamp")
 
-    attendance = Attendance.objects.all().order_by("-timestamp")[:10]
+    # ── BRANCH AND SEMESTER FILTER SCHEME ──
+    if branch_id and branch_id.strip() and branch_id != "None":
+        students_qs = students_qs.filter(branch_id=branch_id)
+        subjects_qs = subjects_qs.filter(branch_id=branch_id)
+        attendance_today_qs = attendance_today_qs.filter(student__branch_id=branch_id)
+        reports_qs = reports_qs.filter(subject__branch_id=branch_id)
+        recent_qs = recent_qs.filter(student__branch_id=branch_id)
 
-    return render(request, "qr_app/dashboard.html", {
+    if selected_sem and selected_sem.strip() and selected_sem != "None":
+        students_qs = students_qs.filter(semester=selected_sem)
+        if hasattr(Subject, 'semester'):
+            subjects_qs = subjects_qs.filter(semester=selected_sem)
+
+    # Filtered Total Registered Students Count
+    students_count = students_qs.count()
+    subjects_count = subjects_qs.count()
+    reports_count = reports_qs.count()
+
+    # ── NEW FIXED LOGIC FOR UNIQUE TODAY'S ATTENDANCE & SPLIT CHART ──
+    # .values('student').distinct() का उपयोग करके हम सुनिश्चित कर रहे हैं कि 
+    # एक छात्र चाहे जितनी भी क्लासेस में प्रेजेंट हो, आज के काउंट में वह 1 ही बार गिना जाएगा।
+    todays_present_unique = attendance_today_qs.values('student').distinct().count()
+    
+    # अगर आज फ़िल्टर किए गए कुल छात्र (जैसे 40) हैं, तो एब्सेंट छात्र = कुल छात्र - यूनीक प्रेजेंट छात्र
+    todays_absent_unique = max(0, students_count - todays_present_unique)
+
+    # ── WEEKLY ATTENDANCE LINE CHART TREND ENGINE ──
+    weekly_labels = []
+    weekly_data = []
+    today = timezone.localdate()
+    for i in range(6, -1, -1):
+        day = today - timedelta(days=i)
+        weekly_labels.append(day.strftime("%a"))  # e.g., Mon, Tue
+        day_count = Attendance.objects.filter(timestamp__date=day)
+        
+        if branch_id and branch_id.strip() and branch_id != "None":
+            day_count = day_count.filter(student__branch_id=branch_id)
+        if selected_sem and selected_sem.strip() and selected_sem != "None":
+            day_count = day_count.filter(student__semester=selected_sem)
+            
+        # यहाँ भी दैनिक ट्रेंड को सही रखने के लिए यूनीक छात्रों को गिनना बेहतर है
+        weekly_data.append(day_count.values('student').distinct().count())
+
+    # ── ACCURATE DEFAULTERS PER-STUDENT TOTAL CLASSES LOGIC ──
+    defaulters = []
+    all_students = students_qs.prefetch_related('subjects')
+    
+    for student in all_students:
+        total_student_classes = QRSession.objects.filter(subject__in=student.subjects.all()).count()
+        present_count = Attendance.objects.filter(student=student).count()
+        
+        if total_student_classes > 0:
+            percentage = round((present_count / total_student_classes) * 100)
+        else:
+            percentage = 0
+            
+        if percentage < 75:
+            defaulters.append({
+                'roll_no': student.roll_no,
+                'name': student.name,
+                'branch':     student.branch.name if student.branch else '—',
+                'semester':   student.semester,
+                'percentage': percentage,
+                'present': present_count,
+                'total': total_student_classes
+            })
+            
+    defaulters = sorted(defaulters, key=lambda x: x['percentage'])[:5]
+
+    # ── Bar chart breakdown stats for subjects (Scans vs Sessions) ──
+    subject_stats = subjects_qs.annotate(
+        total_scans=Count('qrsession__attendance'),
+        total_sessions=Count('qrsession', distinct=True)
+    ).values('name', 'total_scans', 'total_sessions')
+    
+    subject_names = [s['name'] for s in subject_stats]
+    subject_scans = [s['total_scans'] for s in subject_stats]
+    subject_sessions = [s['total_sessions'] for s in subject_stats]
+
+    # Frontend Chart.js में Present/Absent Split भेजने के लिए JSON Array
+    # index 0 पर Present और index 1 पर Absent का डेटा रहेगा
+    donut_data = [todays_present_unique, todays_absent_unique]
+
+    context = {
+        "branches": branches,
+        "semester_choices": semester_choices,
+        "selected_branch": branch_id,
+        "selected_semester": selected_sem,
         "students_count": students_count,
         "subjects_count": subjects_count,
-        "todays_attendance_count": todays_attendance_count,
+        
+        # कार्ड में दिखाने के लिए कुल यूनीक प्रेजेंट छात्र
+        "todays_attendance_count": todays_present_unique, 
         "reports_count": reports_count,
-        "attendance": attendance,
-    })
+        "attendance": recent_qs[:10],
+        "defaulters": defaulters,
+        
+        # Chart JSON Data
+        "weekly_labels_json": json.dumps(weekly_labels),
+        "weekly_present_json": json.dumps(weekly_data),
+        "subject_names_json": json.dumps(subject_names),
+        "subject_scans_json": json.dumps(subject_scans),
+        "subject_sessions_json": json.dumps(subject_sessions),
+        
+        # New Today Split Donut Data
+        "donut_data_json": json.dumps(donut_data),
+    }
+    return render(request, "qr_app/dashboard.html", context)
 
 
 
@@ -1194,3 +1311,90 @@ def success(request):
 @student_required
 def error(request):
     return render(request, "qr_app/error.html")
+
+
+
+from django.http import JsonResponse
+from django.utils import timezone
+from datetime import timedelta
+from .models import Attendance, QRSession
+@never_cache
+@login_required
+@teacher_required
+def live_attendance_feed(request):
+    """API endpoint to get last 5 attendance logs scanned today"""
+    from datetime import time, datetime
+    branch_id = request.GET.get("branch")
+    
+    # ── FIX 1: Timezone robust start of today (Same as working dashboard counters) ──
+    today_start = timezone.make_aware(
+        datetime.combine(timezone.localdate(), time.min)
+    )
+    
+    logs = Attendance.objects.filter(timestamp__gte=today_start).select_related('student', 'qr_session__subject')
+    
+    if branch_id and branch_id.strip() and branch_id != "None":
+        logs = logs.filter(student__branch_id=branch_id)
+        
+    logs = logs.order_by('-timestamp')[:5]
+    
+    data = []
+    for log in logs:
+        formatted_time = timezone.localtime(log.timestamp).strftime("%H:%M:%S")
+        data.append({
+            # Roll no variations for frontend compatibility
+            "roll_no": log.student.roll_no,
+            "roll": log.student.roll_no,
+            
+            # Name variations for frontend compatibility
+            "name": log.student.name,
+            "student_name": log.student.name,
+            "student": log.student.name,
+            
+            # Subject variations
+            "subject": log.qr_session.subject.name,
+            "subject_name": log.qr_session.subject.name,
+            
+            # Time variations
+            "time": formatted_time,
+            "timestamp": formatted_time,
+        })
+        
+    # ── FIX 2: Return all possible keys to guarantee frontend auto-matching ──
+    return JsonResponse({
+        "feed": data,
+        "live_feed": data,
+        "logs": data,
+        "attendance": data
+    })
+
+
+# ── CORRECTION OF LIVE ACTIVE SESSIONS API ENDPOINT ──
+@never_cache
+@login_required
+@teacher_required
+def live_active_sessions(request):
+    """API endpoint to check if any QR Session is active (Created in last 15 mins)"""
+    branch_id = request.GET.get("branch")
+    time_threshold = timezone.now() - timedelta(minutes=15)
+    
+    active_sessions = QRSession.objects.filter(created_at__gte=time_threshold).select_related('subject')
+    
+    if branch_id and branch_id.strip() and branch_id != "None":
+        active_sessions = active_sessions.filter(subject__branch_id=branch_id)
+        
+    data = []
+    for session in active_sessions:
+        time_passed = timezone.now() - session.created_at
+        remaining_seconds = max(0, int(900 - time_passed.total_seconds())) # 15 min countdown
+        mins, secs = divmod(remaining_seconds, 60)
+        
+        session_id_str = str(session.id)
+        short_id = session_id_str[:6] if len(session_id_str) >= 6 else session_id_str
+        
+        data.append({
+            "id": short_id,
+            "subject": session.subject.name,
+            "remaining": f"{mins:02d}:{secs:02d}" if remaining_seconds > 0 else "Expired"
+        })
+    return JsonResponse({"active_sessions": data})

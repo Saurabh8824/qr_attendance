@@ -41,6 +41,8 @@ urlpatterns = [
     # Ajax endpoint
     path("ajax/get-subjects/", views.ajax_get_subjects, name="ajax_get_subjects"),
     path("student/timetable/ajax/", views.get_timetable_ajax, name="timetable_ajax"),
+    path('api/live-feed/', views.live_attendance_feed, name='live_attendance_feed'),
+    path('api/active-sessions/', views.live_active_sessions, name='live_active_sessions')
 
     # Success & Error
     path("success/", views.success, name="success"),

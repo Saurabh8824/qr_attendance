@@ -1,79 +1,987 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container mt-4">
-  <!-- 🔹 Page Heading -->
-  <div class="text-center mb-4">
-    <h2 class="fw-bold">📊 Dashboard</h2>
-    <p class="text-muted">Manage students, subjects & attendance at one place.</p>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<style>
+/* ══════════════════════════════════════════════════════════════
+   DASHBOARD SCOPED STYLES   (.dbd-*)
+   Every property references a base.html CSS variable — no new
+   colours or overrides that could bleed into base styles.
+══════════════════════════════════════════════════════════════ */
+
+/* ── Page shell ─────────────────────────────────────── */
+.dbd-pg {
+  max-width: 1640px;
+  margin: 0 auto;
+  padding: 26px 22px 56px;
+}
+@media(min-width:2400px){ .dbd-pg{ max-width:2300px; padding:36px 48px 72px; } }
+@media(min-width:3800px){ .dbd-pg{ max-width:3500px; padding:52px 72px 96px; } }
+@media(max-width:768px) { .dbd-pg{ padding:14px 12px 40px; } }
+
+/* ── Hero card ──────────────────────────────────────── */
+.dbd-hero {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px 22px;
+  margin-bottom: 16px;
+  display: flex; align-items: center; gap: 14px;
+  position: relative; overflow: hidden;
+}
+.dbd-hero::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  background: var(--accent-grad);
+}
+.dbd-h-av {
+  width:48px; height:48px; border-radius:13px;
+  background: var(--accent-grad);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Sora',sans-serif; font-size:17px; font-weight:800;
+  color:#fff; flex-shrink:0;
+  box-shadow:0 4px 14px rgba(79,99,231,0.24); letter-spacing:-1px;
+}
+.dbd-h-info { flex:1; min-width:0; }
+.dbd-h-info h2 {
+  font-family:'Sora',sans-serif; font-size:16px; font-weight:700;
+  color:var(--text-100); margin:0 0 2px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.dbd-h-info p { font-size:12px; color:var(--text-400); margin:0; }
+.dbd-h-uid {
+  display:inline-flex; align-items:center; gap:5px;
+  background:var(--accent-pale); color:var(--accent);
+  border:1px solid var(--border-focus); border-radius:5px;
+  padding:2px 8px; font-family:'Space Mono',monospace;
+  font-size:9.5px; margin-top:5px;
+}
+.dbd-h-dt { display:flex; flex-direction:column; align-items:flex-end; gap:3px; flex-shrink:0; }
+.dbd-h-date {
+  font-family:'Space Mono',monospace; font-size:17px; font-weight:700;
+  color:var(--accent); line-height:1; letter-spacing:-0.5px;
+}
+.dbd-h-day {
+  font-family:'Space Mono',monospace; font-size:9px;
+  color:var(--text-600); letter-spacing:1px; text-transform:uppercase;
+}
+@media(max-width:600px){ .dbd-h-dt{ display:none; } }
+
+/* ── Filter bar ─────────────────────────────────────── */
+.dbd-fbar {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius-md); padding:13px 16px;
+  margin-bottom:16px; display:flex; align-items:flex-end;
+  gap:10px; flex-wrap:wrap;
+}
+.dbd-fg { display:flex; flex-direction:column; gap:4px; min-width:130px; flex:1; }
+.dbd-flbl {
+  font-size:9.5px; font-weight:600; letter-spacing:0.6px;
+  text-transform:uppercase; color:var(--text-400);
+}
+.dbd-fsel {
+  background:var(--surface-2) !important; border:1px solid var(--border) !important;
+  border-radius:var(--radius-sm) !important; color:var(--text-100) !important;
+  font-family:'Sora',sans-serif; font-size:12.5px;
+  padding:7px 28px 7px 10px; outline:none; cursor:pointer;
+  transition:border-color .14s ease; width:100%;
+  -webkit-appearance:none; appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23999'/%3E%3C/svg%3E") !important;
+  background-repeat:no-repeat !important; background-position:right 9px center !important;
+}
+.dbd-fsel:focus{ border-color:var(--accent) !important; box-shadow:0 0 0 3px rgba(79,99,231,.10) !important; }
+[data-theme="dark"] .dbd-fsel{ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23666'/%3E%3C/svg%3E") !important; }
+[data-theme="dark"] .dbd-fsel option{ background:#1a1916; }
+.dbd-fsel:disabled{ opacity:.45; cursor:not-allowed; }
+.dbd-fbtn {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:8px 15px; border-radius:var(--radius-sm);
+  font-family:'Sora',sans-serif; font-size:12.5px; font-weight:600;
+  cursor:pointer; border:none; text-decoration:none;
+  background:var(--accent-grad); color:#fff;
+  box-shadow:0 2px 10px rgba(79,99,231,.20);
+  transition:opacity .14s ease,transform .14s ease;
+  align-self:flex-end; white-space:nowrap;
+}
+.dbd-fbtn:hover{ opacity:.88; transform:translateY(-1px); color:#fff; }
+.dbd-fbtn:active{ transform:translateY(0); }
+.dbd-fclear {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:8px 12px; border-radius:var(--radius-sm);
+  font-family:'Sora',sans-serif; font-size:12px; font-weight:500;
+  cursor:pointer; border:1px solid var(--border); background:transparent;
+  color:var(--text-400); text-decoration:none;
+  transition:color .14s ease,border-color .14s ease;
+  align-self:flex-end; white-space:nowrap;
+}
+.dbd-fclear:hover{ color:var(--text-100); border-color:var(--border-focus); }
+.dbd-chips{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; width:100%; margin-top:4px; }
+.dbd-chip {
+  display:inline-flex; align-items:center; gap:4px;
+  background:var(--accent-pale); color:var(--accent);
+  border:1px solid var(--border-focus); border-radius:100px;
+  padding:2px 9px; font-size:10.5px; font-weight:600;
+}
+@media(max-width:480px){
+  .dbd-fbar{ flex-direction:column; }
+  .dbd-fg{ min-width:100%; }
+  .dbd-fbtn,.dbd-fclear{ width:100%; justify-content:center; }
+}
+
+/* ── Stats grid ─────────────────────────────────────── */
+.dbd-stats {
+  display:grid; grid-template-columns:repeat(4,1fr);
+  gap:14px; margin-bottom:16px;
+}
+@media(max-width:1100px){ .dbd-stats{ grid-template-columns:repeat(2,1fr); } }
+@media(max-width:480px) { .dbd-stats{ grid-template-columns:1fr 1fr; gap:10px; } }
+
+.dbd-stat {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius-lg); padding:16px 17px 14px;
+  transition:border-color .15s ease,box-shadow .15s ease;
+}
+.dbd-stat:hover{ border-color:var(--border-focus); box-shadow:var(--shadow-sm); }
+.dbd-st-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:11px; }
+.dbd-st-ic{
+  width:35px; height:35px; border-radius:9px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:14px; flex-shrink:0;
+}
+.dbd-ic-blue   { background:rgba(79,99,231,0.10);  color:var(--accent); }
+.dbd-ic-green  { background:rgba(5,150,105,0.10);  color:#059669; }
+.dbd-ic-amber  { background:rgba(217,119,6,0.10);  color:#d97706; }
+.dbd-ic-purple { background:rgba(124,58,237,0.10); color:var(--accent-2); }
+.dbd-ic-red    { background:rgba(220,38,38,0.08);  color:#dc2626; }
+.dbd-st-val {
+  font-family:'Space Mono',monospace; font-size:26px; font-weight:700;
+  color:var(--text-100); line-height:1; letter-spacing:-1px; margin-bottom:3px;
+}
+.dbd-st-lbl{ font-size:11.5px; color:var(--text-400); font-weight:500; }
+.dbd-pill{
+  display:inline-flex; align-items:center; gap:4px;
+  font-size:10px; font-weight:600;
+  padding:2px 7px; border-radius:100px; margin-top:9px;
+}
+.dbd-pill-live  { background:rgba(5,150,105,.10);  color:#059669; }
+.dbd-pill-blue  { background:var(--accent-pale);   color:var(--accent); }
+.dbd-pill-amber { background:rgba(217,119,6,.10);  color:#d97706; }
+.dbd-pill-pur   { background:rgba(124,58,237,.10); color:var(--accent-2); }
+.dbd-pdot{ width:5px;height:5px;border-radius:50%;background:#059669;animation:dbdPD 1.6s ease-in-out infinite; }
+@keyframes dbdPD{ 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
+
+/* ── Quick actions ──────────────────────────────────── */
+.dbd-acts{ display:flex; gap:7px; flex-wrap:wrap; margin-bottom:18px; }
+.dbd-act {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:7px 14px; border-radius:var(--radius-sm);
+  font-family:'Sora',sans-serif; font-size:12px; font-weight:600;
+  cursor:pointer; border:1px solid transparent; text-decoration:none;
+  transition:opacity .14s ease,transform .14s ease; white-space:nowrap;
+}
+.dbd-act:hover { opacity:.85; transform:translateY(-1px); }
+.dbd-act:active{ transform:translateY(0); opacity:1; }
+.dbd-a-pri { background:var(--accent-grad); color:#fff; box-shadow:0 2px 10px rgba(79,99,231,.20); border-color:transparent; }
+.dbd-a-pri:hover{ box-shadow:0 4px 16px rgba(79,99,231,.32); color:#fff; }
+.dbd-a-grn { background:rgba(5,150,105,.10); color:#059669; border-color:rgba(5,150,105,.20); }
+.dbd-a-amb { background:rgba(217,119,6,.10); color:#d97706; border-color:rgba(217,119,6,.20); }
+.dbd-a-pur { background:rgba(124,58,237,.10);color:var(--accent-2); border-color:rgba(124,58,237,.20); }
+.dbd-a-red { background:rgba(220,38,38,.08); color:#dc2626; border-color:rgba(220,38,38,.18); }
+.dbd-a-gh  { background:var(--surface); color:var(--text-200); border-color:var(--border); }
+.dbd-a-gh:hover{ color:var(--text-100); border-color:var(--border-focus); }
+
+/* ── Card base ──────────────────────────────────────── */
+.dbd-card{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; }
+.dbd-ch{ display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid var(--border); }
+.dbd-cht{ display:flex; align-items:center; gap:9px; }
+.dbd-ci{ width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0; }
+.dbd-cht h3{ font-family:'Sora',sans-serif; font-size:13px; font-weight:700; color:var(--text-100); margin:0; }
+.dbd-cht p { font-size:11px; color:var(--text-400); margin:0; }
+.dbd-sa{ font-size:11.5px; color:var(--accent); text-decoration:none; font-weight:600; display:inline-flex; align-items:center; gap:4px; transition:opacity .14s ease; }
+.dbd-sa:hover{ opacity:.72; color:var(--accent); }
+
+/* ── Charts row ─────────────────────────────────────── */
+.dbd-crow{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+@media(max-width:960px){ .dbd-crow{ grid-template-columns:1fr; } }
+
+.dbd-cb{ padding:14px 16px 12px; height:234px; position:relative; }
+
+/* Subject comparison row (full width) */
+.dbd-scrow{ margin-bottom:16px; }
+.dbd-scb{ padding:14px 16px 12px; height:220px; position:relative; }
+
+/* ── Donut ──────────────────────────────────────────── */
+.dbd-dnut-body{ padding:16px 14px; display:flex; flex-direction:column; align-items:center; gap:13px; }
+.dbd-dnut-wr{ position:relative; width:136px; height:136px; }
+.dbd-dnut-ctr{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; pointer-events:none; }
+.dbd-dnut-pct{ font-family:'Space Mono',monospace; font-size:20px; font-weight:700; color:var(--text-100); line-height:1; letter-spacing:-1px; }
+.dbd-dnut-sub{ font-size:10px; color:var(--text-400); margin-top:2px; }
+.dbd-leg{ width:100%; display:flex; flex-direction:column; gap:6px; }
+.dbd-li{ display:flex; align-items:center; gap:7px; font-size:11.5px; color:var(--text-400); }
+.dbd-ld{ width:7px; height:7px; border-radius:2px; flex-shrink:0; }
+.dbd-lv{ margin-left:auto; font-family:'Space Mono',monospace; font-size:12px; font-weight:700; color:var(--text-100); }
+
+/* ── Section label ──────────────────────────────────── */
+.dbd-slbl{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.dbd-slbl h2{ font-family:'Sora',sans-serif; font-size:13.5px; font-weight:700; color:var(--text-100); }
+.dbd-slbl p{ font-size:11.5px; color:var(--text-400); margin-top:2px; }
+
+/* ── Tables shared ──────────────────────────────────── */
+.dbd-tbl{ width:100%; border-collapse:collapse; }
+.dbd-tbl th{
+  background:var(--surface-2); color:var(--text-400);
+  font-size:9.5px; font-weight:600; letter-spacing:.7px;
+  text-transform:uppercase; padding:9px 13px; text-align:left;
+  border-bottom:1px solid var(--border); white-space:nowrap;
+}
+.dbd-tbl td{
+  padding:9px 13px; font-size:12.5px; color:var(--text-200);
+  border-bottom:1px solid var(--border);
+}
+.dbd-tbl tbody tr:last-child td{ border-bottom:none; }
+.dbd-tbl tbody tr:hover td{ background:var(--surface-hover); }
+
+/* ── Shared cell helpers ────────────────────────────── */
+.dbd-roll{
+  font-family:'Space Mono',monospace; font-size:10.5px;
+  background:var(--surface-2); border:1px solid var(--border);
+  border-radius:4px; padding:1px 6px; color:var(--text-400);
+}
+.dbd-stag{
+  display:inline-flex; align-items:center; gap:4px;
+  background:var(--accent-pale); color:var(--accent);
+  border-radius:5px; padding:2px 7px; font-size:11px; font-weight:600;
+}
+.dbd-pdotc{ display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; color:#059669; }
+.dbd-pdotc::before{ content:''; width:5px;height:5px;border-radius:50%;background:#059669;flex-shrink:0; }
+
+/* ── Progress bar ───────────────────────────────────── */
+.dbd-pb-wr{ display:flex; align-items:center; gap:8px; }
+.dbd-pb-tr{ flex:1; height:5px; background:var(--surface-2); border-radius:3px; overflow:hidden; min-width:50px; }
+.dbd-pb-fi{ height:100%; border-radius:3px; transition:width .55s ease; }
+.dbd-pf-g{ background:#059669; } .dbd-pf-w{ background:#d97706; } .dbd-pf-d{ background:#dc2626; }
+.dbd-pn{ font-family:'Space Mono',monospace; font-size:11px; font-weight:700; min-width:34px; text-align:right; }
+.dbd-pn-g{ color:#059669; } .dbd-pn-w{ color:#d97706; } .dbd-pn-d{ color:#dc2626; }
+
+/* ── Empty state ────────────────────────────────────── */
+.dbd-empty{ padding:36px 20px; text-align:center; color:var(--text-600); }
+.dbd-empty i{ font-size:28px; margin-bottom:8px; display:block; opacity:.35; }
+.dbd-empty p{ font-size:12.5px; color:var(--text-400); }
+
+/* ── Scroll wrapper ─────────────────────────────────── */
+.dbd-scroll{ overflow-x:auto; }
+.dbd-scroll::-webkit-scrollbar{ height:3px; }
+
+/* ── Live feed panel ────────────────────────────────── */
+.dbd-feed-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #059669; /* लाइव फीड के लिए सूचक हरा रंग */
+  flex-shrink: 0;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
+  display: inline-block;
+}
+
+.dbd-feed-name {
+  font-family: 'Sora', sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-100);
+  line-height: 1.4;
+}
+
+.dbd-feed-meta {
+  font-size: 11px;
+  color: var(--text-400);
+  margin-top: 2px;
+}
+
+.dbd-feed-row { padding:0; }
+.dbd-feed-item{
+  display:flex; align-items:center; gap:10px;
+  padding:9px 15px; border-bottom:1px solid var(--border);
+  transition:background .13s ease;
+}
+.dbd-feed-item:last-child{ border-bottom:none; }
+.dbd-feed-item:hover{ background:var(--surface-hover); }
+.dbd-feed-av{
+  width:30px; height:30px; border-radius:8px;
+  background:var(--accent-grad);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Sora',sans-serif; font-size:11px; font-weight:700; color:#fff; flex-shrink:0;
+}
+.dbd-feed-nm{ font-size:12.5px; font-weight:600; color:var(--text-100); }
+.dbd-feed-sub{ font-size:11px; color:var(--text-400); }
+.dbd-feed-time{ margin-left:auto; font-family:'Space Mono',monospace; font-size:10.5px; color:var(--text-600); flex-shrink:0; }
+
+/* ── Active sessions panel ──────────────────────────── */
+.dbd-sess-item{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:9px 15px; border-bottom:1px solid var(--border);
+}
+.dbd-sess-item:last-child{ border-bottom:none; }
+.dbd-sess-sub{ font-size:12.5px; font-weight:600; color:var(--text-100); }
+.dbd-sess-id{ font-family:'Space Mono',monospace; font-size:10px; color:var(--text-600); }
+.dbd-timer{
+  font-family:'Space Mono',monospace; font-size:12.5px; font-weight:700;
+  color:#059669; background:rgba(5,150,105,.10); padding:3px 9px;
+  border-radius:6px; flex-shrink:0;
+}
+.dbd-timer.exp{ color:#dc2626; background:rgba(220,38,38,.08); }
+
+/* ── Bottom row (live feed + sessions + recent table) ─ */
+.dbd-brow{ display:grid; grid-template-columns:280px 280px 1fr; gap:16px; margin-bottom:16px; }
+@media(max-width:1200px){ .dbd-brow{ grid-template-columns:1fr 1fr; } }
+@media(max-width:768px) { .dbd-brow{ grid-template-columns:1fr; } }
+
+/* ── Fade-in ─────────────────────────────────────────── */
+@keyframes dbdFU{ from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+.dbd-f { animation:dbdFU .28s ease both; }
+.dbd-f1{ animation-delay:.04s; } .dbd-f2{ animation-delay:.08s; }
+.dbd-f3{ animation-delay:.12s; } .dbd-f4{ animation-delay:.16s; }
+.dbd-f5{ animation-delay:.20s; } .dbd-f6{ animation-delay:.24s; }
+</style>
+
+{# ─────────────────────────────────────────── #}
+<div class="dbd-pg">
+
+  {# ── Hero ── #}
+  <div class="dbd-hero dbd-f">
+    <div class="dbd-h-av">{{ request.user.username|slice:":2"|upper }}</div>
+    <div class="dbd-h-info">
+      <h2>Welcome, {{ request.user.get_full_name|default:request.user.username }}</h2>
+      <p>Teacher Dashboard &nbsp;·&nbsp; QR Attendance System</p>
+      <div class="dbd-h-uid">
+        <i class="fa-solid fa-id-badge" style="font-size:9px"></i>
+        UID {{ request.user.id }} &nbsp;·&nbsp; @{{ request.user.username }}
+      </div>
+    </div>
+    <div class="dbd-h-dt">
+      <div class="dbd-h-date" id="dbdDate">—</div>
+      <div class="dbd-h-day"  id="dbdDay">—</div>
+    </div>
   </div>
 
-  <!-- 🔹 Stats Cards -->
-  <div class="row g-4 mb-4 text-center">
-    <div class="col-md-3">
-      <div class="card shadow-sm p-3">
-        <h5>👨‍🎓 Students</h5>
-        <h2>{{ students_count|default:"0" }}</h2>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card shadow-sm p-3">
-        <h5>📖 Subjects</h5>
-        <h2>{{ subjects_count|default:"0" }}</h2>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card shadow-sm p-3">
-        <h5>📝 Today’s Attendance</h5>
-        <h2>{{ todays_attendance_count|default:"0" }}</h2>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card shadow-sm p-3">
-        <h5>📑 Reports</h5>
-        <h2>{{ reports_count|default:"0" }}</h2>
-      </div>
-    </div>
-  </div>
+  {# ── Filter Bar ── #}
+  <form method="get" action="{% url 'dashboard' %}" id="dbdForm">
+    <div class="dbd-fbar dbd-f dbd-f1">
 
-  <!-- 🔹 Quick Actions -->
-  <div class="text-center mb-5">
-    <a href="{% url 'add_student' %}" class="btn btn-success m-2">➕ Add Student</a>
-    <a href="{% url 'add_subject' %}" class="btn btn-primary m-2">➕ Add Subject</a>
-    <a href="{% url 'qr_generate' %}" class="btn btn-warning m-2">🔐 Generate QR</a>
-    <a href="{% url 'report' %}" class="btn btn-info m-2">📑 View Reports</a>
-  </div>
-
-  <!-- 🔹 Recent Attendance -->
-  <div class="card shadow-sm">
-    <div class="card-header bg-dark text-white">
-      <h5 class="mb-0">📅 Recent Attendance Records</h5>
-    </div>
-    <div class="card-body">
-      {% if attendance %}
-      <table class="table table-hover">
-        <thead>
-          <tr>
-            <th>Roll No</th>
-            <th>Name</th>
-            <th>Subject</th>
-            <th>Date & Time</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for record in attendance|slice:":10" %}
-          <tr>
-            <td>{{ record.student.roll_no }}</td>
-            <td>{{ record.student.name }}</td>
-            <td>{{ record.qr_session.subject.name }}</td>
-            <td>{{ record.timestamp|date:"d-m-Y H:i" }}</td>
-          </tr>
+      {# Branch #}
+      <div class="dbd-fg">
+        <span class="dbd-flbl"><i class="fa-solid fa-code-branch" style="margin-right:3px;font-size:8px"></i>Branch</span>
+        <select name="branch" id="dbdBranch" class="dbd-fsel" onchange="dbdOnBranchChange()">
+          <option value="">All Branches</option>
+          {% for b in branches %}
+          <option value="{{ b.id }}" {% if selected_branch == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
           {% endfor %}
-        </tbody>
-      </table>
+        </select>
+      </div>
+
+      {# Semester #}
+      <div class="dbd-fg">
+        <span class="dbd-flbl"><i class="fa-solid fa-layer-group" style="margin-right:3px;font-size:8px"></i>Semester</span>
+        <select name="semester" id="dbdSemester" class="dbd-fsel" onchange="dbdOnSemChange()">
+          <option value="">All Semesters</option>
+          {% for val,label in semester_choices %}
+          <option value="{{ val }}" {% if selected_semester == val|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div style="display:flex;gap:8px;align-self:flex-end">
+        <button type="submit" class="dbd-fbtn">
+          <i class="fa-solid fa-filter" style="font-size:10px"></i> Apply
+        </button>
+        {% if selected_branch or selected_semester %}
+        <a href="{% url 'dashboard' %}" class="dbd-fclear">
+          <i class="fa-solid fa-xmark" style="font-size:10px"></i> Clear
+        </a>
+        {% endif %}
+      </div>
+
+      {# Active chips #}
+      {% if selected_branch or selected_semester %}
+      <div class="dbd-chips">
+        {% if selected_branch %}
+        <span class="dbd-chip"><i class="fa-solid fa-code-branch" style="font-size:8px"></i>
+          {% for b in branches %}{% if b.id|stringformat:"s" == selected_branch %}{{ b.name }}{% endif %}{% endfor %}
+        </span>
+        {% endif %}
+        {% if selected_semester %}
+        <span class="dbd-chip"><i class="fa-solid fa-layer-group" style="font-size:8px"></i> Sem {{ selected_semester }}</span>
+        {% endif %}
+      </div>
+      {% endif %}
+
+    </div>
+  </form>
+
+  {# ── Stats ── #}
+  <div class="dbd-stats">
+    <div class="dbd-stat dbd-f dbd-f1">
+      <div class="dbd-st-top">
+        <div class="dbd-st-ic dbd-ic-blue"><i class="fa-solid fa-users"></i></div>
+        <span class="pro-badge badge-blue" style="font-size:9px">Enrolled</span>
+      </div>
+      <div class="dbd-st-val" data-dcount="{{ students_count|default:0 }}">0</div>
+      <div class="dbd-st-lbl">Students</div>
+      <div class="dbd-pill dbd-pill-blue"><i class="fa-solid fa-graduation-cap" style="font-size:8px"></i> Total</div>
+    </div>
+
+    <div class="dbd-stat dbd-f dbd-f2">
+      <div class="dbd-st-top">
+        <div class="dbd-st-ic dbd-ic-purple"><i class="fa-solid fa-book-open"></i></div>
+        <span class="pro-badge" style="font-size:9px;background:rgba(124,58,237,.10);color:var(--accent-2);border:1px solid rgba(124,58,237,.2)">Active</span>
+      </div>
+      <div class="dbd-st-val" data-dcount="{{ subjects_count|default:0 }}">0</div>
+      <div class="dbd-st-lbl">Subjects</div>
+      <div class="dbd-pill dbd-pill-pur"><i class="fa-solid fa-book" style="font-size:8px"></i> Running</div>
+    </div>
+
+    <div class="dbd-stat dbd-f dbd-f3">
+      <div class="dbd-st-top">
+        <div class="dbd-st-ic dbd-ic-green"><i class="fa-solid fa-calendar-check"></i></div>
+        <div class="dbd-pill dbd-pill-live" style="margin:0;padding:2px 7px">
+          <div class="dbd-pdot"></div> Live
+        </div>
+      </div>
+      <div class="dbd-st-val" data-dcount="{{ todays_attendance_count|default:0 }}">0</div>
+      <div class="dbd-st-lbl">Today's Attendance</div>
+    </div>
+
+    <div class="dbd-stat dbd-f dbd-f4">
+      <div class="dbd-st-top">
+        <div class="dbd-st-ic dbd-ic-amber"><i class="fa-solid fa-qrcode"></i></div>
+        <span class="pro-badge badge-orange" style="font-size:9px">QR</span>
+      </div>
+      <div class="dbd-st-val" data-dcount="{{ reports_count|default:0 }}">0</div>
+      <div class="dbd-st-lbl">QR Sessions</div>
+      <div class="dbd-pill dbd-pill-amber"><i class="fa-solid fa-chart-bar" style="font-size:8px"></i> Total</div>
+    </div>
+  </div>
+
+  {# ── Quick Actions ── #}
+  <div class="dbd-slbl dbd-f dbd-f2"><div><h2>Quick Actions</h2><p>Shortcuts to key features</p></div></div>
+  <div class="dbd-acts dbd-f dbd-f3">
+    <a href="{% url 'add_student' %}"          class="dbd-act dbd-a-pri"><i class="fa-solid fa-user-plus"   style="font-size:10px"></i> Add Student</a>
+    <a href="{% url 'add_subject' %}"          class="dbd-act dbd-a-grn"><i class="fa-solid fa-book-open"  style="font-size:10px"></i> Add Subject</a>
+    <a href="{% url 'qr_generate' %}"          class="dbd-act dbd-a-amb"><i class="fa-solid fa-qrcode"     style="font-size:10px"></i> Generate QR</a>
+    <a href="{% url 'report' %}"               class="dbd-act dbd-a-pur"><i class="fa-solid fa-chart-bar"  style="font-size:10px"></i> Reports</a>
+    <a href="{% url 'create_alert' %}"         class="dbd-act dbd-a-red"><i class="fa-solid fa-bell"       style="font-size:10px"></i> Alert</a>
+    <a href="{% url 'attendance_faculty' %}"   class="dbd-act dbd-a-gh"><i class="fa-solid fa-list-check"  style="font-size:10px"></i> Faculty View</a>
+    <a href="{% url 'view_timetable' %}"       class="dbd-act dbd-a-gh"><i class="fa-solid fa-table-cells" style="font-size:10px"></i> Timetable</a>
+    <a href="{% url 'attendance_dashboard' %}" class="dbd-act dbd-a-gh"><i class="fa-solid fa-chart-pie"   style="font-size:10px"></i> Analytics</a>
+  </div>
+
+  {# ── Charts Row: Weekly + Donut ── #}
+  <div class="dbd-crow dbd-f dbd-f3">
+
+    {# Weekly real attendance bar #}
+    <div class="dbd-card">
+      <div class="dbd-ch">
+        <div class="dbd-cht">
+          <div class="dbd-ci dbd-ic-blue"><i class="fa-solid fa-chart-column"></i></div>
+          <div><h3>Last 7 Days Attendance</h3><p>Daily scans count</p></div>
+        </div>
+        <a href="{% url 'attendance_faculty' %}" class="dbd-sa">View <i class="fa-solid fa-arrow-right" style="font-size:8px"></i></a>
+      </div>
+      <div class="dbd-cb"><canvas id="dbdWeekly"></canvas></div>
+    </div>
+
+    {# Donut — today #}
+    <div class="dbd-card">
+      <div class="dbd-ch">
+        <div class="dbd-cht">
+          <div class="dbd-ci dbd-ic-amber"><i class="fa-solid fa-chart-pie"></i></div>
+          <div><h3>Today's Split</h3><p>Present vs Absent</p></div>
+        </div>
+      </div>
+      <div class="dbd-dnut-body">
+        <div class="dbd-dnut-wr">
+          <canvas id="dbdDonut"></canvas>
+          <div class="dbd-dnut-ctr">
+            <div class="dbd-dnut-pct" id="dbdDPct">—</div>
+            <div class="dbd-dnut-sub">present</div>
+          </div>
+        </div>
+        <div class="dbd-leg">
+          <div class="dbd-li"><div class="dbd-ld" style="background:#059669"></div><span>Present</span><span class="dbd-lv">{{ todays_attendance_count|default:"0" }}</span></div>
+          <div class="dbd-li"><div class="dbd-ld" style="background:#dc2626"></div><span>Absent</span><span class="dbd-lv" id="dbdAbsVal">—</span></div>
+          <div class="dbd-li"><div class="dbd-ld" style="background:var(--accent)"></div><span>Total</span><span class="dbd-lv">{{ students_count|default:"0" }}</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# ── Subject Comparison Chart (full-width) ── #}
+  <div class="dbd-scrow dbd-f dbd-f4">
+    <div class="dbd-slbl" style="margin-bottom:10px">
+      <div><h2>Subject-wise Attendance Comparison</h2><p>Total attendance scans per subject{% if selected_branch or selected_semester %} (filtered){% endif %}</p></div>
+      <a href="{% url 'attendance_dashboard' %}" class="dbd-sa" style="font-size:11.5px">Analytics <i class="fa-solid fa-arrow-right" style="font-size:8px"></i></a>
+    </div>
+    <div class="dbd-card">
+      <div class="dbd-ch">
+        <div class="dbd-cht">
+          <div class="dbd-ci dbd-ic-purple"><i class="fa-solid fa-chart-bar"></i></div>
+          <div><h3>Subject Comparison</h3><p>Attendance scans vs QR sessions per subject</p></div>
+        </div>
+      </div>
+      <div class="dbd-scb"><canvas id="dbdSubjChart"></canvas></div>
+    </div>
+  </div>
+
+  {# ── Defaulters (<75%) ── #}
+  <div class="dbd-f dbd-f4" style="margin-bottom:16px">
+    <div class="dbd-slbl" style="margin-bottom:10px">
+      <div>
+        <h2>Defaulter Students
+          <span class="pro-badge badge-red" style="vertical-align:middle;font-size:9.5px;margin-left:6px">&lt; 75% Attendance</span>
+        </h2>
+        <p>Students requiring immediate attention</p>
+      </div>
+      <a href="{% url 'attendance_dashboard' %}" class="dbd-sa" style="font-size:11.5px">Full List <i class="fa-solid fa-arrow-right" style="font-size:8px"></i></a>
+    </div>
+    <div class="dbd-card">
+      <div class="dbd-ch">
+        <div class="dbd-cht">
+          <div class="dbd-ci dbd-ic-red"><i class="fa-solid fa-triangle-exclamation"></i></div>
+          <div><h3>Low Attendance</h3><p>Top 8 lowest — sorted ascending</p></div>
+        </div>
+        <span class="pro-badge badge-red" style="font-size:9.5px">
+          <i class="fa-solid fa-user-slash" style="font-size:8px"></i> {{ defaulters|length }} students
+        </span>
+      </div>
+      {% if defaulters %}
+      <div class="dbd-scroll">
+        <table class="dbd-tbl">
+          <thead>
+            <tr>
+              <th><i class="fa-solid fa-hashtag" style="margin-right:3px"></i>Roll</th>
+              <th><i class="fa-solid fa-user" style="margin-right:3px"></i>Student</th>
+              <th><i class="fa-solid fa-code-branch" style="margin-right:3px"></i>Branch</th>
+              <th><i class="fa-solid fa-layer-group" style="margin-right:3px"></i>Sem</th>
+              <th><i class="fa-solid fa-calendar-check" style="margin-right:3px"></i>Present/Total</th>
+              <th style="min-width:160px"><i class="fa-solid fa-percent" style="margin-right:3px"></i>Attendance %</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for d in defaulters %}
+            {% with p=d.percentage %}
+            <tr>
+              <td><span class="dbd-roll">{{ d.roll_no }}</span></td>
+              <td style="color:var(--text-100);font-weight:500">{{ d.name }}</td>
+              <td style="font-size:12px">{{ d.branch }}</td>
+              <td style="font-size:12px">{{ d.semester }}</td>
+              <td style="font-family:'Space Mono',monospace;font-size:11px">{{ d.present }}/{{ d.total }}</td>
+              <td>
+                <div class="dbd-pb-wr">
+                  <div class="dbd-pb-tr">
+                    <div class="dbd-pb-fi {% if p >= 60 %}dbd-pf-w{% else %}dbd-pf-d{% endif %}"
+                         data-w="{{ p }}" style="width:0%"></div>
+                  </div>
+                  <span class="dbd-pn {% if p >= 60 %}dbd-pn-w{% else %}dbd-pn-d{% endif %}">{{ p }}%</span>
+                </div>
+              </td>
+            </tr>
+            {% endwith %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
       {% else %}
-      <p class="text-center text-muted">No attendance records yet.</p>
+      <div class="dbd-empty">
+        <i class="fa-solid fa-circle-check" style="color:#059669"></i>
+        <p>All students above 75%{% if selected_branch or selected_semester %} for selected filters{% endif %}. Great work!</p>
+      </div>
       {% endif %}
     </div>
   </div>
-</div>
+
+  {# ── Bottom Row: Live Feed + Active Sessions + Recent Attendance ── #}
+  <div class="dbd-slbl dbd-f dbd-f5" style="margin-bottom:10px">
+    <div><h2>Live Monitoring</h2><p>Real-time attendance feed and active QR sessions</p></div>
+  </div>
+  <div class="dbd-brow dbd-f dbd-f5">
+
+    {# Live Attendance Feed (auto-refreshes every 15s) #}
+    <div class="dbd-card">
+      <div class="dbd-ch">
+        <div class="dbd-cht">
+          <div class="dbd-ci dbd-ic-green"><i class="fa-solid fa-satellite-dish"></i></div>
+          <div><h3>Live Feed</h3><p>Last 5 scans today</p></div>
+        </div>
+        <div class="dbd-pill dbd-pill-live" style="margin:0;padding:2px 8px">
+          <div class="dbd-pdot"></div> Auto
+        </div>
+      </div>
+      <div id="dbdFeedBody">
+        <div class="dbd-empty"><i class="fa-solid fa-spinner fa-spin"></i><p>Loading…</p></div>
+      </div>
+    </div>
+
+    {# Active QR Sessions #}
+    <div class="dbd-card">
+      <div class="dbd-ch">
+        <div class="dbd-cht">
+          <div class="dbd-ci dbd-ic-amber"><i class="fa-solid fa-qrcode"></i></div>
+          <div><h3>Active Sessions</h3><p>QR active in last 15 min</p></div>
+        </div>
+        <a href="{% url 'qr_generate' %}" class="dbd-sa">New QR <i class="fa-solid fa-plus" style="font-size:8px"></i></a>
+      </div>
+      <div id="dbdSessBody">
+        <div class="dbd-empty"><i class="fa-solid fa-spinner fa-spin"></i><p>Loading…</p></div>
+      </div>
+    </div>
+
+    {# Recent attendance table #}
+    <div class="dbd-card">
+      <div class="dbd-ch">
+        <div class="dbd-cht">
+          <div class="dbd-ci dbd-ic-blue"><i class="fa-solid fa-clock-rotate-left"></i></div>
+          <div><h3>Recent Records</h3><p>Last 10 entries</p></div>
+        </div>
+        <a href="{% url 'attendance_faculty' %}" class="dbd-sa">All <i class="fa-solid fa-arrow-right" style="font-size:8px"></i></a>
+      </div>
+      {% if attendance %}
+      <div class="dbd-scroll">
+        <table class="dbd-tbl">
+          <thead>
+            <tr>
+              <th>Roll</th>
+              <th>Student</th>
+              <th>Subject</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in attendance|slice:":10" %}
+            <tr>
+              <td><span class="dbd-roll">{{ r.student.roll_no }}</span></td>
+              <td style="color:var(--text-100);font-weight:500;font-size:12px">{{ r.student.name }}</td>
+              <td><span class="dbd-stag">{{ r.qr_session.subject.name }}</span></td>
+              <td style="font-family:'Space Mono',monospace;font-size:10.5px;color:var(--text-400)">{{ r.timestamp|date:"d M H:i" }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="dbd-empty">
+        <i class="fa-regular fa-calendar-xmark"></i>
+        <p>No records yet. Generate a QR to begin.</p>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>{# /dbd-brow #}
+
+</div>{# /dbd-pg #}
+
+{# ── JSON data for charts (safe, server-rendered) ── #}
+<script id="dbdChartData" type="application/json">
+{
+  "weeklyLabels":   {{ weekly_labels_json|safe }},
+  "weeklyPresent":  {{ weekly_present_json|safe }},
+  "subjNames":      {{ subject_names_json|safe }},
+  "subjScans":      {{ subject_scans_json|safe }},
+  "subjSessions":   {{ subject_sessions_json|safe }},
+  "todayCount":     {{ todays_attendance_count|default:0 }},
+  "totalStudents":  {{ students_count|default:0 }},
+  "branchId":       "{{ selected_branch|default:'' }}"
+}
+</script>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ── Parse server data ── */
+  var CD = JSON.parse(document.getElementById('dbdChartData').textContent);
+
+  /* ── Date display ── */
+  (function() {
+    var n   = new Date();
+    var mon = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var day = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    var hd  = document.getElementById('dbdDate');
+    var hy  = document.getElementById('dbdDay');
+    if (hd) hd.textContent = String(n.getDate()).padStart(2,'0') + ' ' + mon[n.getMonth()] + ' ' + n.getFullYear();
+    if (hy) hy.textContent = day[n.getDay()];
+  })();
+
+  /* ── Counters ── */
+  function dbdCounters() {
+    document.querySelectorAll('[data-dcount]').forEach(function(el) {
+      var t  = parseInt(el.getAttribute('data-dcount')) || 0;
+      var s  = Math.max(1, Math.ceil(t / 55));
+      var c  = 0;
+      var tm = setInterval(function() { c = Math.min(c+s,t); el.textContent=c; if(c>=t) clearInterval(tm); }, 16);
+    });
+  }
+
+  /* ── Progress bars ── */
+  function dbdBars() {
+    document.querySelectorAll('[data-w]').forEach(function(b) {
+      var w = b.getAttribute('data-w');
+      setTimeout(function(){ b.style.width = w + '%'; }, 120);
+    });
+  }
+
+  /* ── CSS var ── */
+  function cv(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim() || ''; }
+
+  /* ── Chart instances ── */
+  var cWeekly = null, cDonut = null, cSubj = null;
+
+  function dbdBuildCharts() {
+    var muted  = cv('--text-400') || '#888';
+    var grid   = cv('--border')   || 'rgba(0,0,0,.08)';
+    var surf   = cv('--surface')  || '#fff';
+    var t100   = cv('--text-100') || '#111';
+    var accent = cv('--accent')   || '#4f63e7';
+    var acc2   = cv('--accent-2') || '#7c3aed';
+
+    /* ── Weekly bar ── */
+    var wEl = document.getElementById('dbdWeekly');
+    if (wEl) {
+      if (cWeekly) cWeekly.destroy();
+      cWeekly = new Chart(wEl, {
+        type: 'bar',
+        data: {
+          labels: CD.weeklyLabels,
+          datasets: [{
+            label: 'Attendance',
+            data: CD.weeklyPresent,
+            backgroundColor: function(ctx) {
+              var i = ctx.dataIndex;
+              /* Highlight today (last item) */
+              return i === CD.weeklyPresent.length - 1 ? '#059669' : accent;
+            },
+            borderRadius: 5,
+            borderSkipped: false,
+            barPercentage: 0.55,
+            categoryPercentage: 0.7
+          }]
+        },
+        options: {
+          responsive:true, maintainAspectRatio:false, animation:{duration:600},
+          scales:{
+            x:{ grid:{display:false}, ticks:{color:muted,font:{family:"'Sora',sans-serif",size:10}}, border:{display:false} },
+            y:{ beginAtZero:true, grid:{color:grid},
+                ticks:{color:muted,font:{family:"'Space Mono',monospace",size:10},
+                       stepSize:Math.max(1,Math.ceil(Math.max.apply(null,CD.weeklyPresent.concat([1]))/5))},
+                border:{display:false} }
+          },
+          plugins:{
+            legend:{display:false},
+            tooltip:{ backgroundColor:surf, titleColor:t100, bodyColor:muted,
+              borderColor:grid, borderWidth:1, cornerRadius:7, padding:9 }
+          }
+        }
+      });
+    }
+
+    /* ── Donut ── */
+    var dEl   = document.getElementById('dbdDonut');
+    var pEl   = document.getElementById('dbdDPct');
+    var absEl = document.getElementById('dbdAbsVal');
+    var today = CD.todayCount;
+    var total = CD.totalStudents;
+    var absent = Math.max(total - today, 0);
+    var pct    = total > 0 ? Math.round((today/total)*100) : 0;
+    if (pEl)   pEl.textContent  = pct + '%';
+    if (absEl) absEl.textContent = absent;
+
+    if (dEl) {
+      if (cDonut) cDonut.destroy();
+      cDonut = new Chart(dEl, {
+        type:'doughnut',
+        data:{
+          labels:['Present','Absent'],
+          datasets:[{
+            data: total > 0 ? [today, absent] : [1,0],
+            backgroundColor:['#059669','#dc2626'],
+            borderColor:surf, borderWidth:3, hoverOffset:4
+          }]
+        },
+        options:{
+          cutout:'68%', responsive:true, maintainAspectRatio:true, animation:{duration:600},
+          plugins:{
+            legend:{display:false},
+            tooltip:{ backgroundColor:surf, titleColor:t100, bodyColor:muted,
+              borderColor:grid, borderWidth:1, cornerRadius:7, padding:9 }
+          }
+        }
+      });
+    }
+
+    /* ── Subject comparison grouped bar (Horizontal Variant with Multi-Colors) ── */
+    var sEl = document.getElementById('dbdSubjChart');
+    if (sEl && CD.subjNames.length) {
+      if (cSubj) cSubj.destroy();
+
+      // प्रत्येक Subject बार को अलग आकर्षक रंग देने के लिए कलर पैलेट
+      var attendanceColors = ['#4f63e7', '#059669', '#d97706', '#dc2626', '#2563eb', '#7c3aed', '#db2777', '#0891b2'];
+      var sessionColors    = ['#a5b4fc', '#6ee7b7', '#fcd34d', '#fca5a5', '#93c5fd', '#c4b5fd', '#fbcfe8', '#67e8f9'];
+
+      cSubj = new Chart(sEl, {
+        type:'bar',
+        data:{
+          labels: CD.subjNames,
+          datasets:[
+            {
+              label:'Attendance Scans',
+              data: CD.subjScans,
+              backgroundColor: function(context) {
+                var index = context.dataIndex;
+                return attendanceColors[index % attendanceColors.length];
+              },
+              borderRadius:4, borderSkipped:false,
+              barPercentage:0.45, categoryPercentage:0.7
+            },
+            {
+              label:'QR Sessions',
+              data: CD.subjSessions,
+              backgroundColor: function(context) {
+                var index = context.dataIndex;
+                return sessionColors[index % sessionColors.length];
+              },
+              borderRadius:4, borderSkipped:false,
+              barPercentage:0.45, categoryPercentage:0.7
+            }
+          ]
+        },
+        options:{
+          indexAxis: 'y', // चार्ट को वर्टिकल से हॉरिजॉन्टल में बदलने के लिए
+          responsive:true, maintainAspectRatio:false, animation:{duration:600},
+          scales:{
+            x:{ 
+              beginAtZero:true, 
+              grid:{color:grid},
+              ticks:{color:muted,font:{family:"'Space Mono',monospace",size:10},stepSize:1},
+              border:{display:false} 
+            },
+            y:{ 
+              grid:{display:false},
+              ticks:{color:muted,font:{family:"'Sora',sans-serif",size:10}},
+              border:{display:false} 
+            }
+          },
+          plugins:{
+            legend:{
+              position:'top', align:'end',
+              labels:{boxWidth:8,boxHeight:8,borderRadius:2,useBorderRadius:true,
+                      padding:12,color:muted,font:{family:"'Sora',sans-serif",size:11}}
+            },
+            tooltip:{ backgroundColor:surf, titleColor:t100, bodyColor:muted,
+              borderColor:grid, borderWidth:1, cornerRadius:7, padding:9 }
+          }
+        }
+      });
+    } else if (sEl && !CD.subjNames.length) {
+      /* No subjects — show empty message */
+      var parent = sEl.parentElement;
+      parent.innerHTML = '<div class="dbd-empty"><i class="fa-solid fa-chart-bar"></i><p>No subject data for selected filters.</p></div>';
+    }
+  }
+
+  /* ── 100% Fixed Fetch Feed Engine ── */
+  function dbdFetchFeed() {
+    var body = document.getElementById('dbdFeedBody');
+    if(!body) return;
+
+    var branch = "{{ selected_branch|default:'' }}";
+    var queryParam = "";
+    if (branch && branch !== "None" && branch.trim() !== "") {
+        queryParam = "?branch=" + branch;
+    }
+
+    // Django native secure absolute route integration
+    var url = "{% url 'live_attendance_feed' %}" + queryParam;
+
+    fetch(url)
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if(!data.feed || data.feed.length === 0) {
+          body.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--text-secondary);font-size:13px;"><i class="fa-solid fa-fingerprint" style="font-size:20px;opacity:0.4;margin-bottom:6px;display:block;"></i>No recent logs today</div>';
+          return;
+        }
+        var html = '';
+        data.feed.forEach(function(item) {
+          html += '<div class="dbd-feed-item">'
+            + '<div class="dbd-feed-dot"></div>'
+            + '<div style="flex:1">'
+            + '<div class="dbd-feed-name">' + item.name + '</div>'
+            + '<div class="dbd-feed-meta">' + item.roll_no + ' • ' + item.subject + '</div>'
+            + '</div>'
+            + '<div class="dbd-feed-time">' + item.time + '</div>'
+            + '</div>';
+        });
+        body.innerHTML = html;
+      })
+      .catch(function(){});
+  }
+
+  /* ── 100% Fixed Fetch Active Sessions Monitor ── */
+  function dbdFetchSessions() {
+    var body = document.getElementById('dbdSessBody');
+    if(!body) return;
+
+    var branch = "{{ selected_branch|default:'' }}";
+    var queryParam = "";
+    if (branch && branch !== "None" && branch.trim() !== "") {
+        queryParam = "?branch=" + branch;
+    }
+
+    // Django native secure absolute route integration
+    var url = "{% url 'live_active_sessions' %}" + queryParam;
+
+    fetch(url)
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if(!data.active_sessions || data.active_sessions.length === 0) {
+          body.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--text-secondary);font-size:13px;"><i class="fa-solid fa-circle-minus" style="font-size:20px;opacity:0.4;margin-bottom:6px;display:block;"></i>No active tracking running</div>';
+          return;
+        }
+        var html = '';
+        data.active_sessions.forEach(function(s) {
+          var isExp = s.remaining === 'Expired';
+          html += '<div class="dbd-sess-item">'
+            + '<div><div class="dbd-sess-sub"><i class="fa-solid fa-bookmark" style="font-size:9px;margin-right:4px;color:var(--accent)"></i>' + s.subject + '</div>'
+            + '<div class="dbd-sess-id">Session #' + s.id + '</div></div>'
+            + '<div class="dbd-timer' + (isExp ? ' exp' : '') + '\">' + s.remaining + '</div>'
+            + '</div>';
+        });
+        body.innerHTML = html;
+      })
+      .catch(function(){});
+  }
+
+  /* ── Branch change → reload form ── */
+  window.dbdOnBranchChange = function() {
+    /* Just let form submit pick it up; semester stays as-is */
+  };
+  window.dbdOnSemChange = function() {};
+
+  /* ── Init ── */
+  document.addEventListener('DOMContentLoaded', function() {
+    dbdCounters();
+    dbdBuildCharts();
+    dbdBars();
+    dbdFetchFeed();
+    dbdFetchSessions();
+    /* Auto-refresh every 15 seconds */
+    setInterval(function(){ dbdFetchFeed(); dbdFetchSessions(); }, 15000);
+  });
+
+  /* ── Re-render charts on theme toggle ── */
+  new MutationObserver(function(muts) {
+    muts.forEach(function(m) {
+      if (m.attributeName === 'data-theme') { setTimeout(dbdBuildCharts, 60); }
+    });
+  }).observe(document.documentElement, {attributes:true});
+
+})();
+</script>
+
 {% endblock %}

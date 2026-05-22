@@ -2,63 +2,44 @@
 {% block content %}
 
 <style>
-/* 🎨 Global Theme Variables */
-:root {
-    --bg-gradient: linear-gradient(135deg, #eef2ff, #f8fafc);
-    --card-bg: rgba(255, 255, 255, 0.8);
-    --card-border: rgba(0, 0, 0, 0.05);
-    --text-main: #2c3e50;
-    --text-muted: #7f8c8d;
-    --input-bg: rgba(255, 255, 255, 0.95);
-    --input-border: #cbd5e1;
-    --input-text: #1e293b;
-    --shadow: 0 10px 25px rgba(0,0,0,0.06);
+/* 🎨 Theme Styles mapped with base.html's data-theme architecture */
+[data-theme="light"] {
+    --card-bg: rgba(255, 255, 255, 0.75);
+    --card-border: rgba(60, 50, 30, 0.1);
+    --text-main: #16130e;
+    --text-muted: #6b6459;
+    --input-bg: #ffffff;
+    --input-text: #16130e;
+    --input-border: rgba(60, 50, 30, 0.15);
+    --shadow: 0 10px 25px rgba(16, 13, 8, 0.08);
 }
 
-/* 🔥 Global dark theme tracking selector rules */
-.dark-mode, .dark-mode * {
-    --bg-gradient: linear-gradient(135deg, #0f172a, #1e1e2f);
-    --card-bg: rgba(30, 41, 59, 0.65);
-    --card-border: rgba(255, 255, 255, 0.08);
-    --text-main: #f8fafc;
-    --text-muted: #94a3b8;
-    --input-bg: rgba(15, 23, 42, 0.7);
-    --input-border: rgba(255, 255, 255, 0.15);
-    --input-text: #f8fafc;
-    --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-}
-
-body {
-    background: var(--bg-gradient) !important;
-    transition: background 0.3s ease;
-}
-
-/* ❌ Removed the artificial borders from here entirely */
-.page-bg {
-    min-height: 80vh;
-    padding: 30px 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+[data-theme="dark"] {
+    --card-bg: rgba(26, 25, 22, 0.75);
+    --card-border: rgba(255, 248, 235, 0.08);
+    --text-main: #f5f0e8;
+    --text-muted: #8a8278;
+    --input-bg: #201e1b;
+    --input-text: #f5f0e8;
+    --input-border: rgba(255, 248, 235, 0.12);
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.38);
 }
 
 /* 🧊 Modern Glassmorphic Container Form Card */
 .form-card {
-    width: 100%;
     max-width: 600px;
-    margin: auto;
+    margin: 20px auto;
     background: var(--card-bg) !important;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     border: 1px solid var(--card-border) !important;
     padding: 35px;
     border-radius: 18px;
     box-shadow: var(--shadow);
     animation: fadeIn 0.4s ease;
-    transition: background 0.3s ease, border 0.3s ease, box-shadow 0.3s ease;
+    transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
-/* 🔥 Typography */
 .form-title {
     font-weight: 700;
     color: var(--text-main);
@@ -69,18 +50,21 @@ body {
     color: var(--text-muted);
 }
 
+/* 🎛️ Input Controllers Styling */
 .form-label {
-    color: var(--text-main);
-    font-weight: 500;
-    font-size: 14px;
+    color: var(--text-main) !important;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
 }
 
-/* 🎛️ Form Components & Input Controls */
 .form-control, .form-select {
     background-color: var(--input-bg) !important;
     border: 1px solid var(--input-border) !important;
     color: var(--input-text) !important;
-    border-radius: 10px;
+    border-radius: 10px !important;
     padding: 10px 14px;
     font-size: 14px;
     transition: all 0.2s ease;
@@ -89,11 +73,11 @@ body {
 .form-control:focus, .form-select:focus {
     background-color: var(--input-bg) !important;
     color: var(--input-text) !important;
-    box-shadow: 0 0 0 3px rgba(99,102,241,0.25) !important;
-    border-color: #6366f1 !important;
+    box-shadow: 0 0 0 3px rgba(79, 99, 231, 0.15) !important;
+    border-color: var(--accent, #4f63e7) !important;
 }
 
-/* 🌐 Chrome Autofill Neutralizer */
+/* 🌐 Chrome Autofill White Blocker styling */
 .form-control:-webkit-autofill,
 .form-control:-webkit-autofill:hover, 
 .form-control:-webkit-autofill:focus,
@@ -105,21 +89,23 @@ body {
     transition: background-color 5000s ease-in-out 0s;
 }
 
-/* 🚀 Interactive Submit CTA */
-.btn-submit {
-    background: linear-gradient(90deg, #6366f1, #8b5cf6);
+/* 🚀 Premium Styled Action Button */
+.btn-submit-custom {
+    background: var(--accent-grad, linear-gradient(135deg, #4f63e7 0%, #7c3aed 100%));
     border: none;
     border-radius: 10px;
     padding: 12px;
     color: white;
     font-weight: 600;
-    transition: all 0.3s ease;
+    width: 100%;
+    box-shadow: 0 4px 14px rgba(79, 99, 231, 0.25);
+    transition: all 0.2s ease;
 }
 
-.btn-submit:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
-    background: linear-gradient(90deg, #4f46e5, #7c3aed);
+.btn-submit-custom:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(79, 99, 231, 0.38);
+    filter: brightness(1.06);
 }
 
 option {
@@ -133,66 +119,64 @@ option {
 }
 </style>
 
-<div class="page-bg">
-    <div class="form-card">
-        <div class="mb-4">
-            <h3 class="form-title">📢 Create Alert</h3>
-            <p class="form-subtitle">Send notifications to students easily</p>
+<div class="form-card">
+    <div class="mb-4">
+        <h3 class="form-title">📢 Create Alert</h3>
+        <p class="form-subtitle">Send notifications to students easily</p>
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+        
+        <div class="mb-3">
+            <label class="form-label">Alert Title</label>
+            <input type="text" name="title" placeholder="Enter alert title"
+                class="form-control" required>
         </div>
 
-        <form method="POST">
-            {% csrf_token %}
-            
-            <div class="mb-3">
-                <label class="form-label">Alert Title</label>
-                <input type="text" name="title" placeholder="Enter alert title"
-                    class="form-control" required>
-            </div>
+        <div class="mb-3">
+            <label class="form-label">Message</label>
+            <textarea name="message" rows="3"
+                placeholder="Enter alert message"
+                class="form-control" required></textarea>
+        </div>
 
-            <div class="mb-3">
-                <label class="form-label">Message</label>
-                <textarea name="message" rows="3"
-                    placeholder="Enter alert message"
-                    class="form-control" required></textarea>
-            </div>
+        <div class="mb-3">
+            <label class="form-label">Branch</label>
+            <select name="branch" class="form-select">
+                <option value="">All Branches</option>
+                {% for b in branches %}
+                <option value="{{ b.id }}">{{ b.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
 
-            <div class="mb-3">
-                <label class="form-label">Branch</label>
-                <select name="branch" class="form-select">
-                    <option value="">All Branches</option>
-                    {% for b in branches %}
-                    <option value="{{ b.id }}">{{ b.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
+        <div class="mb-3">
+            <label class="form-label">Semester</label>
+            <select name="semester" class="form-select">
+                <option value="">All Semesters</option>
+                <option value="1">Sem 1</option>
+                <option value="2">Sem 2</option>
+                <option value="3">Sem 3</option>
+                <option value="4">Sem 4</option>
+                <option value="5">Sem 5</option>
+                <option value="6">Sem 6</option>
+            </select>
+        </div>
 
-            <div class="mb-3">
-                <label class="form-label">Semester</label>
-                <select name="semester" class="form-select">
-                    <option value="">All Semesters</option>
-                    <option value="1">Sem 1</option>
-                    <option value="2">Sem 2</option>
-                    <option value="3">Sem 3</option>
-                    <option value="4">Sem 4</option>
-                    <option value="5">Sem 5</option>
-                    <option value="6">Sem 6</option>
-                </select>
-            </div>
+        <div class="mb-4">
+            <label class="form-label">Priority</label>
+            <select name="priority" class="form-select">
+                <option value="normal">Normal</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+            </select>
+        </div>
 
-            <div class="mb-4">
-                <label class="form-label">Priority</label>
-                <select name="priority" class="form-select">
-                    <option value="normal">Normal</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                </select>
-            </div>
-
-            <button class="btn-submit w-100 shadow-sm">
-                🚀 Send Alert
-            </button>
-        </form>
-    </div>
+        <button type="submit" class="btn-submit-custom">
+            🚀 Send Alert
+        </button>
+    </form>
 </div>
 
 {% endblock %}

@@ -2,93 +2,101 @@
 {% block content %}
 
 <style>
-/* 🌟 Light Mode & Core Tokens */
+/* 🎨 Theme CSS Variables (Supports base file dark/white toggle) */
 :root {
-    --page-bg: linear-gradient(135deg, #eef2ff, #f8fafc);
-    --card-bg: #ffffff;
-    --card-border: transparent;
-    --title-color: #1e293b;
-    --subtitle-color: #64748b;
-    --input-bg: #ffffff;
+    --bg-gradient: linear-gradient(135deg, #eef2ff, #f8fafc);
+    --card-bg: rgba(255, 255, 255, 0.75);
+    --card-border: rgba(255, 255, 255, 0.4);
+    --text-main: #2c3e50;
+    --text-muted: #7f8c8d;
+    --input-bg: rgba(255, 255, 255, 0.9);
     --input-border: #cbd5e1;
-    --input-text: #0f172a;
-    --shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    --input-text: #1e293b;
+    --shadow: 0 10px 25px rgba(0,0,0,0.06);
 }
 
-/* 🌟 Dark Mode Theme Customizations */
-@media (prefers-color-scheme: dark) {
-    :root {
-        --page-bg: linear-gradient(135deg, #0f172a, #111827);
-        --card-bg: rgba(30, 41, 59, 0.7);
-        --card-border: rgba(255, 255, 255, 0.08);
-        --title-color: #f8fafc;
-        --subtitle-color: #94a3b8;
-        --input-bg: #1e293b;
-        --input-border: #334155;
-        --input-text: #f8fafc;
-        --shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
-    }
+body.dark-mode, .dark-mode body {
+    --bg-gradient: linear-gradient(135deg, #0f172a, #1e1e2f);
+    --card-bg: rgba(30, 41, 59, 0.45);
+    --card-border: rgba(255, 255, 255, 0.08);
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --input-bg: rgba(15, 23, 42, 0.6);
+    --input-border: rgba(255, 255, 255, 0.15);
+    --input-text: #f8fafc;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
+/* 🔥 Page Background */
 .page-bg {
-    background: var(--page-bg);
+    background: var(--bg-gradient) !important;
     min-height: 100vh;
-    padding: 40px 20px;
-    transition: background 0.3s;
+    padding: 30px;
+    transition: background 0.3s ease;
 }
 
+/* 🧊 Glassmorphic Card Setup */
 .form-card {
     max-width: 600px;
     margin: auto;
     background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--card-border);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
     padding: 30px;
     border-radius: 18px;
     box-shadow: var(--shadow);
     animation: fadeIn 0.4s ease;
-    transition: background 0.3s, border 0.3s, box-shadow 0.3s;
 }
 
+/* 🔥 Header Typography */
 .form-title {
     font-weight: 700;
-    color: var(--title-color);
+    color: var(--text-main);
 }
 
 .form-subtitle {
-    font-size: 13.5px;
-    color: var(--subtitle-color);
+    font-size: 13px;
+    color: var(--text-muted);
 }
 
 .form-label {
-    color: var(--title-color);
+    color: var(--text-main);
     font-weight: 500;
     font-size: 14px;
 }
 
+/* 🎛️ Dynamic UI Inputs & Controls */
 .form-control, .form-select {
-    background-color: var(--input-bg);
+    background-color: var(--input-bg) !important;
     border: 1px solid var(--input-border);
-    color: var(--input-text);
+    color: var(--input-text) !important;
     border-radius: 10px;
-    padding: 11px;
+    padding: 10px 14px;
     font-size: 14px;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
 }
 
 .form-control:focus, .form-select:focus {
-    background-color: var(--input-bg);
-    color: var(--input-text);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+    background-color: var(--input-bg) !important;
+    color: var(--input-text) !important;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.25);
     border-color: #6366f1;
 }
 
-.form-select option {
-    background-color: var(--input-bg);
-    color: var(--input-text);
+/* 🌐 Fix Google Chrome Autofill White Background styling */
+.form-control:-webkit-autofill,
+.form-control:-webkit-autofill:hover, 
+.form-control:-webkit-autofill:focus,
+.form-select:-webkit-autofill,
+.form-select:-webkit-autofill:hover,
+.form-select:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--input-text) !important;
+    -webkit-box-shadow: 0 0 0px 1000px var(--input-bg) inset !important;
+    transition: background-color 5000s ease-in-out 0s;
 }
 
+/* 🚀 Premium Styled Action Button */
 .btn-submit {
     background: linear-gradient(90deg, #6366f1, #8b5cf6);
     border: none;
@@ -101,28 +109,19 @@
 
 .btn-submit:hover {
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(99, 102, 241, 0.35);
+    box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
     background: linear-gradient(90deg, #4f46e5, #7c3aed);
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(12px); }
-    to { opacity: 1; transform: translateY(0); }
+option {
+    background-color: var(--input-bg);
+    color: var(--input-text);
 }
 
-/* 🔥 Google Auto-Fill Styling Fixes */
-input:-webkit-autofill,
-input:-webkit-autofill:hover, 
-input:-webkit-autofill:focus,
-textarea:-webkit-autofill,
-textarea:-webkit-autofill:hover,
-textarea:-webkit-autofill:focus,
-select:-webkit-autofill,
-select:-webkit-autofill:hover,
-select:-webkit-autofill:focus {
-    -webkit-text-fill-color: var(--input-text) !important;
-    -webkit-box-shadow: 0 0 0px 1000px var(--input-bg) inset !important;
-    transition: background-color 5000s ease-in-out 0s;
+/* 🔥 Entry Animation */
+@keyframes fadeIn {
+    from {opacity:0; transform: translateY(10px);}
+    to {opacity:1; transform: translateY(0);}
 }
 </style>
 
@@ -162,7 +161,7 @@ select:-webkit-autofill:focus {
             <div class="mb-3">
                 <label class="form-label">Semester</label>
                 <select name="semester" class="form-select">
-                    <option value="">All Semester</option>
+                    <option value="">All Semesters</option>
                     <option value="1">Sem 1</option>
                     <option value="2">Sem 2</option>
                     <option value="3">Sem 3</option>
@@ -181,7 +180,7 @@ select:-webkit-autofill:focus {
                 </select>
             </div>
 
-            <button class="btn-submit w-100">
+            <button class="btn-submit w-100 shadow-sm">
                 🚀 Send Alert
             </button>
         </form>

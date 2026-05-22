@@ -1,142 +1,214 @@
 {% extends "qr_app/base.html" %}
-
 {% block content %}
 
 <style>
+/* 🎨 Dynamic Theme Variables Sync with base.html */
+[data-theme="light"] {
+    --card-bg: rgba(255, 255, 255, 0.75);
+    --card-border: rgba(60, 50, 30, 0.08);
+    --text-main: #16130e;
+    --text-muted: #6b6459;
+    --input-bg: #ffffff;
+    --input-text: #16130e;
+    --input-border: rgba(60, 50, 30, 0.15);
+    --shadow: 0 10px 25px rgba(16, 13, 8, 0.05);
+}
 
-/* 🔥 Page */
+[data-theme="dark"] {
+    --card-bg: rgba(26, 25, 22, 0.75);
+    --card-border: rgba(255, 248, 235, 0.08);
+    --text-main: #f5f0e8;
+    --text-muted: #8a8278;
+    --input-bg: #201e1b;
+    --input-text: #f5f0e8;
+    --input-border: rgba(255, 248, 235, 0.12);
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
 .page-container {
     max-width: 900px;
     margin: auto;
+    padding-bottom: 40px;
 }
 
-/* 🔥 Header */
+/* 🧊 Glassmorphic Headers & Text */
 .page-header h2 {
-    font-weight: 700;
-    color: #2c3e50;
+    font-weight: 800;
+    color: var(--text-main);
 }
 
 .page-header p {
-    color: #7f8c8d;
+    color: var(--text-muted);
 }
 
-/* 🔥 Filter Card */
+/* 🧊 Glassmorphic Filter Row */
 .filter-card {
-    background: white;
-    padding: 15px;
-    border-radius: 12px;
-    box-shadow: 0 6px 15px rgba(0,0,0,0.05);
-    margin-bottom: 20px;
-}
-
-/* 🔥 Card */
-.alert-card {
-    background: white;
+    background: var(--card-bg) !important;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--card-border) !important;
     padding: 15px;
     border-radius: 14px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.05);
-    margin-bottom: 15px;
-    transition: 0.3s;
-    border-left: 5px solid transparent;
+    box-shadow: var(--shadow);
+}
+
+/* 🎛️ Form Controls Layout */
+.form-select {
+    background-color: var(--input-bg) !important;
+    border: 1px solid var(--input-border) !important;
+    color: var(--input-text) !important;
+    border-radius: 10px !important;
+    padding: 9px 12px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.form-select:focus {
+    box-shadow: 0 0 0 3px rgba(79, 99, 231, 0.15) !important;
+    border-color: #4f63e7 !important;
+}
+
+/* 🌐 Google Autofill White Blocker Fix */
+.form-select:-webkit-autofill {
+    -webkit-text-fill-color: var(--input-text) !important;
+    -webkit-box-shadow: 0 0 0px 1000px var(--input-bg) inset !important;
+}
+
+/* 🚨 Dynamic Priority Alert Cards */
+.alert-card {
+    background: var(--card-bg) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 22px;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    margin-bottom: 18px;
+    transition: all 0.25s ease;
+    border: 1px solid var(--card-border) !important;
 }
 
 .alert-card:hover {
-    transform: translateY(-3px);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
 }
 
-/* 🔥 Border Colors */
-.high-border { border-left: 5px solid #ef4444; }
-.medium-border { border-left: 5px solid #facc15; }
-.normal-border { border-left: 5px solid #3b82f6; }
-}
+/* Left Accent Borders based on Priority */
+.high-border { border-left: 6px solid #ef4444 !important; }
+.medium-border { border-left: 6px solid #f59e0b !important; }
+.normal-border { border-left: 6px solid #10b981 !important; }
 
-
-/* 🔥 Content */
-.alert-content {
-    flex: 1;
-}
-
-/* 🔥 Title */
 .alert-title {
-    font-weight: 600;
-    font-size: 15px;
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--text-main);
 }
 
-/* 🔥 Message */
 .alert-msg {
-    font-size: 13px;
-    color: #555;
-    margin-top: 5px;
+    margin-top: 10px;
+    color: var(--text-main);
+    font-size: 15px;
+    line-height: 1.5;
+    opacity: 0.95;
 }
 
-/* 🔥 Footer */
+/* 🗓️ Info Footers */
 .alert-meta {
-    font-size: 11px;
-    color: #999;
-    margin-top: 8px;
+    margin-top: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
 }
 
-/* 🔥 Badge */
+.alert-meta span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Custom Badges */
 .badge-priority {
+    padding: 4px 10px;
+    border-radius: 20px;
     font-size: 11px;
-    padding: 4px 8px;
-    border-radius: 6px;
-    color: white;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.badge-high { background: #e74c3c; }
-.badge-medium { background: #f1c40f; color:black; }
-.badge-normal { background: #3498db; }
+.badge-high { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+.badge-medium { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+.badge-normal { background: rgba(16, 114, 129, 0.15); color: #10b981; }
 
+.btn-filter-custom {
+    background: linear-gradient(135deg, #4f63e7 0%, #7c3aed 100%);
+    color: white;
+    font-weight: 600;
+    border: none;
+    border-radius: 10px;
+    padding: 9px 25px;
+    transition: all 0.2s ease;
+}
+
+.btn-filter-custom:hover {
+    filter: brightness(1.08);
+    box-shadow: 0 4px 12px rgba(79, 99, 231, 0.25);
+}
+
+option {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+}
 </style>
 
-<div class="page-container">
+<div class="page-container mt-4 px-2">
 
-    <!-- 🔥 HEADER -->
-    <div class="page-header mb-4">
-        <h2>📢 My Alerts</h2>
-        <p>View and filter your alerts</p>
+    <div class="page-header mb-4 text-center text-sm-start">
+        <h2>📢 Teacher Alerts Dashboard</h2>
+        <p>Monitor, track and filter active broadcasts sent to students</p>
     </div>
 
-    <!-- 🔥 FILTER -->
-    <form method="GET" class="filter-card d-flex gap-2">
+    <div class="filter-card mb-4">
+        <form method="GET" class="row g-2">
+            <div class="col-sm-5">
+                <select name="branch" class="form-select">
+                    <option value="">All Branches</option>
+                    {% for b in branches %}
+                    <option value="{{ b.id }}" {% if selected_branch == b.id|stringformat:"i" %}selected{% endif %}>
+                        {{ b.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
 
-        <select name="branch" class="form-select">
-            <option value="">All Branch</option>
-            {% for b in branches %}
-            <option value="{{ b.id }}" {% if selected_branch == b.id|stringformat:"s" %}selected{% endif %}>
-                {{ b.name }}
-            </option>
-            {% endfor %}
-        </select>
+            <div class="col-sm-4">
+                <select name="semester" class="form-select">
+                    <option value="">All Semesters</option>
+                    {% for i in "123456" %}
+                    <option value="{{ i }}" {% if selected_semester == i %}selected{% endif %}>
+                        Sem {{ i }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
 
-        <select name="semester" class="form-select">
-            <option value="">All Semester</option>
-            {% for i in "123456" %}
-            <option value="{{ i }}" {% if selected_semester == i %}selected{% endif %}>
-                Sem {{ i }}
-            </option>
-            {% endfor %}
-        </select>
+            <div class="col-sm-3">
+                <button type="submit" class="btn-filter-custom w-100">⚡ Filter</button>
+            </div>
+        </form>
+    </div>
 
-        <button class="btn btn-primary">Filter</button>
+    {% for a in alerts %}
+    <div class="alert-card 
+        {% if a.priority == 'high' %}high-border
+        {% elif a.priority == 'medium' %}medium-border
+        {% else %}normal-border
+        {% endif %}">
 
-    </form>
-
-    <!-- 🔥 ALERT LIST -->
-
-{% for a in alerts %}
-<div class="alert-card 
-    {% if a.priority == 'high' %}high-border
-    {% elif a.priority == 'medium' %}medium-border
-    {% else %}normal-border
-    {% endif %}">
-
-    <div class="alert-content">
-
-        <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex justify-content-between align-items-start gap-2">
             <div class="alert-title">{{ a.title }}</div>
-
             <span class="badge-priority
                 {% if a.priority == 'high' %}badge-high
                 {% elif a.priority == 'medium' %}badge-medium
@@ -149,16 +221,26 @@
         <div class="alert-msg">{{ a.message }}</div>
 
         <div class="alert-meta">
-            📅 {{ a.created_at|date:"d M Y H:i" }}
+            <span>
+                <i class="fa-solid fa-graduation-cap"></i> 
+                {% if a.branch %}{{ a.branch.name }}{% else %}All Branches{% endif %}
+            </span>
+            <span>
+                <i class="fa-regular fa-bookmark"></i> 
+                {% if a.semester %}Sem {{ a.semester }}{% else %}All Semesters{% endif %}
+            </span>
+            <span>
+                <i class="fa-regular fa-clock"></i> 
+                {{ a.created_at|date:"d M Y, h:i A" }}
+            </span>
         </div>
-
     </div>
-
-</div>
-
-{% empty %}
-<p class="text-center text-muted">No alerts found</p>
-{% endfor %}
+    {% empty %}
+    <div class="text-center py-5" style="color: var(--text-muted);">
+        <i class="fa-regular fa-bell-slash fa-3x mb-3" style="opacity: 0.5;"></i>
+        <p class="m-0">No alerts found matching the active selection.</p>
+    </div>
+    {% endfor %}
 
 </div>
 

@@ -2,29 +2,30 @@
 {% block content %}
 
 <style>
-/* 🎨 Theme CSS Variables (Supports base file dark/white toggle) */
+/* 🎨 Global Theme Variables (Catching .dark-mode anywhere in your HTML tree) */
 :root {
     --bg-gradient: linear-gradient(135deg, #eef2ff, #f8fafc);
-    --card-bg: rgba(255, 255, 255, 0.75);
-    --card-border: rgba(255, 255, 255, 0.4);
+    --card-bg: rgba(255, 255, 255, 0.8);
+    --card-border: rgba(0, 0, 0, 0.05);
     --text-main: #1e293b;
     --text-muted: #64748b;
-    --input-bg: rgba(255, 255, 255, 0.9);
+    --input-bg: rgba(255, 255, 255, 0.95);
     --input-border: #cbd5e1;
     --input-text: #1e293b;
     --shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 
-body.dark-mode, .dark-mode body {
+/* 🔥 Robust selector matching whether .dark-mode is on <html>, <body>, or wrappers */
+.dark-mode, .dark-mode * {
     --bg-gradient: linear-gradient(135deg, #0f172a, #1e1e2f);
-    --card-bg: rgba(30, 41, 59, 0.45);
+    --card-bg: rgba(30, 41, 59, 0.65);
     --card-border: rgba(255, 255, 255, 0.08);
     --text-main: #f8fafc;
     --text-muted: #94a3b8;
-    --input-bg: rgba(15, 23, 42, 0.6);
+    --input-bg: rgba(15, 23, 42, 0.7);
     --input-border: rgba(255, 255, 255, 0.15);
     --input-text: #f8fafc;
-    --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
 }
 
 body {
@@ -37,16 +38,16 @@ body {
     max-width: 900px;
 }
 
-/* 🧊 Premium Glassmorphism Card */
-.card {
-    background: var(--card-bg);
+/* 🧊 Modern Glassmorphic Main Card */
+.timetable-card {
+    background: var(--card-bg) !important;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--card-border);
+    border: 1px solid var(--card-border) !important;
     border-radius: 16px;
     padding: 30px;
     box-shadow: var(--shadow);
-    transition: all 0.3s ease;
+    transition: background 0.3s ease, border 0.3s ease, box-shadow 0.3s ease;
 }
 
 .form-label {
@@ -56,10 +57,10 @@ body {
     margin-bottom: 6px;
 }
 
-/* 🎛️ Form Controls & Dropdowns */
+/* 🎛️ Dynamic Text & Select Inputs */
 .form-control, .form-select {
     background-color: var(--input-bg) !important;
-    border: 1px solid var(--input-border);
+    border: 1px solid var(--input-border) !important;
     color: var(--input-text) !important;
     border-radius: 10px;
     padding: 10px 14px;
@@ -69,11 +70,11 @@ body {
 .form-control:focus, .form-select:focus {
     background-color: var(--input-bg) !important;
     color: var(--input-text) !important;
-    border-color: #6366f1;
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+    border-color: #6366f1 !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25) !important;
 }
 
-/* 🌐 Fix Google Chrome Autofill White Background styling */
+/* 🌐 Force Fix Google Autofill White Blocker */
 .form-control:-webkit-autofill,
 .form-control:-webkit-autofill:hover, 
 .form-control:-webkit-autofill:focus,
@@ -85,7 +86,7 @@ body {
     transition: background-color 5000s ease-in-out 0s;
 }
 
-/* 🚀 Vibrant Interactive Button */
+/* 🚀 Premium Glow Submit Button */
 .btn-primary {
     background: linear-gradient(90deg, #6366f1, #9333ea);
     border: none;
@@ -102,7 +103,6 @@ body {
     background: linear-gradient(90deg, #4f46e5, #7c3aed);
 }
 
-/* Custom styling inside options for dark theme visibility */
 option {
     background-color: var(--input-bg);
     color: var(--input-text);
@@ -110,7 +110,7 @@ option {
 </style>
 
 <div class="container mt-5">
-    <div class="card">
+    <div class="timetable-card">
         <h3 class="text-center mb-4" style="color: var(--text-main); font-weight: 700;">📅 Add Timetable</h3>
 
         <form method="POST">

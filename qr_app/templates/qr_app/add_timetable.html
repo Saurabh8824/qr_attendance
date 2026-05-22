@@ -2,129 +2,123 @@
 {% block content %}
 
 <style>
-/* 🌟 Light Mode (Default) & Core Theme Variables */
+/* 🎨 Theme CSS Variables (Supports base file dark/white toggle) */
 :root {
     --bg-gradient: linear-gradient(135deg, #eef2ff, #f8fafc);
     --card-bg: rgba(255, 255, 255, 0.75);
-    --card-border: rgba(255, 255, 255, 0.5);
-    --text-primary: #1e293b;
-    --text-label: #475569;
-    --input-bg: #ffffff;
+    --card-border: rgba(255, 255, 255, 0.4);
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --input-bg: rgba(255, 255, 255, 0.9);
     --input-border: #cbd5e1;
-    --input-text: #0f172a;
-    --shadow: 0 10px 25px rgba(99, 102, 241, 0.08);
+    --input-text: #1e293b;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 
-/* 🌟 Dark Mode Media Query */
-@media (prefers-color-scheme: dark) {
-    :root {
-        --bg-gradient: linear-gradient(135deg, #0f172a, #1e1b4b);
-        --card-bg: rgba(30, 41, 59, 0.45);
-        --card-border: rgba(255, 255, 255, 0.08);
-        --text-primary: #f8fafc;
-        --text-label: #cbd5e1;
-        --input-bg: #1e293b;
-        --input-border: #334155;
-        --input-text: #f8fafc;
-        --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-    }
+body.dark-mode, .dark-mode body {
+    --bg-gradient: linear-gradient(135deg, #0f172a, #1e1e2f);
+    --card-bg: rgba(30, 41, 59, 0.45);
+    --card-border: rgba(255, 255, 255, 0.08);
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --input-bg: rgba(15, 23, 42, 0.6);
+    --input-border: rgba(255, 255, 255, 0.15);
+    --input-text: #f8fafc;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 body {
-    background: var(--bg-gradient);
-    color: var(--text-primary);
-    transition: background 0.3s, color 0.3s;
-    min-height: 100vh;
+    background: var(--bg-gradient) !important;
+    color: var(--text-main);
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
 .container {
     max-width: 900px;
 }
 
+/* 🧊 Premium Glassmorphism Card */
 .card {
     background: var(--card-bg);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--card-border);
     border-radius: 16px;
     padding: 30px;
     box-shadow: var(--shadow);
-    transition: background 0.3s, border 0.3s, box-shadow 0.3s;
+    transition: all 0.3s ease;
 }
 
-h3.text-center {
-    color: var(--text-primary);
-    font-weight: 700;
-}
-
-label {
-    color: var(--text-label);
+.form-label {
+    color: var(--text-main);
     font-weight: 500;
     font-size: 14px;
     margin-bottom: 6px;
 }
 
+/* 🎛️ Form Controls & Dropdowns */
 .form-control, .form-select {
-    background-color: var(--input-bg);
+    background-color: var(--input-bg) !important;
     border: 1px solid var(--input-border);
-    color: var(--input-text);
+    color: var(--input-text) !important;
     border-radius: 10px;
-    padding: 10px 12px;
-    transition: all 0.3s ease;
+    padding: 10px 14px;
+    transition: all 0.2s ease;
 }
 
 .form-control:focus, .form-select:focus {
-    background-color: var(--input-bg);
+    background-color: var(--input-bg) !important;
+    color: var(--input-text) !important;
     border-color: #6366f1;
-    color: var(--input-text);
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
 }
 
-.form-select option {
-    background-color: var(--input-bg);
-    color: var(--input-text);
+/* 🌐 Fix Google Chrome Autofill White Background styling */
+.form-control:-webkit-autofill,
+.form-control:-webkit-autofill:hover, 
+.form-control:-webkit-autofill:focus,
+.form-select:-webkit-autofill,
+.form-select:-webkit-autofill:hover,
+.form-select:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--input-text) !important;
+    -webkit-box-shadow: 0 0 0px 1000px var(--input-bg) inset !important;
+    transition: background-color 5000s ease-in-out 0s;
 }
 
+/* 🚀 Vibrant Interactive Button */
 .btn-primary {
     background: linear-gradient(90deg, #6366f1, #9333ea);
     border: none;
     border-radius: 10px;
     padding: 12px 30px;
     font-weight: 600;
+    letter-spacing: 0.5px;
     transition: all 0.3s ease;
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
+    background: linear-gradient(90deg, #4f46e5, #7c3aed);
 }
 
-/* 🔥 Google Auto-Fill Styling Fixes */
-input:-webkit-autofill,
-input:-webkit-autofill:hover, 
-input:-webkit-autofill:focus,
-textarea:-webkit-autofill,
-textarea:-webkit-autofill:hover,
-textarea:-webkit-autofill:focus,
-select:-webkit-autofill,
-select:-webkit-autofill:hover,
-select:-webkit-autofill:focus {
-    -webkit-text-fill-color: var(--input-text) !important;
-    -webkit-box-shadow: 0 0 0px 1000px var(--input-bg) inset !important;
-    transition: background-color 5000s ease-in-out 0s;
+/* Custom styling inside options for dark theme visibility */
+option {
+    background-color: var(--input-bg);
+    color: var(--input-text);
 }
 </style>
 
 <div class="container mt-5">
     <div class="card">
-        <h3 class="text-center mb-4">📅 Add Timetable</h3>
+        <h3 class="text-center mb-4" style="color: var(--text-main); font-weight: 700;">📅 Add Timetable</h3>
 
         <form method="POST">
             {% csrf_token %}
 
-            <div class="row g-3">
+            <div class="row g-4">
                 <div class="col-md-4">
-                    <label>Branch</label>
+                    <label class="form-label">Branch</label>
                     <select name="branch" id="branch" class="form-select" required>
                         <option value="">Select Branch</option>
                         {% for b in branches %}
@@ -134,7 +128,7 @@ select:-webkit-autofill:focus {
                 </div>
 
                 <div class="col-md-4">
-                    <label>Semester</label>
+                    <label class="form-label">Semester</label>
                     <select name="semester" id="semester" class="form-select" required>
                         <option value="">Select Semester</option>
                         <option value="1">Sem 1</option>
@@ -147,14 +141,14 @@ select:-webkit-autofill:focus {
                 </div>
 
                 <div class="col-md-4">
-                    <label>Subject</label>
+                    <label class="form-label">Subject</label>
                     <select name="subject" id="subject" class="form-select" required>
                         <option value="">Select Subject</option>
                     </select>
                 </div>
 
                 <div class="col-md-4">
-                    <label>Day</label>
+                    <label class="form-label">Day</label>
                     <select name="day" class="form-select">
                         <option value="Mon">Monday</option>
                         <option value="Tue">Tuesday</option>
@@ -166,28 +160,28 @@ select:-webkit-autofill:focus {
                 </div>
 
                 <div class="col-md-4">
-                    <label>Start Time</label>
+                    <label class="form-label">Start Time</label>
                     <input type="time" name="start_time" class="form-control" required>
                 </div>
 
                 <div class="col-md-4">
-                    <label>End Time</label>
+                    <label class="form-label">End Time</label>
                     <input type="time" name="end_time" class="form-control" required>
                 </div>
 
                 <div class="col-md-6">
-                    <label>Room</label>
+                    <label class="form-label">Room</label>
                     <input type="text" name="room" class="form-control" placeholder="Room No">
                 </div>
 
                 <div class="col-md-6">
-                    <label>Teacher Name</label>
-                    <input type="text" name="teacher_name" class="form-control" placeholder="Enter teacher name">
+                    <label class="form-label">Teacher Name</label>
+                    <input type="text" name="teacher_name" class="form-control" placeholder="Enter teacher's name">
                 </div>
             </div>
 
             <div class="text-center mt-4">
-                <button class="btn btn-primary px-5">Save Timetable</button>
+                <button class="btn btn-primary px-5 shadow-sm">Save Timetable</button>
             </div>
         </form>
     </div>

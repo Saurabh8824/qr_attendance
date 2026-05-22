@@ -1,96 +1,147 @@
 {% extends "qr_app/base.html" %}
-
 {% block content %}
 
 <style>
-
-/* 🔥 Page Background */
-.page-bg {
-    background: linear-gradient(135deg, #eef2ff, #f8fafc);
-    min-height: 100vh;
-    padding: 30px;
+/* 🌟 Light Mode & Core Tokens */
+:root {
+    --page-bg: linear-gradient(135deg, #eef2ff, #f8fafc);
+    --card-bg: #ffffff;
+    --card-border: transparent;
+    --title-color: #1e293b;
+    --subtitle-color: #64748b;
+    --input-bg: #ffffff;
+    --input-border: #cbd5e1;
+    --input-text: #0f172a;
+    --shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
 }
 
-/* 🔥 Card */
+/* 🌟 Dark Mode Theme Customizations */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --page-bg: linear-gradient(135deg, #0f172a, #111827);
+        --card-bg: rgba(30, 41, 59, 0.7);
+        --card-border: rgba(255, 255, 255, 0.08);
+        --title-color: #f8fafc;
+        --subtitle-color: #94a3b8;
+        --input-bg: #1e293b;
+        --input-border: #334155;
+        --input-text: #f8fafc;
+        --shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    }
+}
+
+.page-bg {
+    background: var(--page-bg);
+    min-height: 100vh;
+    padding: 40px 20px;
+    transition: background 0.3s;
+}
+
 .form-card {
     max-width: 600px;
     margin: auto;
-    background: white;
-    padding: 25px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 30px;
     border-radius: 18px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    box-shadow: var(--shadow);
     animation: fadeIn 0.4s ease;
+    transition: background 0.3s, border 0.3s, box-shadow 0.3s;
 }
 
-/* 🔥 Header */
 .form-title {
     font-weight: 700;
-    color: #2c3e50;
+    color: var(--title-color);
 }
 
 .form-subtitle {
-    font-size: 13px;
-    color: #7f8c8d;
+    font-size: 13.5px;
+    color: var(--subtitle-color);
 }
 
-/* 🔥 Inputs */
-.form-control, .form-select {
-    border-radius: 10px;
-    padding: 10px;
+.form-label {
+    color: var(--title-color);
+    font-weight: 500;
     font-size: 14px;
 }
 
+.form-control, .form-select {
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    color: var(--input-text);
+    border-radius: 10px;
+    padding: 11px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
 .form-control:focus, .form-select:focus {
-    box-shadow: 0 0 0 2px rgba(99,102,241,0.2);
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
     border-color: #6366f1;
 }
 
-/* 🔥 Button */
+.form-select option {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+}
+
 .btn-submit {
     background: linear-gradient(90deg, #6366f1, #8b5cf6);
     border: none;
     border-radius: 10px;
-    padding: 10px;
+    padding: 12px;
     color: white;
     font-weight: 600;
-    transition: 0.3s;
+    transition: all 0.3s ease;
 }
 
 .btn-submit:hover {
     transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(99, 102, 241, 0.35);
     background: linear-gradient(90deg, #4f46e5, #7c3aed);
 }
 
-/* 🔥 Animation */
 @keyframes fadeIn {
-    from {opacity:0; transform: translateY(10px);}
-    to {opacity:1; transform: translateY(0);}
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
+/* 🔥 Google Auto-Fill Styling Fixes */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--input-text) !important;
+    -webkit-box-shadow: 0 0 0px 1000px var(--input-bg) inset !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
 </style>
 
 <div class="page-bg">
-
     <div class="form-card">
-
-        <!-- 🔥 Header -->
         <div class="mb-4">
             <h3 class="form-title">📢 Create Alert</h3>
             <p class="form-subtitle">Send notifications to students easily</p>
         </div>
 
-        <!-- 🔥 Form -->
         <form method="POST">
             {% csrf_token %}
             
-            <!-- Title -->
             <div class="mb-3">
                 <label class="form-label">Alert Title</label>
                 <input type="text" name="title" placeholder="Enter alert title"
                     class="form-control" required>
             </div>
 
-            <!-- Message -->
             <div class="mb-3">
                 <label class="form-label">Message</label>
                 <textarea name="message" rows="3"
@@ -98,7 +149,6 @@
                     class="form-control" required></textarea>
             </div>
 
-            <!-- Branch -->
             <div class="mb-3">
                 <label class="form-label">Branch</label>
                 <select name="branch" class="form-select">
@@ -109,7 +159,6 @@
                 </select>
             </div>
 
-            <!-- Semester -->
             <div class="mb-3">
                 <label class="form-label">Semester</label>
                 <select name="semester" class="form-select">
@@ -123,7 +172,6 @@
                 </select>
             </div>
 
-            <!-- Priority -->
             <div class="mb-4">
                 <label class="form-label">Priority</label>
                 <select name="priority" class="form-select">
@@ -133,15 +181,11 @@
                 </select>
             </div>
 
-            <!-- Button -->
             <button class="btn-submit w-100">
                 🚀 Send Alert
             </button>
-
         </form>
-
     </div>
-
 </div>
 
 {% endblock %}

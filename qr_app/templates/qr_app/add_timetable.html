@@ -2,67 +2,63 @@
 {% block content %}
 
 <style>
-/* 🎨 Global Theme Variables (Catching .dark-mode anywhere in your HTML tree) */
-:root {
-    --bg-gradient: linear-gradient(135deg, #eef2ff, #f8fafc);
-    --card-bg: rgba(255, 255, 255, 0.8);
-    --card-border: rgba(0, 0, 0, 0.05);
-    --text-main: #1e293b;
-    --text-muted: #64748b;
-    --input-bg: rgba(255, 255, 255, 0.95);
-    --input-border: #cbd5e1;
-    --input-text: #1e293b;
-    --shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+/* 🎨 Theme Styles mapped with base.html's data-theme architecture */
+[data-theme="light"] {
+    --card-bg: rgba(255, 255, 255, 0.75);
+    --card-border: rgba(60, 50, 30, 0.1);
+    --text-main: #16130e;
+    --input-bg: #ffffff;
+    --input-text: #16130e;
+    --input-border: rgba(60, 50, 30, 0.15);
+    --shadow: 0 10px 25px rgba(16, 13, 8, 0.08);
 }
 
-/* 🔥 Robust selector matching whether .dark-mode is on <html>, <body>, or wrappers */
-.dark-mode, .dark-mode * {
-    --bg-gradient: linear-gradient(135deg, #0f172a, #1e1e2f);
-    --card-bg: rgba(30, 41, 59, 0.65);
-    --card-border: rgba(255, 255, 255, 0.08);
-    --text-main: #f8fafc;
-    --text-muted: #94a3b8;
-    --input-bg: rgba(15, 23, 42, 0.7);
-    --input-border: rgba(255, 255, 255, 0.15);
-    --input-text: #f8fafc;
-    --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-}
-
-body {
-    background: var(--bg-gradient) !important;
-    color: var(--text-main);
-    transition: background 0.3s ease, color 0.3s ease;
+[data-theme="dark"] {
+    --card-bg: rgba(26, 25, 22, 0.75);
+    --card-border: rgba(255, 248, 235, 0.08);
+    --text-main: #f5f0e8;
+    --input-bg: #201e1b;
+    --input-text: #f5f0e8;
+    --input-border: rgba(255, 248, 235, 0.12);
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.38);
 }
 
 .container {
     max-width: 900px;
 }
 
-/* 🧊 Modern Glassmorphic Main Card */
+/* 🧊 Beautiful Modern Glassmorphism Card */
 .timetable-card {
     background: var(--card-bg) !important;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     border: 1px solid var(--card-border) !important;
-    border-radius: 16px;
+    border-radius: 18px;
     padding: 30px;
     box-shadow: var(--shadow);
-    transition: background 0.3s ease, border 0.3s ease, box-shadow 0.3s ease;
+    transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
-.form-label {
+.timetable-card h3 {
     color: var(--text-main);
-    font-weight: 500;
-    font-size: 14px;
+    font-weight: 700;
+}
+
+/* 🎛️ Form Components & Inputs */
+.form-label {
+    color: var(--text-main) !important;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
     margin-bottom: 6px;
 }
 
-/* 🎛️ Dynamic Text & Select Inputs */
 .form-control, .form-select {
     background-color: var(--input-bg) !important;
     border: 1px solid var(--input-border) !important;
     color: var(--input-text) !important;
-    border-radius: 10px;
+    border-radius: 10px !important;
     padding: 10px 14px;
     transition: all 0.2s ease;
 }
@@ -70,11 +66,11 @@ body {
 .form-control:focus, .form-select:focus {
     background-color: var(--input-bg) !important;
     color: var(--input-text) !important;
-    border-color: #6366f1 !important;
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25) !important;
+    border-color: var(--accent, #4f63e7) !important;
+    box-shadow: 0 0 0 3px rgba(79, 99, 231, 0.15) !important;
 }
 
-/* 🌐 Force Fix Google Autofill White Blocker */
+/* 🌐 Chrome Autofill Fix (Force fields layout styling) */
 .form-control:-webkit-autofill,
 .form-control:-webkit-autofill:hover, 
 .form-control:-webkit-autofill:focus,
@@ -86,21 +82,23 @@ body {
     transition: background-color 5000s ease-in-out 0s;
 }
 
-/* 🚀 Premium Glow Submit Button */
-.btn-primary {
-    background: linear-gradient(90deg, #6366f1, #9333ea);
+/* Button style overrides */
+.btn-primary-custom {
+    background: var(--accent-grad, linear-gradient(135deg, #4f63e7 0%, #7c3aed 100%));
+    color: #fff;
     border: none;
     border-radius: 10px;
-    padding: 12px 30px;
+    padding: 12px 35px;
     font-weight: 600;
-    letter-spacing: 0.5px;
-    transition: all 0.3s ease;
+    font-size: 14px;
+    box-shadow: 0 4px 14px rgba(79, 99, 231, 0.25);
+    transition: all 0.2s ease;
 }
 
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
-    background: linear-gradient(90deg, #4f46e5, #7c3aed);
+.btn-primary-custom:hover {
+    box-shadow: 0 6px 20px rgba(79, 99, 231, 0.38);
+    transform: translateY(-1px);
+    filter: brightness(1.06);
 }
 
 option {
@@ -109,9 +107,9 @@ option {
 }
 </style>
 
-<div class="container mt-5">
+<div class="container mt-4">
     <div class="timetable-card">
-        <h3 class="text-center mb-4" style="color: var(--text-main); font-weight: 700;">📅 Add Timetable</h3>
+        <h3 class="text-center mb-4">📅 Add Timetable</h3>
 
         <form method="POST">
             {% csrf_token %}
@@ -181,7 +179,7 @@ option {
             </div>
 
             <div class="text-center mt-4">
-                <button class="btn btn-primary px-5 shadow-sm">Save Timetable</button>
+                <button type="submit" class="btn-primary-custom">Save Timetable</button>
             </div>
         </form>
     </div>

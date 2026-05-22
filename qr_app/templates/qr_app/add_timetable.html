@@ -2,8 +2,39 @@
 {% block content %}
 
 <style>
+/* 🌟 Light Mode (Default) & Core Theme Variables */
+:root {
+    --bg-gradient: linear-gradient(135deg, #eef2ff, #f8fafc);
+    --card-bg: rgba(255, 255, 255, 0.75);
+    --card-border: rgba(255, 255, 255, 0.5);
+    --text-primary: #1e293b;
+    --text-label: #475569;
+    --input-bg: #ffffff;
+    --input-border: #cbd5e1;
+    --input-text: #0f172a;
+    --shadow: 0 10px 25px rgba(99, 102, 241, 0.08);
+}
+
+/* 🌟 Dark Mode Media Query */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-gradient: linear-gradient(135deg, #0f172a, #1e1b4b);
+        --card-bg: rgba(30, 41, 59, 0.45);
+        --card-border: rgba(255, 255, 255, 0.08);
+        --text-primary: #f8fafc;
+        --text-label: #cbd5e1;
+        --input-bg: #1e293b;
+        --input-border: #334155;
+        --input-text: #f8fafc;
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+}
+
 body {
-    background: linear-gradient(135deg, #eef2ff, #f8fafc);
+    background: var(--bg-gradient);
+    color: var(--text-primary);
+    transition: background 0.3s, color 0.3s;
+    min-height: 100vh;
 }
 
 .container {
@@ -11,115 +42,157 @@ body {
 }
 
 .card {
-    background: rgba(255,255,255,0.7);
-    backdrop-filter: blur(10px);
-    border-radius: 15px;
-    padding: 25px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    background: var(--card-bg);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: var(--shadow);
+    transition: background 0.3s, border 0.3s, box-shadow 0.3s;
+}
+
+h3.text-center {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+label {
+    color: var(--text-label);
+    font-weight: 500;
+    font-size: 14px;
+    margin-bottom: 6px;
 }
 
 .form-control, .form-select {
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    color: var(--input-text);
     border-radius: 10px;
+    padding: 10px 12px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: var(--input-bg);
+    border-color: #6366f1;
+    color: var(--input-text);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+}
+
+.form-select option {
+    background-color: var(--input-bg);
+    color: var(--input-text);
 }
 
 .btn-primary {
     background: linear-gradient(90deg, #6366f1, #9333ea);
     border: none;
+    border-radius: 10px;
+    padding: 12px 30px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
+}
+
+/* 🔥 Google Auto-Fill Styling Fixes */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--input-text) !important;
+    -webkit-box-shadow: 0 0 0px 1000px var(--input-bg) inset !important;
+    transition: background-color 5000s ease-in-out 0s;
 }
 </style>
 
-<div class="container mt-4">
+<div class="container mt-5">
+    <div class="card">
+        <h3 class="text-center mb-4">📅 Add Timetable</h3>
 
-<div class="card">
+        <form method="POST">
+            {% csrf_token %}
 
-<h3 class="text-center mb-4">📅 Add Timetable</h3>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label>Branch</label>
+                    <select name="branch" id="branch" class="form-select" required>
+                        <option value="">Select Branch</option>
+                        {% for b in branches %}
+                        <option value="{{ b.id }}">{{ b.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-<form method="POST">
-    {% csrf_token %}
+                <div class="col-md-4">
+                    <label>Semester</label>
+                    <select name="semester" id="semester" class="form-select" required>
+                        <option value="">Select Semester</option>
+                        <option value="1">Sem 1</option>
+                        <option value="2">Sem 2</option>
+                        <option value="3">Sem 3</option>
+                        <option value="4">Sem 4</option>
+                        <option value="5">Sem 5</option>
+                        <option value="6">Sem 6</option>
+                    </select>
+                </div>
 
-    <div class="row g-3">
+                <div class="col-md-4">
+                    <label>Subject</label>
+                    <select name="subject" id="subject" class="form-select" required>
+                        <option value="">Select Subject</option>
+                    </select>
+                </div>
 
-        <!-- Branch -->
-        <div class="col-md-4">
-            <label>Branch</label>
-            <select name="branch" id="branch" class="form-select" required>
-                <option value="">Select Branch</option>
-                {% for b in branches %}
-                <option value="{{ b.id }}">{{ b.name }}</option>
-                {% endfor %}
-            </select>
-        </div>
+                <div class="col-md-4">
+                    <label>Day</label>
+                    <select name="day" class="form-select">
+                        <option value="Mon">Monday</option>
+                        <option value="Tue">Tuesday</option>
+                        <option value="Wed">Wednesday</option>
+                        <option value="Thu">Thursday</option>
+                        <option value="Fri">Friday</option>
+                        <option value="Sat">Saturday</option>
+                    </select>
+                </div>
 
-        <!-- Semester -->
-        <div class="col-md-4">
-            <label>Semester</label>
-            <select name="semester" id="semester" class="form-select" required>
-                <option value="">Select Semester</option>
-                <option value="1">Sem 1</option>
-                <option value="2">Sem 2</option>
-                <option value="3">Sem 3</option>
-                <option value="4">Sem 4</option>
-                <option value="5">Sem 5</option>
-                <option value="6">Sem 6</option>
-            </select>
-        </div>
+                <div class="col-md-4">
+                    <label>Start Time</label>
+                    <input type="time" name="start_time" class="form-control" required>
+                </div>
 
-        <!-- Subject -->
-        <div class="col-md-4">
-            <label>Subject</label>
-            <select name="subject" id="subject" class="form-select" required>
-                <option value="">Select Subject</option>
-            </select>
-        </div>
+                <div class="col-md-4">
+                    <label>End Time</label>
+                    <input type="time" name="end_time" class="form-control" required>
+                </div>
 
-        <!-- Day -->
-        <div class="col-md-4">
-            <label>Day</label>
-            <select name="day" class="form-select">
-                <option value="Mon">Monday</option>
-                <option value="Tue">Tuesday</option>
-                <option value="Wed">Wednesday</option>
-                <option value="Thu">Thursday</option>
-                <option value="Fri">Friday</option>
-                <option value="Sat">Saturday</option>
-            </select>
-        </div>
+                <div class="col-md-6">
+                    <label>Room</label>
+                    <input type="text" name="room" class="form-control" placeholder="Room No">
+                </div>
 
-        <!-- Time -->
-        <div class="col-md-4">
-            <label>Start Time</label>
-            <input type="time" name="start_time" class="form-control" required>
-        </div>
+                <div class="col-md-6">
+                    <label>Teacher Name</label>
+                    <input type="text" name="teacher_name" class="form-control" placeholder="Enter teacher name">
+                </div>
+            </div>
 
-        <div class="col-md-4">
-            <label>End Time</label>
-            <input type="time" name="end_time" class="form-control" required>
-        </div>
-
-        <!-- Room -->
-        <div class="col-md-6">
-            <label>Room</label>
-            <input type="text" name="room" class="form-control" placeholder="Room No">
-        </div>
-
-        <!-- Teacher -->
-        <div class="col-md-6">
-            <label>Teacher Name</label>
-            <input type="text" name="teacher_name" class="form-control">
-        </div>
-
+            <div class="text-center mt-4">
+                <button class="btn btn-primary px-5">Save Timetable</button>
+            </div>
+        </form>
     </div>
-
-    <div class="text-center mt-4">
-        <button class="btn btn-primary px-5">Save Timetable</button>
-    </div>
-
-</form>
-
-</div>
 </div>
 
-<!-- 🔥 AJAX SUBJECT FILTER -->
 <script>
 document.getElementById("branch").addEventListener("change", loadSubjects);
 document.getElementById("semester").addEventListener("change", loadSubjects);
@@ -134,7 +207,7 @@ function loadSubjects() {
         .then(res => res.json())
         .then(data => {
             let subjectSelect = document.getElementById("subject");
-            subjectSelect.innerHTML = "<option>Select Subject</option>";
+            subjectSelect.innerHTML = "<option value=''>Select Subject</option>";
 
             data.results.forEach(sub => {
                 subjectSelect.innerHTML += `<option value="${sub.id}">${sub.name}</option>`;

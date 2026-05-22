@@ -5,105 +5,487 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Login — QR Attendance</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 
   <style>
-    :root{
-      --bg1: #0f172a; /* deep navy */
-      --bg2: #0b1220; /* darker */
-      --glass: rgba(255,255,255,0.06);
-      --glass-2: rgba(255,255,255,0.08);
-      --accent: rgba(99,102,241,0.95); /* indigo */
-      --accent-2: rgba(45,212,191,0.95); /* teal */
-      --text: #e6eef8;
-      --muted: rgba(230,238,248,0.7);
-      --radius: 14px;
-      --maxw: 420px;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    :root {
+      --ink:    #0a0a0f;
+      --ink2:   #111118;
+      --surface: rgba(255,255,255,0.035);
+      --border:  rgba(255,255,255,0.07);
+      --gold:   #c8a96e;
+      --gold2:  #e8c88a;
+      --text:   #f0ece4;
+      --muted:  rgba(240,236,228,0.5);
+      --danger: #ff6b6b;
+      --radius: 20px;
+      --maxw:   420px;
+      --lamp-glow: radial-gradient(circle at center, rgba(200, 169, 110, 0.18) 0%, rgba(200, 169, 110, 0.07) 40%, transparent 70%);
+      --bg-grid-color: rgba(255,255,255,0.025);
     }
 
-    /* Full-page animated gradient background */
-    html,body{height:100%;margin:0}
-    body{
-      background: radial-gradient(1200px 600px at 10% 10%, rgba(99,102,241,0.12), transparent 8%),
-                  radial-gradient(900px 500px at 90% 90%, rgba(45,212,191,0.06), transparent 8%),
-                  linear-gradient(180deg,var(--bg1), var(--bg2));
-      color:var(--text);
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-      overflow:hidden;
+    /* ─── Light Theme Overrides ─── */
+    body.light-theme {
+      --ink:    #f5f5f8;
+      --ink2:   #ffffff;
+      --surface: rgba(0,0,0,0.03);
+      --border:  rgba(0,0,0,0.08);
+      --gold:   #b08d4b;
+      --gold2:  #cd9e53;
+      --text:   #1c1b22;
+      --muted:  rgba(28,27,34,0.6);
+      --danger: #e03131;
+      --lamp-glow: radial-gradient(circle at center, rgba(232, 200, 138, 0.75) 0%, rgba(232, 200, 138, 0.3) 35%, rgba(232, 200, 138, 0.1) 55%, transparent 75%);
+      --bg-grid-color: rgba(0,0,0,0.035);
     }
 
-    /* floating decorative blobs */
-    .blob{
-      position:fixed; z-index:0; filter: blur(40px); opacity:0.62;
-      transform-origin:center;
-      mix-blend-mode:screen;
-      animation: float 8s ease-in-out infinite;
-    }
-    .blob.b1{width:420px;height:420px;left:-80px;top:-60px;background:linear-gradient(135deg,var(--accent), #7c3aed); animation-duration:11s}
-    .blob.b2{width:320px;height:320px;right:-60px;bottom:-40px;background:linear-gradient(135deg,var(--accent-2), #06b6d4); animation-duration:9s}
-    @keyframes float{0%{transform:translateY(0) scale(1)}50%{transform:translateY(18px) scale(1.03)}100%{transform:translateY(0) scale(1)}}
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    /* Center card */
-    .wrap{position:relative;z-index:2;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px}
-    .card{
-      width:100%;max-width:var(--maxw);background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
-      border-radius:var(--radius);backdrop-filter: blur(10px) saturate(120%);
-      -webkit-backdrop-filter: blur(10px) saturate(120%);
-      box-shadow: 0 10px 30px rgba(2,6,23,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
-      padding:28px; border:1px solid rgba(255,255,255,0.04);
-      display:flex;flex-direction:column;gap:18px;box-sizing:border-box;
+    html, body { height: 100%; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: var(--ink);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      overflow: hidden;
+      cursor: none; /* hide default cursor on desktop */
+      transition: background-color 0.5s ease, color 0.3s ease;
     }
 
-    .brand{display:flex;align-items:center;gap:12px}
-    .logo{width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,var(--accent), var(--accent-2));display:flex;align-items:center;justify-content:center;font-weight:700;color:white;box-shadow:0 6px 18px rgba(15,23,42,0.6)}
-    .brand h1{font-size:18px;margin:0}
-    .brand p{margin:0;font-size:12px;color:var(--muted)}
-
-    form{display:flex;flex-direction:column;gap:14px}
-    label{font-size:13px;color:var(--muted)}
-
-    .field{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:10px;padding:10px 12px;border:1px solid rgba(255,255,255,0.03);display:flex;align-items:center;gap:8px}
-    .field input{flex:1;background:transparent;border:0;color:var(--text);outline:none;font-size:15px}
-
-    .btn{
-      display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;border-radius:10px;border:0;cursor:pointer;font-weight:600;font-size:15px;
-      background:linear-gradient(90deg,var(--accent), var(--accent-2));color:white;box-shadow:0 8px 20px rgba(99,102,241,0.18);
-      transition:transform .16s ease, box-shadow .16s ease;
+    /* ─── Interactive Hanging Lamp Component ─── */
+    .lamp-container {
+      position: fixed;
+      top: 0;
+      right: 12%;
+      z-index: 100;
+      width: 80px;
+      height: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transform-origin: top center;
     }
-    .btn:active{transform:translateY(1px)}
 
-    .muted-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted)}
+    .lamp-fixture {
+      width: 40px;
+      height: auto;
+      fill: var(--text);
+      opacity: 0.85;
+      transition: fill 0.3s ease, transform 0.2s ease;
+      cursor: pointer;
+    }
+    .lamp-container:hover .lamp-fixture {
+      transform: scaleY(1.03);
+      opacity: 1;
+    }
 
-    /* messages */
-    .messages{background:linear-gradient(180deg, rgba(255,255,255,0.018), rgba(255,255,255,0.01));border-radius:10px;padding:10px;border:1px solid rgba(255,100,100,0.08);color:#ffd7d7}
+    .lamp-rope-wrapper {
+      position: relative;
+      width: 20px;
+      height: 90px;
+      margin-top: -2px;
+      cursor: pointer;
+    }
 
-    /* small footer */
-    .foot{text-align:center;font-size:13px;color:var(--muted);margin-top:4px}
+    .lamp-rope {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      width: 2px;
+      height: 75px;
+      background: var(--text);
+      opacity: 0.6;
+      transform: translateX(-50%);
+      transition: background 0.3s ease, height 0.15s ease-out;
+    }
 
-    /* responsive tweaks */
-    @media(max-width:520px){
-      .card{padding:18px;border-radius:12px}
-      .brand h1{font-size:16px}
-      .logo{width:44px;height:44px}
+    .lamp-handle {
+      position: absolute;
+      left: 50%;
+      top: 72px;
+      width: 10px;
+      height: 14px;
+      background: var(--gold);
+      border-radius: 4px;
+      transform: translateX(-50%);
+      transition: background 0.3s ease, top 0.15s ease-out;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    /* Pull string dynamic activation response */
+    .lamp-rope-wrapper:active .lamp-rope { height: 88px; }
+    .lamp-rope-wrapper:active .lamp-handle { top: 85px; }
+
+    /* Faded Warm Light Glow Ambient Area */
+    .lamp-glow-area {
+      position: absolute;
+      top: 25px;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 550px;
+      height: 550px;
+      pointer-events: none;
+      z-index: -1;
+      background: var(--lamp-glow);
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    body.light-theme .lamp-glow-area {
+      opacity: 1;
+    }
+
+    /* ─── Custom cursor (desktop only) ─── */
+    #cursor-orb {
+      position: fixed;
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle at center, rgba(200, 169, 110, 0.18) 0%, rgba(200, 169, 110, 0.07) 40%, transparent 70%);
+      transition: transform 0.12s ease-out, width 0.3s ease, height 0.3s ease;
+      will-change: transform;
+    }
+    body.light-theme #cursor-orb {
+      background: radial-gradient(circle at center, rgba(200, 169, 110, 0.25) 0%, rgba(200, 169, 110, 0.08) 40%, transparent 70%);
+    }
+
+    #cursor-dot {
+      position: fixed;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      background: var(--gold2);
+      transform: translate(-50%, -50%);
+      transition: transform 0.06s ease-out, opacity 0.2s;
+      box-shadow: 0 0 12px rgba(200,169,110,0.8);
+    }
+
+    /* ─── Animated grid background ─── */
+    .bg-grid {
+      position: fixed; inset: 0; z-index: 0;
+      background-image:
+        linear-gradient(var(--bg-grid-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--bg-grid-color) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+      animation: gridpulse 8s ease-in-out infinite;
+    }
+    @keyframes gridpulse { 0%,100%{opacity:0.6} 50%{opacity:1} }
+
+    /* ─── Corner accent lines ─── */
+    .corner {
+      position: fixed;
+      width: 140px; height: 140px;
+      pointer-events: none; z-index: 1;
+    }
+    .corner::before, .corner::after {
+      content: '';
+      position: absolute;
+      background: linear-gradient(90deg, var(--gold), transparent);
+      opacity: 0.35;
+    }
+    .corner.tl { top: 0; left: 0; }
+    .corner.tl::before { width: 100%; height: 1px; top: 48px; left: 48px; }
+    .corner.tl::after  { width: 1px; height: 100%; top: 48px; left: 48px; }
+
+    .corner.br { bottom: 0; right: 0; transform: rotate(180deg); }
+    .corner.br::before { width: 100%; height: 1px; top: 48px; left: 48px; }
+    .corner.br::after  { width: 1px; height: 100%; top: 48px; left: 48px; }
+
+    /* ─── Wrap & card ─── */
+    .wrap {
+      position: relative; z-index: 2;
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 32px 20px;
+    }
+
+    .card {
+      width: 100%; max-width: var(--maxw);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 40px 36px;
+      backdrop-filter: blur(24px) saturate(140%);
+      -webkit-backdrop-filter: blur(24px) saturate(140%);
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.03) inset,
+        0 32px 80px rgba(0,0,0,0.4),
+        0 0 120px rgba(200,169,110,0.04);
+      animation: cardIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+      transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+    }
+    body.light-theme .card {
+      box-shadow:
+        0 0 0 1px rgba(0,0,0,0.01) inset,
+        0 24px 60px rgba(0,0,0,0.08),
+        0 0 80px rgba(200,169,110,0.02);
+    }
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(28px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* ─── Brand header ─── */
+    .brand {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 32px;
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+    .logo-mark {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #c8a96e, #e8c88a);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800; font-size: 15px;
+      color: #0a0a0f;
+      box-shadow: 0 6px 24px rgba(200,169,110,0.3);
+      flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .logo-mark::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.25), transparent 60%);
+    }
+    .brand-text h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 17px; font-weight: 700;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .brand-text p {
+      font-size: 12px; color: var(--muted);
+      margin-top: 2px; font-weight: 300;
+      letter-spacing: 0.04em; text-transform: uppercase;
+    }
+
+    /* ─── Divider ─── */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin-bottom: 28px;
+      animation: fadeUp 0.6s 0.15s ease both;
+    }
+
+    /* ─── Messages ─── */
+    .messages {
+      background: rgba(255,107,107,0.08);
+      border: 1px solid rgba(255,107,107,0.2);
+      border-radius: 10px; padding: 12px 14px;
+      color: var(--danger); font-size: 13px;
+      margin-bottom: 20px;
+      animation: fadeUp 0.4s ease both;
+    }
+    body.light-theme .messages {
+      background: rgba(224, 49, 49, 0.06);
+    }
+
+    /* ─── Form ─── */
+    form { display: flex; flex-direction: column; gap: 18px; }
+
+    .form-group { display: flex; flex-direction: column; gap: 7px; }
+    .form-group { animation: fadeUp 0.6s ease both; }
+    .form-group:nth-child(1) { animation-delay: 0.2s; }
+    .form-group:nth-child(2) { animation-delay: 0.28s; }
+    .form-group:nth-child(3) { animation-delay: 0.34s; }
+    .form-group:nth-child(4) { animation-delay: 0.4s; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    label {
+      font-size: 11px; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+
+    .field {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,0.025);
+      border: 1px solid var(--border);
+      border-radius: 12px; padding: 13px 16px;
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    }
+    body.light-theme .field {
+      background: rgba(0,0,0,0.015);
+    }
+    .field:focus-within {
+      border-color: rgba(200,169,110,0.5);
+      background: rgba(200,169,110,0.04);
+      box-shadow: 0 0 0 3px rgba(200,169,110,0.08);
+    }
+    .field svg { flex-shrink: 0; color: var(--muted); transition: color 0.2s; }
+    .field:focus-within svg { color: var(--gold); }
+    .field input {
+      flex: 1; background: transparent; border: 0; outline: none;
+      color: var(--text); font-family: 'DM Sans', sans-serif;
+      font-size: 14px; font-weight: 400;
+    }
+    .field input::placeholder { color: rgba(240,236,228,0.25); }
+    body.light-theme .field input::placeholder { color: rgba(0, 0, 0, 0.3); }
+
+    /* ─── Remember & forgot row ─── */
+    .aux-row {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 13px; color: var(--muted);
+    }
+    .check-label {
+      display: flex; align-items: center; gap: 8px;
+      cursor: pointer;
+    }
+    .check-label input[type="checkbox"] {
+      accent-color: var(--gold);
+      width: 15px; height: 15px; cursor: pointer;
+    }
+    .forgot-link {
+      color: var(--muted); text-decoration: none;
+      font-size: 12px; letter-spacing: 0.03em;
+      transition: color 0.2s;
+    }
+    .forgot-link:hover { color: var(--gold2); }
+
+    /* ─── Submit button ─── */
+    .btn {
+      position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 14px; border-radius: 12px; border: 0;
+      cursor: none;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700; font-size: 14px; letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #0a0a0f;
+      background: linear-gradient(100deg, var(--gold) 0%, var(--gold2) 50%, var(--gold) 100%);
+      background-size: 200% 100%;
+      box-shadow: 0 8px 28px rgba(200,169,110,0.25), 0 2px 8px rgba(0,0,0,0.2);
+      transition: background-position 0.4s ease, box-shadow 0.2s, transform 0.15s;
+    }
+    .btn:hover {
+      background-position: 100% 0;
+      box-shadow: 0 12px 36px rgba(200,169,110,0.35), 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .btn:active { transform: translateY(1px); }
+    .btn-shine {
+      position: absolute; top: 0; left: -80%;
+      width: 60%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transform: skewX(-20deg);
+      animation: shine 3s 1.5s ease infinite;
+    }
+    @keyframes shine { 0%{left:-80%} 40%,100%{left:140%} }
+
+    /* ─── Student link ─── */
+    .student-link {
+      text-align: center; font-size: 13px;
+      color: var(--muted); margin-top: 6px;
+    }
+    .student-link a {
+      color: var(--gold2); font-weight: 600;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(200,169,110,0.3);
+      padding-bottom: 1px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .student-link a:hover { color: var(--text); border-color: var(--text); }
+
+    /* ─── Footer ─── */
+    .foot {
+      text-align: center; font-size: 11px;
+      color: var(--muted);
+      opacity: 0.5;
+      margin-top: 28px; letter-spacing: 0.05em;
+      animation: fadeUp 0.6s 0.5s ease both;
+    }
+
+    /* ─── Mobile Adjustments ─── */
+    @media (pointer: coarse), (max-width: 600px) {
+      body { cursor: auto; }
+      #cursor-orb, #cursor-dot { display: none; }
+      .card { padding: 28px 22px; }
+      .brand-text h1 { font-size: 15px; }
+      .lamp-container { right: 6%; } /* Reposition lamp slightly for narrow mobile screens */
+    }
+
+    /* ─── Mobile animated ring (pulse) ─── */
+    .mobile-ring {
+      display: none;
+      position: fixed;
+      width: 200px; height: 200px;
+      border-radius: 50%;
+      border: 1px solid rgba(200,169,110,0.12);
+      top: -60px; right: -60px;
+      animation: ringpulse 5s ease-in-out infinite;
+    }
+    .mobile-ring:nth-child(2) {
+      width: 320px; height: 320px;
+      top: -100px; right: -100px;
+      animation-delay: 1.5s;
+      border-color: rgba(200,169,110,0.06);
+    }
+    .mobile-ring:nth-child(3) {
+      width: 440px; height: 440px;
+      top: -140px; right: -140px;
+      animation-delay: 3s;
+      border-color: rgba(200,169,110,0.03);
+    }
+    @keyframes ringpulse {
+      0%,100% { transform: scale(1); opacity: 1; }
+      50%      { transform: scale(1.06); opacity: 0.5; }
+    }
+    @media (pointer: coarse), (max-width: 600px) {
+      .mobile-ring { display: block; }
     }
   </style>
 </head>
 <body>
-  <!-- decorative blobs -->
-  <div class="blob b1" aria-hidden="true"></div>
-  <div class="blob b2" aria-hidden="true"></div>
+
+  <div class="lamp-container">
+    <svg class="lamp-fixture" viewBox="0 0 40 30">
+      <rect x="19" y="0" width="2" height="12"/>
+      <path d="M10 20 L30 20 L34 28 L6 28 Z" />
+      <circle cx="20" cy="29" r="2.5" fill="var(--gold2)"/>
+    </svg>
+    <div class="lamp-rope-wrapper" id="theme-pull-rope" title="Pull to toggle light">
+      <div class="lamp-rope"></div>
+      <div class="lamp-handle"></div>
+    </div>
+    <div class="lamp-glow-area"></div>
+  </div>
+
+  <div id="cursor-orb"></div>
+  <div id="cursor-dot"></div>
+
+  <div class="mobile-ring"></div>
+  <div class="mobile-ring"></div>
+  <div class="mobile-ring"></div>
+
+  <div class="bg-grid" aria-hidden="true"></div>
+
+  <div class="corner tl" aria-hidden="true"></div>
+  <div class="corner br" aria-hidden="true"></div>
 
   <div class="wrap">
     <main class="card" role="main" aria-labelledby="login-heading">
 
       <header class="brand">
-        <div class="logo">QR</div>
-        <div>
-          <h1 id="login-heading">QR Attendance — Login</h1>
-          
+        <div class="logo-mark">QR</div>
+        <div class="brand-text">
+          <h1 id="login-heading">QR Attendance</h1>
+          <p>Secure Portal</p>
         </div>
       </header>
+
+      <div class="divider"></div>
 
       {% if messages %}
         <div class="messages" role="alert">
@@ -116,76 +498,144 @@
       <form method="post" novalidate>
         {% csrf_token %}
 
-        <div>
+        <div class="form-group">
           <label for="id_username">Username</label>
           <div class="field">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <input id="id_username" name="username" type="text" placeholder="Username" required autocomplete="username">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <input id="id_username" name="username" type="text"
+                   placeholder="Enter username" required autocomplete="username">
           </div>
         </div>
 
-        <div>
+        <div class="form-group">
           <label for="id_password">Password</label>
           <div class="field">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 10v6a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><rect x="8" y="4" width="8" height="6" rx="3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <input id="id_password" name="password" type="password" placeholder="Password" required autocomplete="current-password">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <circle cx="12" cy="16" r="1.5" fill="currentColor"/>
+            </svg>
+            <input id="id_password" name="password" type="password"
+                   placeholder="Enter password" required autocomplete="current-password">
           </div>
         </div>
 
-        <div class="muted-row">
-          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)"><input type="checkbox" name="remember"> Remember</label>
-          <a href="#" style="color:var(--muted);text-decoration:none;font-size:13px">Forgot?</a>
+        <div class="form-group">
+          <div class="aux-row">
+            <label class="check-label">
+              <input type="checkbox" name="remember">
+              Remember me
+            </label>
+            <a href="#" class="forgot-link">Forgot password?</a>
+          </div>
         </div>
 
-        <button class="btn" type="submit">Sign in</button>
+        <div class="form-group">
+          <button class="btn" type="submit">
+            <div class="btn-shine"></div>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Sign In
+          </button>
+        </div>
       </form>
 
-
-       <!-- 🔗 Student login link -->
-      <p style="text-align:center;margin-top:10px;font-size:13px;color:var(--muted)">
-        Student? <a href="{% url 'student_signup' %}" style="color:#60a5fa;font-weight:600">Register here</a>
+      <p class="student-link">
+        New Student? <a href="{% url 'student_signup' %}">Register here</a>
       </p>
 
-      <div class="foot">© {{ now|date:"Y" }} QR Attendance</div>
     </main>
   </div>
 
+  <div class="foot">© {{ now|date:"Y" }} QR Attendance System. All rights reserved.</div>
+
   <script>
-    // small accessibility + UX enhancements
-    (function(){
-      // autofocus on username for larger screens
-      try{ if(window.innerWidth>420){document.getElementById('id_username').focus()} }catch(e){}
-      // subtle tilt on card based on pointer (desktop only)
-      const card = document.querySelector('.card');
-      if(card && window.matchMedia('(pointer:fine)').matches){
-        document.addEventListener('mousemove', e=>{
-          const rect = card.getBoundingClientRect();
-          const cx = rect.left + rect.width/2;
-          const cy = rect.top + rect.height/2;
-          const dx = (e.clientX - cx)/rect.width;
-          const dy = (e.clientY - cy)/rect.height;
-          card.style.transform = `perspective(900px) rotateX(${(-dy*4).toFixed(2)}deg) rotateY(${(dx*6).toFixed(2)}deg)`;
+    /* ── Theme Switcher Engine (System Prefs + Manual Pull interaction) ── */
+    const ropeToggle = document.getElementById('theme-pull-rope');
+    
+    function setTheme(isLight) {
+      if (isLight) {
+        document.body.classList.add('light-theme');
+        localStorage.setItem('theme', 'light');
+      } else {
+        document.body.classList.remove('light-theme');
+        localStorage.setItem('theme', 'dark');
+      }
+    }
+
+    // Initialize logic: local cache check or match system device properties
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      setTheme(savedTheme === 'light');
+    } else {
+      const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+      setTheme(prefersLight);
+    }
+
+    // Event listener for pulling the rope toggle
+    ropeToggle.addEventListener('click', () => {
+      const currentIsDark = !document.body.classList.contains('light-theme');
+      setTheme(currentIsDark);
+    });
+
+    /* ── Custom cursor tracker (desktop / pointer:fine only) ── */
+    (function () {
+      const isCoarse = window.matchMedia('(pointer: coarse)').matches;
+      const orb  = document.getElementById('cursor-orb');
+      const dot  = document.getElementById('cursor-dot');
+
+      if (isCoarse || !orb) return;
+
+      let mx = window.innerWidth / 2, my = window.innerHeight / 2;
+      let ox = mx, oy = my;
+
+      document.addEventListener('mousemove', e => {
+        mx = e.clientX; my = e.clientY;
+        dot.style.left = mx + 'px';
+        dot.style.top  = my + 'px';
+      });
+
+      /* Orb follows with lerp for smooth trailing effect */
+      function lerp(a, b, t) { return a + (b - a) * t; }
+
+      (function tick() {
+        ox = lerp(ox, mx, 0.08);
+        oy = lerp(oy, my, 0.08);
+        orb.style.left = ox + 'px';
+        orb.style.top  = oy + 'px';
+        requestAnimationFrame(tick)
+      })();
+
+      /* Expand orb over interactive elements */
+      document.querySelectorAll('input, button, a, label, .lamp-rope-wrapper').forEach(el => {
+        el.addEventListener('mouseenter', () => {
+          orb.style.width  = '420px';
+          orb.style.height = '420px';
+          dot.style.transform = 'translate(-50%,-50%) scale(1.8)';
         });
-        document.addEventListener('mouseleave', ()=>card.style.transform='');
+        el.addEventListener('mouseleave', () => {
+          orb.style.width  = '320px';
+          orb.style.height = '320px';
+          dot.style.transform = 'translate(-50%,-50%) scale(1)';
+        });
+      });
+    })();
+
+    /* ── Autofocus on large screens ── */
+    try { if (window.innerWidth > 500) document.getElementById('id_username').focus(); } catch(e){}
+
+    /* ── Access denied alert ── */
+    (function(){
+      const p = new URLSearchParams(window.location.search);
+      if (p.get('access') === 'denied') {
+        alert('Access Denied');
+        window.history.replaceState({}, document.title, window.location.pathname);
       }
     })();
   </script>
-  <script>
-
-const params =
-new URLSearchParams(window.location.search);
-
-if(params.get("access") === "denied"){
-
-    alert("Access Denied");
-
-    window.history.replaceState(
-        {},
-        document.title,
-        window.location.pathname
-    );
-}
-
-</script>
 </body>
 </html>

@@ -1065,105 +1065,270 @@ def attendance_form(request, token):
         "time": timezone.localtime().strftime("%I:%M %p")
     })
 
-
-
 # 📊 Attendance Dashboard
 @never_cache
 @login_required
 @teacher_required
 def attendance_dashboard(request):
-    today = timezone.now().date()
-    subjects = Subject.objects.all()
-
+    branches = Branch.objects.all()
+    semester_choices = Student._meta.get_field("semester").choices
+    subjects = Subject.objects.none()
+    qr_sessions = QRSession.objects.none()
+    
+    students_data = []
+    present_count = 0
+    absent_count = 0
+    
+    branch_id = request.GET.get("branch")
+    semester = request.GET.get("semester")
     subject_id = request.GET.get("subject")
-    date_str = request.GET.get("date", str(today))
+    date = request.GET.get("date", str(localdate()))
+    session_id = request.GET.get("session")
+    selected_date = None
+
+    # ====================================
+    # AUTO SUBJECT FETCH
+    # ====================================
+    if branch_id and semester:
+        subjects = Subject.objects.filter(branch_id=branch_id, semester=semester).order_by("name")
+
+    # ====================================
+    # QR SESSION FETCH
+    # ====================================
+    if branch_id and semester and date:
+        selected_date = datetime.strptime(date, "%Y-%m-%d").date()
+
+        start_datetime = timezone.make_aware(
+            datetime.combine(selected_date, datetime.min.time())
+        )
+        end_datetime = timezone.make_aware(
+            datetime.combine(selected_date, datetime.max.time())
+        )
+
+        qr_sessions = QRSession.objects.filter(
+            subject__branch_id=branch_id,
+            subject__semester=semester,
+            created_at__range=(start_datetime, end_datetime)
+        )
+
+        # 🔥 Specific subject selected
+        if subject_id and subject_id != "all":
+            qr_sessions = qr_sessions.filter(subject_id=subject_id)
+
+        qr_sessions = qr_sessions.select_related("subject").order_by("-created_at")
+
+    # ====================================
+    # SESSION DETAILS
+    # ====================================
+    selected_session = None
+
+    if session_id:
+        selected_session = get_object_or_404(QRSession.objects.select_related("subject"), id=session_id)
+
+        # 🔥 enrolled students
+        students = Student.objects.filter(
+            branch=selected_session.subject.branch, 
+            semester=selected_session.subject.semester, 
+            subjects=selected_session.subject
+        ).distinct()
+
+        # 🔥 attendance records
+        attendance_records = Attendance.objects.filter(qr_session=selected_session).distinct()
+        attendance_map = {a.student_id: a for a in attendance_records}
+
+        for student in students:
+            att = attendance_map.get(student.id)
+            students_data.append({
+                "roll_no": student.roll_no, 
+                "name": student.name, 
+                "enrollment": student.enrollment_no, 
+                "present": bool(att), 
+                "time": timezone.localtime(att.timestamp).strftime("%I:%M %p") if att else None
+            })
+
+        # ====================================
+        # PRESENT / ABSENT COUNTS
+        # ====================================
+        present_count = sum(1 for s in students_data if s["present"])
+        absent_count = len(students_data) - present_count
+
+    # ====================================
+    # EXPORT CSV
+    # ====================================
     export = request.GET.get("export")
 
-    selected_subject = None
-    selected_date = today
-    students = []
-    present_ids = []
+    if export == "csv" and selected_session:
+        response = HttpResponse(content_type="text/csv")
+        filename = f"attendance_{selected_session.id}.csv"
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
 
-    if subject_id:
-        selected_subject = Subject.objects.get(id=subject_id)
+        writer = csv.writer(response)
 
-        try:
-            selected_date = timezone.datetime.fromisoformat(date_str).date()
-        except Exception:
-            selected_date = today
+        # ====================================
+        # HEADER DETAILS
+        # ====================================
+        teacher_name = request.user.get_full_name() or request.user.username
 
-        # All students for that subject
-        students = Student.objects.filter(subjects=selected_subject).order_by("roll_no")
+        writer.writerow(["COLLEGE NAME", "GOVT POLYTECHNIC COLLEGE KOTA"])
+        writer.writerow([])
+        writer.writerow(["Branch", selected_session.subject.branch.name])
+        writer.writerow(["Semester", selected_session.subject.semester])
+        writer.writerow(["Subject", f"{selected_session.subject.code} - {selected_session.subject.name}"])
+        writer.writerow(["Teacher", teacher_name])
+        
+        # Localize timestamp once instead of repeating the operation
+        local_time = timezone.localtime(selected_session.created_at)
+        writer.writerow(["Date", local_time.strftime("%d-%m-%Y")])
+        writer.writerow(["Session Time", local_time.strftime("%I:%M %p")])
+        writer.writerow([])
 
-        # Present students
-        present = Attendance.objects.filter(
-            qr_session__subject=selected_subject,
-            timestamp__date=selected_date
-        ).select_related("student")
+        # ====================================
+        # TABLE HEADER
+        # ====================================
+        writer.writerow([
+            "S.No",
+            "Roll No",
+            "Enrollment No",
+            "Student Name",
+            "Status",
+            "Attendance Time"
+        ])
 
-        present_ids = [att.student.id for att in present]
+        # ====================================
+        # STUDENT DATA
+        # ====================================
+        for index, s in enumerate(students_data, start=1):
+            status = "Present" if s["present"] else "Absent"
+            att_time = s["time"] or "-"
+            
+            writer.writerow([
+                index,
+                s["roll_no"],
+                s["enrollment"],
+                s["name"],
+                status,
+                att_time
+            ])
 
-        # 🔹 Export to CSV
-        if export == "csv":
-            response = HttpResponse(content_type="text/csv")
-            filename = f"attendance_{selected_subject.code}_{selected_date}.csv"
-            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
 
-            writer = csv.writer(response)
-            writer.writerow(["Roll No", "Name", "Status"])
+    # ====================================
+    # EXPORT PDF
+    # ====================================
+    if export == "pdf" and selected_session:
+        response = HttpResponse(content_type="application/pdf")
+        
+        # Date aur Subject name ke according filename generate karna
+        local_time = timezone.localtime(selected_session.created_at)
+        date_str = local_time.strftime('%d-%m-%Y')
+        subject_name = selected_session.subject.name.replace(" ", "_")  # Spaces ko underscore se replace kiya
+        
+        filename = f"Attendance_{subject_name}_{date_str}.pdf"
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
 
-            for student in students:
-                status = "Present" if student.id in present_ids else "Absent"
-                writer.writerow([student.roll_no, student.name, status])
-            return response
+        p = canvas.Canvas(response, pagesize=letter)
+        width, height = letter
+        y = height - 40
 
-        # 🔹 Export to PDF
-        if export == "pdf":
-            response = HttpResponse(content_type="application/pdf")
-            filename = f"attendance_{selected_subject.code}_{selected_date}.pdf"
-            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        # ====================================
+        # COLLEGE HEADER
+        # ====================================
+        p.setFont("Helvetica-Bold", 14)
+        p.drawCentredString(width / 2, y, "GOVT POLYTECHNIC COLLEGE KOTA")
+        y -= 30
 
-            p = canvas.Canvas(response, pagesize=letter)
-            width, height = letter
+        # ====================================
+        # SESSION DETAILS (2-Column Layout)
+        # ====================================
+        teacher_name = request.user.get_full_name() or request.user.username
 
-            # Title
-            p.setFont("Helvetica-Bold", 14)
-            p.drawString(50, height - 50, f"Attendance Sheet - {selected_subject.name} ({selected_subject.code})")
-            p.setFont("Helvetica", 12)
-            p.drawString(50, height - 70, f"Date: {selected_date}")
+        p.setFont("Helvetica", 11)
+        
+        # Left Column (X = 40)                       # Right Column (X = 320)
+        p.drawString(40, y, f"Branch: {selected_session.subject.branch.name}")
+        p.drawString(320, y, f"Teacher: {teacher_name}")
+        y -= 18
+        
+        p.drawString(40, y, f"Semester: {selected_session.subject.semester}")
+        p.drawString(320, y, f"Date: {date_str}")
+        y -= 18
+        
+        p.drawString(40, y, f"Subject: {selected_session.subject.code} - {selected_session.subject.name}")
+        p.drawString(320, y, f"Session Time: {local_time.strftime('%I:%M %p')}")
+        y -= 30  # Table header ke liye space
 
-            # Table headers
-            y = height - 100
-            p.setFont("Helvetica-Bold", 11)
-            p.drawString(50, y, "Roll No")
-            p.drawString(150, y, "Name")
-            p.drawString(400, y, "Status")
+        # ====================================
+        # TABLE HEADER
+        # ====================================
+        p.setFont("Helvetica-Bold", 10)
+        p.drawString(30, y, "S.No")
+        p.drawString(70, y, "Roll No")
+        p.drawString(140, y, "Enroll No")
+        p.drawString(240, y, "Student Name")
+        p.drawString(420, y, "Status")
+        p.drawString(500, y, "Time")
+        
+        y -= 15
+        p.line(30, y, 580, y)
+        y -= 15
 
-            # Rows
-            p.setFont("Helvetica", 11)
-            y -= 20
-            for student in students:
-                status = "Present ✓" if student.id in present_ids else "Absent ×"
-                p.drawString(50, y, str(student.roll_no))
-                p.drawString(150, y, student.name)
-                p.drawString(400, y, status)
-                y -= 20
-                if y < 50:  # New page if too long
-                    p.showPage()
-                    y = height - 50
+        # ====================================
+        # TABLE DATA
+        # ====================================
+        p.setFont("Helvetica", 9)
 
-            p.showPage()
-            p.save()
-            return response
+        for index, s in enumerate(students_data, start=1):
+            status = "Present" if s["present"] else "Absent"
 
-    return render(request, "qr_app/attendance_dashboard.html", {
-        "subjects": subjects,
-        "selected_subject": selected_subject,
-        "selected_date": selected_date,
-        "students": students,
-        "present_ids": present_ids,
-    })
+            p.drawString(30, y, str(index))
+            p.drawString(70, y, s["roll_no"])
+            p.drawString(140, y, s["enrollment"] or "-")
+            p.drawString(240, y, s["name"][:25])
+            p.drawString(420, y, status)
+            p.drawString(500, y, s["time"] or "-")
+            y -= 18
 
+            # NEW PAGE
+            if y < 50:
+                p.showPage()
+                y = height - 50
+                p.setFont("Helvetica", 9)
+
+        # ====================================
+        # SUMMARY
+        # ====================================
+        y -= 20
+        p.setFont("Helvetica-Bold", 11)
+        p.drawString(40, y, f"Total Students: {len(students_data)}")
+        y -= 20
+        p.drawString(40, y, f"Present: {present_count}")
+        y -= 20
+        p.drawString(40, y, f"Absent: {absent_count}")
+
+        p.save()
+        return response
+
+    # ====================================
+    # FINAL RENDER
+    # ====================================
+    return render(
+        request,
+        "qr_app/attendance_dashboard.html",
+        {
+            "branches": branches,
+            "semester_choices": semester_choices,
+            "subjects": subjects,
+            "qr_sessions": qr_sessions,
+            "students": students_data,
+            "present_count": present_count,
+            "absent_count": absent_count,
+            "selected_session": selected_session,
+            "selected_branch": branch_id,
+            "selected_semester": semester,
+            "selected_subject": subject_id,
+            "selected_date": date,
+        },
+    )
 
 @login_required
 def mark_attendance(request):

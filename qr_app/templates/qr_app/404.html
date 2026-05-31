@@ -1,8 +1,129 @@
-{% extends 'qr_app/base.html' %}
-{% block content %}
-<div class="text-center mt-5">
-    <h1 class="display-4">😕 404</h1>
-    <p class="lead">Page not found!</p>
-    <a href="/" class="btn btn-primary">Go to Home</a>
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Page Not Found</title><!-- Font Awesome 6 --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"><style>
+:root{
+    --bg:#ffffff;
+    --text:#111827;
+    --muted:#6b7280;
+    --accent:#2563eb;
+}
+
+@media (prefers-color-scheme: dark){
+:root{
+    --bg:#0f172a;
+    --text:#f8fafc;
+    --muted:#94a3b8;
+    --accent:#60a5fa;
+}
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Inter,Segoe UI,Arial,sans-serif;
+}
+
+body{
+    min-height:100vh;
+    background:var(--bg);
+    color:var(--text);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    padding:20px;
+}
+
+.container{
+    width:100%;
+    max-width:700px;
+}
+
+.icon{
+    font-size:70px;
+    color:var(--accent);
+    margin-bottom:15px;
+}
+
+.error-code{
+    font-size:clamp(90px,18vw,180px);
+    font-weight:800;
+    line-height:1;
+    color:var(--accent);
+    letter-spacing:-6px;
+}
+
+.line{
+    width:120px;
+    height:2px;
+    background:var(--accent);
+    margin:25px auto;
+    opacity:.8;
+}
+
+.title{
+    font-size:clamp(28px,4vw,42px);
+    font-weight:700;
+    letter-spacing:1px;
+}
+
+.description{
+    margin-top:15px;
+    color:var(--muted);
+    font-size:16px;
+    line-height:1.8;
+}
+
+.status{
+    margin-top:25px;
+    color:var(--muted);
+    font-size:13px;
+    letter-spacing:3px;
+    text-transform:uppercase;
+}
+
+@media(max-width:480px){
+
+.icon{
+    font-size:55px;
+}
+
+.error-code{
+    font-size:90px;
+}
+
+.title{
+    font-size:30px;
+}
+
+.description{
+    font-size:15px;
+}
+}
+</style></head><body><div class="container"><div class="icon">
+    <i class="fa-solid fa-file-circle-question"></i>
 </div>
-{% endblock %}
+
+<div class="error-code">
+    404
+</div>
+
+<div class="line"></div>
+
+<h1 class="title">
+    PAGE NOT FOUND
+</h1>
+
+<p class="description">
+    The page you are looking for does not exist or may have been moved.😭
+</p>
+
+<div class="status">
+    Resource Not Available
+</div>
+
+</div></body>
+</html>

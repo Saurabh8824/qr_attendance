@@ -21,7 +21,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://qrattendance-production-9015.up.railway.app",
     "https://*.ngrok-free.dev",
     "https://*.ngrok-free.app",
-    "https://mooned-mom-unlikable.ngrok-free.dev"
+    "https://qr-attendance-1-ard4.onrender.com"
 ]
 
 

@@ -48,12 +48,12 @@
     </form>
 </div>
 
-{% regroup students by get_semester_display as semester_groups %}
+{% regroup students by semester as semester_groups %}
 
 {% for semester in semester_groups %}
     <div class="mb-5">
         <h3 class="section-heading mb-3" style="color: var(--accent); border-bottom: 2px solid var(--border); padding-bottom: 8px;">
-            <i class="fa-solid fa-layer-group me-2"></i>{{ semester.grouper|default:"Unknown Semester" }}
+            <i class="fa-solid fa-layer-group me-2"></i>{{ semester.list.0.get_semester_display|default:"Unknown Semester" }}
         </h3>
 
         {% regroup semester.list by branch.name as branch_groups %}
@@ -129,6 +129,8 @@
         </a>
     </div>
 {% endfor %}
+
+{% endblock %}
 
 {% endblock %}        <td>{{ student.roll_no }}</td>
         <td>{{ student.name }}</td>

@@ -816,7 +816,10 @@ def add_student(request):
 @login_required
 @teacher_required
 def student_list(request):
-    students = Student.objects.all().order_by("roll_no")
+    # 🔥 MAIN FIX: 'semester' aur 'branch__name' ke according pehle data sort karna zaroori hai
+    # select_related('branch') use karne se database queries bhi kam lagengi aur speed badhegi
+    students = Student.objects.select_related('branch').all().order_by("semester", "branch__name", "roll_no")
+    
     branches = Branch.objects.all()
     semester_choices = Student._meta.get_field("semester").choices
 

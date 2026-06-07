@@ -2,137 +2,64 @@
 {% load static %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-    <div>
-        <h2 class="section-heading mb-1"><i class="fa-solid fa-user-graduate me-2"></i>Student Directory</h2>
-        <p class="section-sub mb-0">Manage and view all students grouped by semester and branch.</p>
-    </div>
-    <a href="{% url 'add_student' %}" class="btn-pro btn-primary-pro">
-        <i class="fa-solid fa-plus"></i> Add Student
-    </a>
+<h2 style="text-align:center; margin-bottom:20px;">👨‍🎓 Student List</h2>
+
+<!-- 🔹 Top Actions -->
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+  
+  <!-- Add Student Button -->
+  <a href="{% url 'add_student' %}" class="btn btn-success">➕ Add Student</a>
+
+  <!-- Filter + Search Form -->
+  <form method="get" class="d-flex" style="gap:10px; flex-wrap:wrap;">
+    <select name="branch" class="form-select">
+      <option value="">All Branches</option>
+      {% for b in branches %}
+        <option value="{{ b.id }}" {% if request.GET.branch == b.id|stringformat:"s" %}selected{% endif %}>
+          {{ b.name }}
+        </option>
+      {% endfor %}
+    </select>
+
+    <select name="semester" class="form-select">
+      <option value="">All Semesters</option>
+      {% for key, value in semester_choices %}
+        <option value="{{ key }}" {% if request.GET.semester == key|stringformat:"s" %}selected{% endif %}>
+          {{ value }}
+        </option>
+      {% endfor %}
+    </select>
+
+    <input type="text" name="q" class="form-control" placeholder="Search by Roll No or Name"
+           value="{{ request.GET.q }}">
+
+    <button type="submit" class="btn btn-primary">🔍 Search</button>
+    <a href="{% url 'student_list' %}" class="btn btn-secondary">Reset</a>
+  </form>
 </div>
 
-<div class="pro-card mb-4 p-3">
-    <form method="get" class="row g-2 align-items-center">
-        <div class="col-12 col-md-auto">
-            <select name="branch" class="form-select">
-                <option value="">All Branches</option>
-                {% for b in branches %}
-                    <option value="{{ b.id }}" {% if request.GET.branch == b.id|stringformat:"s" %}selected{% endif %}>
-                        {{ b.name }}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="col-12 col-md-auto">
-            <select name="semester" class="form-select">
-                <option value="">All Semesters</option>
-                {% for key, value in semester_choices %}
-                    <option value="{{ key }}" {% if request.GET.semester == key|stringformat:"s" %}selected{% endif %}>
-                        {{ value }}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="col-12 col-md">
-            <input type="text" name="q" class="form-control" placeholder="Search by Roll No or Name..." value="{{ request.GET.q }}">
-        </div>
-        <div class="col-12 col-md-auto d-flex gap-2">
-            <button type="submit" class="btn-pro btn-primary-pro w-100">
-                <i class="fa-solid fa-magnifying-glass"></i> Search
-            </button>
-            <a href="{% url 'student_list' %}" class="btn-pro btn-ghost-pro w-100 text-center">
-                <i class="fa-solid fa-rotate-right"></i> Reset
-            </a>
-        </div>
-    </form>
-</div>
-
-{% regroup students by semester as semester_groups %}
-
-{% for semester in semester_groups %}
-    <div class="mb-5">
-        <h3 class="section-heading mb-3" style="color: var(--accent); border-bottom: 2px solid var(--border); padding-bottom: 8px;">
-            <i class="fa-solid fa-layer-group me-2"></i>{{ semester.list.0.get_semester_display|default:"Unknown Semester" }}
-        </h3>
-
-        {% regroup semester.list by branch.name as branch_groups %}
-
-        <div class="row g-4">
-        {% for branch in branch_groups %}
-            <div class="col-12">
-                <div class="pro-card p-0 overflow-hidden">
-                    
-                    <div class="p-3 d-flex justify-content-between align-items-center" style="background: var(--surface-2); border-bottom: 1px solid var(--border);">
-                        <h5 class="mb-0" style="color: var(--text-100); font-size: 15px; font-weight: 600;">
-                            <i class="fa-solid fa-code-branch me-2" style="color: var(--text-400);"></i>{{ branch.grouper|default:"No Branch Assigned" }}
-                        </h5>
-                        <span class="pro-badge badge-blue">{{ branch.list|length }} Students</span>
-                    </div>
-
-                    <div class="table-responsive">
-                        <table class="pro-table table-hover mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Roll No</th>
-                                    <th>Name</th>
-                                    <th>Father</th>
-                                    <th>Mother</th>
-                                    <th>DOB</th>
-                                    <th>Year</th>
-                                    <th>Mobile</th>
-                                    <th>Email</th>
-                                    <th>Subjects</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for student in branch.list %}
-                                <tr>
-                                    <td style="font-family: 'Space Mono', monospace; font-weight: 600; color: var(--text-100);">
-                                        {{ student.roll_no }}
-                                    </td>
-                                    <td style="font-weight: 500;">{{ student.name }}</td>
-                                    <td>{{ student.father_name }}</td>
-                                    <td>{{ student.mother_name }}</td>
-                                    <td>{{ student.dob|date:"d-m-Y" }}</td>
-                                    <td>{{ student.get_year_display }}</td>
-                                    <td>{{ student.mobile }}</td>
-                                    <td>{{ student.email }}</td>
-                                    <td>
-                                        <div class="d-flex flex-wrap gap-1">
-                                        {% for subject in student.subjects.all %}
-                                            <span class="pro-badge badge-green">{{ subject.code }}</span>
-                                        {% empty %}
-                                            <span style="color: var(--text-600); font-size: 11px;">No subjects</span>
-                                        {% endfor %}
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        {% endfor %}
-        </div>
-    </div>
-{% empty %}
-    <div class="pro-card text-center py-5">
-        <div style="font-size: 40px; color: var(--text-600); margin-bottom: 15px;">
-            <i class="fa-regular fa-folder-open"></i>
-        </div>
-        <h4 class="section-heading">No Students Found</h4>
-        <p class="section-sub mb-4">There are no students matching your current filters.</p>
-        <a href="{% url 'add_student' %}" class="btn-pro btn-primary-pro">
-            <i class="fa-solid fa-plus"></i> Add New Student
-        </a>
-    </div>
-{% endfor %}
-
-{% endblock %}
-
-{% endblock %}        <td>{{ student.roll_no }}</td>
+<!-- 🔹 Student Table -->
+<div class="table-container">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Roll No</th>
+        <th>Name</th>
+        <th>Father</th>
+        <th>Mother</th>
+        <th>DOB</th>
+        <th>Year</th>
+        <th>Semester</th>
+        <th>Branch</th>
+        <th>Mobile</th>
+        <th>Email</th>
+        <th>Subjects</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for student in students %}
+      <tr>
+        <td>{{ student.roll_no }}</td>
         <td>{{ student.name }}</td>
         <td>{{ student.father_name }}</td>
         <td>{{ student.mother_name }}</td>

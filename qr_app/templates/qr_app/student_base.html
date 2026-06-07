@@ -13,6 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<link rel="manifest" href="{% static 'manifest.json' %}">
 
 <!-- Tailwind -->
 <script src="https://cdn.tailwindcss.com"></script>
@@ -505,20 +506,22 @@ body.dark nav {
     width: 68px;
     height: 68px;
     border-radius: 50%;
-    background: var(--accent-grad);
+    /* Gemini-inspired vibrant gradient */
+    background: linear-gradient(135deg, #4f46e5, #9333ea, #ec4899);
+    background-size: 200% 200%;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
     font-size: 26px;
-    box-shadow: 0 10px 32px rgba(99,102,241,0.40),
-                0 2px 8px rgba(99,102,241,0.20),
-                inset 0 1px 0 rgba(255,255,255,0.30);
-    border: 1.5px solid rgba(255,255,255,0.25);
-    transition: transform var(--transition-spring),
-                box-shadow var(--transition-base);
+    /* Live Glow Effect */
+    box-shadow: 0 0 20px rgba(147, 51, 234, 0.4),
+                0 10px 32px rgba(99, 102, 241, 0.35);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.4s ease;
     position: relative;
     overflow: hidden;
+    animation: gradientMove 6s ease infinite;
 }
 
 /* scan circle shimmer */
@@ -538,18 +541,16 @@ body.dark nav {
     animation: shimmer 4s ease-in-out infinite;
 }
 
-@keyframes shimmer {
-    0%   { left: -60%; opacity: 0; }
-    20%  { opacity: 1; }
-    60%  { left: 120%; opacity: 1; }
-    61%  { opacity: 0; }
-    100% { left: 120%; opacity: 0; }
+@keyframes gradientMove {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 .scan-btn:hover .scan-circle {
-    transform: scale(1.08) translateY(-2px);
-    box-shadow: 0 16px 44px rgba(99,102,241,0.50),
-                0 4px 12px rgba(99,102,241,0.28);
+    box-shadow: 0 0 30px rgba(236, 72, 153, 0.6), 
+                0 12px 38px rgba(99, 102, 241, 0.5);
+    transform: scale(1.05);
 }
 
 .scan-btn:active .scan-circle {
@@ -1069,6 +1070,12 @@ if(params.get("access") === "denied"){
     );
 }
 
+</script>
+<script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/static/service-worker.js')
+            .then(() => console.log("Service Worker Registered"));
+    }
 </script>
 </body>
 </html>

@@ -34,7 +34,7 @@ def home(request):
     return render(request, "qr_app/home.html")
 
 
-@never_cache
+
 @login_required
 @student_required
 def student_dashboard(request):
@@ -162,7 +162,7 @@ def student_signup(request):
     })
 
 
-@never_cache
+
 @login_required
 @student_required
 def student_dashboard(request):
@@ -500,7 +500,7 @@ def view_timetable(request):
 
 
 
-@never_cache
+
 @login_required
 @student_required
 def student_timetable(request):
@@ -554,7 +554,7 @@ def get_timetable_ajax(request):
     return JsonResponse({"timetable": data, "day": day})
 
 
-@never_cache
+
 @login_required
 @student_required
 def student_scan(request):
@@ -565,7 +565,7 @@ def student_scan(request):
     })
 
 
-@never_cache
+
 @login_required
 @student_required
 def student_alerts(request):
@@ -590,7 +590,7 @@ def student_alerts(request):
     })
 
 
-@never_cache
+
 @login_required
 @student_required
 def student_profile(request):

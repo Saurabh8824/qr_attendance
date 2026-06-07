@@ -1,227 +1,81 @@
 {% extends "qr_app/base.html" %}
+
 {% block content %}
+<div class="page-wrapper">
 
-<style>
-/* 🎨 Dynamic Theme Variables Sync with base.html */
-[data-theme="light"] {
-    --card-bg: rgba(255, 255, 255, 0.75);
-    --card-border: rgba(60, 50, 30, 0.08);
-    --text-main: #16130e;
-    --text-muted: #6b6459;
-    --input-bg: #ffffff;
-    --input-text: #16130e;
-    --input-border: rgba(60, 50, 30, 0.15);
-    --shadow: 0 10px 25px rgba(16, 13, 8, 0.05);
-    --badge-bg: rgba(79, 99, 231, 0.1);
-    --badge-text: #4f63e7;
-}
+  <div style="margin-bottom: 24px; text-align: center;">
+    <h2 class="section-heading">📅 Timetable View</h2>
+    <p class="section-sub">View your weekly class schedule</p>
+  </div>
 
-[data-theme="dark"] {
-    --card-bg: rgba(26, 25, 22, 0.75);
-    --card-border: rgba(255, 248, 235, 0.08);
-    --text-main: #f5f0e8;
-    --text-muted: #8a8278;
-    --input-bg: #201e1b;
-    --input-text: #f5f0e8;
-    --input-border: rgba(255, 248, 235, 0.12);
-    --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    --badge-bg: rgba(124, 58, 237, 0.2);
-    --badge-text: #a78bfa;
-}
+  <!-- 🔥 Day Tabs -->
+  <div class="day-tabs mb-4" style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+      {% for d in days %}
+      <a href="?day={{ d }}" 
+         class="btn-pro {% if selected_day == d %}btn-primary-pro{% else %}btn-ghost-pro{% endif %}">
+         {{ d }}
+      </a>
+      {% endfor %}
+  </div>
 
-.container {
-    max-width: 1100px;
-    padding-bottom: 40px;
-}
+  <!-- 🔹 Filter -->
+  <div class="pro-card mb-4">
+    <form method="GET" class="row g-3 align-items-end">
+        <div class="col-md-5">
+            <label class="form-label">Branch</label>
+            <select name="branch" class="form-select">
+                <option value="">All Branches</option>
+                {% for b in branches %}
+                <option value="{{ b.id }}" {% if request.GET.branch == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-5">
+            <label class="form-label">Semester</label>
+            <select name="semester" class="form-select">
+                <option value="">All Semesters</option>
+                <option value="1" {% if request.GET.semester == "1" %}selected{% endif %}>Sem 1</option>
+                <option value="2" {% if request.GET.semester == "2" %}selected{% endif %}>Sem 2</option>
+                <option value="3" {% if request.GET.semester == "3" %}selected{% endif %}>Sem 3</option>
+                <option value="4" {% if request.GET.semester == "4" %}selected{% endif %}>Sem 4</option>
+                <option value="5" {% if request.GET.semester == "5" %}selected{% endif %}>Sem 5</option>
+                <option value="6" {% if request.GET.semester == "6" %}selected{% endif %}>Sem 6</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button class="btn-pro btn-primary-pro w-100">Filter</button>
+        </div>
+    </form>
+  </div>
 
-/* 🧊 Glassmorphic Filter Card */
-.filter-card {
-    background: var(--card-bg) !important;
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border: 1px solid var(--card-border) !important;
-    border-radius: 16px;
-    padding: 20px;
-    box-shadow: var(--shadow);
-    transition: all 0.3s ease;
-}
-
-.filter-card label {
-    color: var(--text-main);
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 6px;
-}
-
-/* 🎛️ Form inputs & select styling */
-.form-select {
-    background-color: var(--input-bg) !important;
-    border: 1px solid var(--input-border) !important;
-    color: var(--input-text) !important;
-    border-radius: 10px !important;
-    padding: 10px 14px;
-    transition: all 0.2s ease;
-}
-
-.form-select:focus {
-    box-shadow: 0 0 0 3px rgba(79, 99, 231, 0.15) !important;
-    border-color: #4f63e7 !important;
-}
-
-/* 🌐 Google Autofill White Blocker Fix */
-.form-select:-webkit-autofill {
-    -webkit-text-fill-color: var(--input-text) !important;
-    -webkit-box-shadow: 0 0 0px 1000px var(--input-bg) inset !important;
-}
-
-/* 📅 Timetable Grid and Responsive Layout */
-.tt-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 20px;
-}
-
-/* 🧊 Glassmorphic Timetable Cards */
-.tt-card {
-    background: var(--card-bg) !important;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--card-border) !important;
-    border-radius: 16px;
-    padding: 20px;
-    box-shadow: var(--shadow);
-    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
-}
-
-.tt-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-}
-
-.tt-card h5 {
-    color: var(--text-main);
-    font-weight: 700;
-    margin: 0;
-    font-size: 17px;
-}
-
-.tt-info-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 12px;
-    color: var(--text-muted);
-    font-size: 14px;
-}
-
-.tt-info-item i {
-    color: #4f63e7;
-    width: 18px;
-    text-align: center;
-}
-
-/* 🏷️ Badge Style */
-.day-badge {
-    background: var(--badge-bg);
-    color: var(--badge-text);
-    padding: 5px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-/* 🚀 Premium Custom Button */
-.btn-primary-custom {
-    background: linear-gradient(135deg, #4f63e7 0%, #7c3aed 100%);
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    padding: 11px;
-    font-weight: 600;
-    box-shadow: 0 4px 14px rgba(79, 99, 231, 0.2);
-    transition: all 0.2s ease;
-}
-
-.btn-primary-custom:hover {
-    box-shadow: 0 6px 20px rgba(79, 99, 231, 0.35);
-    filter: brightness(1.08);
-}
-
-option {
-    background-color: var(--input-bg);
-    color: var(--input-text);
-}
-</style>
-
-<div class="container mt-4">
-
-    <div class="filter-card mb-4">
-        <form method="GET" class="row g-3">
-            <div class="col-md-4">
-                <label>Branch</label>
-                <select name="branch" class="form-select">
-                    <option value="">All Branches</option>
-                    {% for b in branches %}
-                    <option value="{{ b.id }}" {% if selected_branch == b.id|stringformat:"i" %}selected{% endif %}>{{ b.name }}</option>
-                    {% endfor %}
-                </select>
+  <!-- 🔹 Timetable Grid -->
+  <div class="row g-3">
+    {% for t in timetable %}
+    <div class="col-md-6 col-lg-4">
+        <div class="pro-card h-100">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <h5 class="section-heading" style="margin-bottom:0;">{{ t.subject.name }}</h5>
+                <span class="pro-badge badge-blue">{{ t.day }}</span>
+            </div>
+            
+            <div style="font-family: 'Space Mono', monospace; font-size: 13px; color: var(--accent); margin-bottom: 10px;">
+                🕒 {{ t.start_time }} - {{ t.end_time }}
             </div>
 
-            <div class="col-md-4">
-                <label>Semester</label>
-                <select name="semester" class="form-select">
-                    <option value="">All Semesters</option>
-                    <option value="1" {% if selected_semester == "1" %}selected{% endif %}>Sem 1</option>
-                    <option value="2" {% if selected_semester == "2" %}selected{% endif %}>Sem 2</option>
-                    <option value="3" {% if selected_semester == "3" %}selected{% endif %}>Sem 3</option>
-                    <option value="4" {% if selected_semester == "4" %}selected{% endif %}>Sem 4</option>
-                    <option value="5" {% if selected_semester == "5" %}selected{% endif %}>Sem 5</option>
-                    <option value="6" {% if selected_semester == "6" %}selected{% endif %}>Sem 6</option>
-                </select>
-            </div>
+            <p style="font-size: 13px; margin: 4px 0;"><i class="fa-solid fa-location-dot" style="margin-right:8px;"></i> Room: {{ t.room }}</p>
+            <p style="font-size: 13px; margin: 4px 0;"><i class="fa-solid fa-user-tie" style="margin-right:8px;"></i> {{ t.teacher_name }}</p>
 
-            <div class="col-md-4 d-flex align-items-end">
-                <button type="submit" class="btn-primary-custom w-100">🔍 Filter Timetable</button>
-            </div>
-        </form>
-    </div>
-
-    <div class="tt-grid">
-        {% for t in timetable %}
-        <div class="tt-card">
-            <div class="d-flex justify-content-between align-items-start gap-2">
-                <h5>{{ t.subject.name }}</h5>
-                <span class="day-badge">{{ t.day }}</span>
-            </div>
-
-            <hr style="border-color: var(--card-border); margin: 15px 0 5px 0;">
-
-            <div class="tt-info-item">
-                <i class="fa-regular fa-clock"></i>
-                <span>{{ t.start_time|time:"h:i A" }} - {{ t.end_time|time:"h:i A" }}</span>
-            </div>
-
-            <div class="tt-info-item">
-                <i class="fa-solid fa-location-dot"></i>
-                <span>Room: <strong>{{ t.room|default:"N/A" }}</strong></span>
-            </div>
-
-            <div class="tt-info-item">
-                <i class="fa-solid fa-user-tie"></i>
-                <span>{{ t.teacher_name|default:"No Teacher Assigned" }}</span>
+            <div class="mt-3 pt-2" style="border-top:1px solid var(--border); font-size: 11px; color: var(--text-600);">
+                {{ t.branch.name }} &bull; Sem {{ t.semester }}
             </div>
         </div>
-        {% empty %}
-        <div class="w-100 text-center py-5" style="grid-column: 1 / -1; color: var(--text-muted);">
-            <i class="fa-regular fa-calendar-xmark fa-3x mb-3" style="opacity: 0.6;"></i>
-            <p class="m-0">No timetable entries found for selected criteria.</p>
-        </div>
-        {% endfor %}
     </div>
+    {% empty %}
+    <div class="col-12 text-center py-5">
+        <p style="color:var(--text-600);">No timetable found for the selected criteria.</p>
+    </div>
+    {% endfor %}
+  </div>
 
 </div>
-
 {% endblock %}

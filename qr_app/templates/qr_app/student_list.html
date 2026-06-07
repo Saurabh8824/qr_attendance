@@ -1,46 +1,39 @@
-{% extends "base.html" %}
+{% extends "qr_app/base.html" %}
 {% load static %}
 
 {% block content %}
-<h2 style="text-align:center; margin-bottom:20px;">👨‍🎓 Student List</h2>
+<h2 class="section-heading" style="text-align:center; margin-bottom:25px;">👨‍🎓 Student List</h2>
 
-<!-- 🔹 Top Actions -->
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+<!-- 🔹 Top Actions: Using base CSS classes for consistent theme -->
+<div class="pro-card" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:15px;">
   
-  <!-- Add Student Button -->
-  <a href="{% url 'add_student' %}" class="btn btn-success">➕ Add Student</a>
+  <a href="{% url 'add_student' %}" class="btn-pro btn-primary-pro">➕ Add Student</a>
 
-  <!-- Filter + Search Form -->
   <form method="get" class="d-flex" style="gap:10px; flex-wrap:wrap;">
     <select name="branch" class="form-select">
       <option value="">All Branches</option>
       {% for b in branches %}
-        <option value="{{ b.id }}" {% if request.GET.branch == b.id|stringformat:"s" %}selected{% endif %}>
-          {{ b.name }}
-        </option>
+        <option value="{{ b.id }}" {% if request.GET.branch == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
       {% endfor %}
     </select>
 
     <select name="semester" class="form-select">
       <option value="">All Semesters</option>
       {% for key, value in semester_choices %}
-        <option value="{{ key }}" {% if request.GET.semester == key|stringformat:"s" %}selected{% endif %}>
-          {{ value }}
-        </option>
+        <option value="{{ key }}" {% if request.GET.semester == key|stringformat:"s" %}selected{% endif %}>{{ value }}</option>
       {% endfor %}
     </select>
 
-    <input type="text" name="q" class="form-control" placeholder="Search by Roll No or Name"
-           value="{{ request.GET.q }}">
+    <input type="text" name="q" class="form-control" placeholder="Search..." value="{{ request.GET.q }}">
 
-    <button type="submit" class="btn btn-primary">🔍 Search</button>
-    <a href="{% url 'student_list' %}" class="btn btn-secondary">Reset</a>
+    <button type="submit" class="btn-pro btn-primary-pro">🔍 Search</button>
+    <a href="{% url 'student_list' %}" class="btn-pro btn-ghost-pro">Reset</a>
   </form>
 </div>
 
-<!-- 🔹 Student Table -->
-<div class="table-container">
-  <table class="table">
+<!-- 🔹 Student Table: Using pro-table class from base.html -->
+<div class="pro-card" style="padding:0; overflow-x: auto;">
+  <table class="table pro-table">
     <thead>
       <tr>
         <th>Roll No</th>
@@ -71,32 +64,18 @@
         <td>{{ student.email }}</td>
         <td>
           {% for subject in student.subjects.all %}
-            <span class="badge">{{ subject.code }}</span>
+            <span class="pro-badge badge-green">{{ subject.code }}</span>
           {% empty %}
-            <span style="color:gray;">No subjects</span>
+            <span style="color:var(--text-600);">No subjects</span>
           {% endfor %}
         </td>
       </tr>
       {% empty %}
       <tr>
-        <td colspan="11" style="text-align:center; color:gray;">No students found.</td>
+        <td colspan="11" style="text-align:center; padding: 20px; color:var(--text-600);">No students found.</td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
 </div>
-
-<style>
-.table-container { max-width: 100%; overflow-x: auto; }
-.table { width: 100%; border-collapse: collapse; }
-.table th, .table td {
-  padding: 8px 12px; border: 1px solid #ddd; text-align: center;
-}
-.table th { background: #2c3e50; color: white; }
-.badge {
-  background: #27ae60; color: white;
-  padding: 3px 6px; border-radius: 5px;
-  font-size: 12px; margin: 2px; display: inline-block;
-}
-</style>
 {% endblock %}

@@ -1,11 +1,54 @@
-{% extends "base.html" %}
+{% extends "qr_app/base.html" %}
+
 {% block content %}
-<div class="container mt-4">
-  <h2>➕ Add Subject</h2>
-  <form method="POST">
+<div class="page-wrapper" style="max-width: 600px; margin: 0 auto;">
+  
+  <div style="margin-bottom: 24px;">
+    <h2 class="section-heading">➕ Add Subject</h2>
+    <p class="section-sub">Enter the details for a new subject.</p>
+  </div>
+
+  <form method="POST" class="pro-card">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Save</button>
+    
+    <div class="d-flex flex-column gap-3">
+      {% for field in form %}
+        <div class="field-wrapper">
+          <label class="form-label">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}
+            <div class="text-danger small mt-1">{{ field.errors|striptags }}</div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="d-flex justify-content-end gap-3 mt-4 pt-3" style="border-top: 1px solid var(--border);">
+      <a href="{% url 'subject_list' %}" class="btn-pro btn-ghost-pro">Cancel</a>
+      <button type="submit" class="btn-pro btn-primary-pro">Save Subject</button>
+    </div>
   </form>
+
 </div>
+
+<style>
+  /* Form fields styling */
+  .field-wrapper input, 
+  .field-wrapper select {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-200);
+    font-family: 'Sora', sans-serif;
+  }
+
+  .field-wrapper input:focus, 
+  .field-wrapper select:focus {
+    border-color: var(--accent);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--accent-pale);
+  }
+</style>
 {% endblock %}

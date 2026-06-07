@@ -1034,45 +1034,48 @@
     });
 
     /* ── Theme ── */
-    const htmlEl = document.documentElement;
+    /* ── Custom Theme Switcher Logic ── */
+  const htmlEl = document.documentElement;
+  
+  function toggleTheme() {
+    const current = htmlEl.getAttribute('data-theme');
+    const target  = (current === 'dark') ? 'light' : 'dark';
+    
+    // Custom Variable theme toggle
+    htmlEl.setAttribute('data-theme', target);
+    
+    // BOOTSTRAP 5 DARK MODE TOGGLE (Add this line)
+    htmlEl.setAttribute('data-bs-theme', target);
+    
+    localStorage.setItem('qrTheme', target);
 
-    function applyTheme(dark) {
-      htmlEl.setAttribute('data-theme', dark ? 'dark' : 'light');
-      const icons = [
-        document.getElementById('themeIcon'),
-        document.getElementById('themeIconMob')
-      ];
-      icons.forEach(icon => {
-        if (!icon) return;
-        icon.style.opacity = '0';
-        icon.style.transform = 'rotate(180deg) scale(0.5)';
-        setTimeout(() => {
-          icon.className = dark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
-          icon.style.opacity = '1';
-          icon.style.transform = 'rotate(0deg) scale(1)';
-        }, 130);
+    const isDark = (target === 'dark');
+    ['themeIcon','themeIconMob'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+    });
+  }
+
+  // Init theme from storage on Page Load
+  (function() {
+    const saved = localStorage.getItem('qrTheme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const useDark = saved ? saved === 'dark' : prefersDark;
+    if (useDark) {
+      htmlEl.setAttribute('data-theme', 'dark');
+      
+      // BOOTSTRAP 5 INITIALIZER FOR DARK MODE (Add this line)
+      htmlEl.setAttribute('data-bs-theme', 'dark');
+      
+      ['themeIcon','themeIconMob'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.className = 'fa-solid fa-sun';
       });
+    } else {
+      // Light mode default initializer
+      htmlEl.setAttribute('data-bs-theme', 'light');
     }
-
-    function toggleTheme() {
-      const isDark = htmlEl.getAttribute('data-theme') === 'dark';
-      applyTheme(!isDark);
-      localStorage.setItem('qrTheme', isDark ? 'light' : 'dark');
-    }
-
-    // Init theme from storage
-    (function() {
-      const saved = localStorage.getItem('qrTheme');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const useDark = saved ? saved === 'dark' : prefersDark;
-      if (useDark) {
-        htmlEl.setAttribute('data-theme', 'dark');
-        ['themeIcon','themeIconMob'].forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.className = 'fa-solid fa-sun';
-        });
-      }
-    })();
+  })();
 
     /* ── Navbar scroll state ── */
     const nav = document.getElementById('mainNav');

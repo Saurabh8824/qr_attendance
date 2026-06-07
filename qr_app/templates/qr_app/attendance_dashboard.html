@@ -2,13 +2,13 @@
 {% load static %}
 
 {% block content %}
-<div class="container-fluid py-4">
+<div class="container-fluid py-4" style="color: var(--text-100);">
 
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-body d-flex justify-content-between align-items-center flex-wrap">
             <div>
-                <h3 class="mb-1 fw-bold">Attendance Dashboard</h3>
-                <p class="text-muted mb-0">Session Wise Attendance Management</p>
+                <h3 class="mb-1 fw-bold" style="color: var(--text-100);">Attendance Dashboard</h3>
+                <p class="mb-0" style="color: var(--text-300);">Session Wise Attendance Management</p>
             </div>
         </div>
     </div>
@@ -68,8 +68,8 @@
 
     {% if qr_sessions %}
     <div class="card border-0 shadow-sm mb-4">
-        <div class="card-header bg-white border-0">
-            <h5 class="mb-0 fw-bold">QR Sessions</h5>
+        <div class="card-header bg-transparent border-0 pt-3">
+            <h5 class="mb-0 fw-bold" style="color: var(--text-100);">QR Sessions</h5>
         </div>
         <div class="card-body">
             <div class="row g-3">
@@ -77,22 +77,22 @@
                     <div class="col-lg-4">
                         <a href="?branch={{ selected_branch }}&semester={{ selected_semester }}&subject={{ selected_subject }}&date={{ selected_date }}&session={{ session.id }}" class="text-decoration-none">
                             <div class="card border h-100 session-card {% if selected_session and selected_session.id == session.id %}border-primary{% endif %}">
-                                <div class="card-body">
+                                <div class="card-body p-1">
                                     <div class="d-flex justify-content-between align-items-center mb-3">
                                         <div>
-                                            <h6 class="fw-bold mb-1">{{ session.subject.name }}</h6>
-                                            <small class="text-muted">{{ session.subject.code }}</small>
+                                            <h6 class="fw-bold mb-1" style="color: var(--text-100);">{{ session.subject.name }}</h6>
+                                            <small style="color: var(--text-300);">{{ session.subject.code }}</small>
                                         </div>
                                         <div class="text-end">
                                             <div class="fw-bold text-primary">{{ session.created_at|date:"h:i A" }}</div>
-                                            <small class="text-muted">{{ session.created_at|date:"d M Y" }}</small>
+                                            <small style="color: var(--text-300);">{{ session.created_at|date:"d M Y" }}</small>
                                         </div>
                                     </div>
                                     <div class="d-flex justify-content-between align-items-center">
                                         <span class="badge bg-primary-subtle text-primary">
                                             {{ session.session_type|default:"Class" }}
                                         </span>
-                                        <span class="text-muted small">Session ID: {{ session.id }}</span>
+                                        <span class="small" style="color: var(--text-300);">Session ID: {{ session.id }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -106,11 +106,11 @@
 
     {% if selected_session %}
     <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white border-0">
+        <div class="card-header bg-transparent border-0 pt-3">
             <div class="d-flex justify-content-between align-items-center flex-wrap">
                 <div>
-                    <h5 class="fw-bold mb-1">{{ selected_session.subject.name }}</h5>
-                    <small class="text-muted">
+                    <h5 class="fw-bold mb-1" style="color: var(--text-100);">{{ selected_session.subject.name }}</h5>
+                    <small style="color: var(--text-300);">
                         {{ selected_session.subject.code }} • {{ selected_session.created_at|date:"d M Y h:i A" }}
                     </small>
                 </div>
@@ -125,52 +125,52 @@
             </div>
         </div>
 
-        <div class="card-body border-bottom">
+        <div class="card-body border-bottom" style="border-color: var(--border) !important;">
             <div class="row g-3">
                 <div class="col-md-3">
-                    <div class="border rounded p-3 text-center">
-                        <h4 class="fw-bold mb-1">{{ students|length }}</h4>
-                        <small class="text-muted">Total Students</small>
+                    <div class="border rounded p-3 text-center" style="border-color: var(--border) !important;">
+                        <h4 class="fw-bold mb-1" style="color: var(--text-100);">{{ students|length }}</h4>
+                        <small style="color: var(--text-300);">Total Students</small>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="border rounded p-3 text-center">
+                    <div class="border rounded p-3 text-center" style="border-color: var(--border) !important;">
                         <h4 class="fw-bold text-success mb-1">{{ present_count }}</h4>
-                        <small class="text-muted">Present</small>
+                        <small style="color: var(--text-300);">Present</small>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="border rounded p-3 text-center">
+                    <div class="border rounded p-3 text-center" style="border-color: var(--border) !important;">
                         <h4 class="fw-bold text-danger mb-1">{{ absent_count }}</h4>
-                        <small class="text-muted">Absent</small>
+                        <small style="color: var(--text-300);">Absent</small>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="border rounded p-3 text-center">
+                    <div class="border rounded p-3 text-center" style="border-color: var(--border) !important;">
                         <h4 class="fw-bold text-primary mb-1">{{ selected_session.created_at|date:"h:i A" }}</h4>
-                        <small class="text-muted">Session Time</small>
+                        <small style="color: var(--text-300);">Session Time</small>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="table-responsive">
-            <table class="table align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>Roll No</th>
-                        <th>Enrollment No.</th>
-                        <th>Student Name</th>
-                        <th class="text-center">Status</th>
-                        <th class="text-center">Attendance Time</th>
+            <table class="table align-middle mb-0 table-hover">
+                <thead style="background-color: var(--bg) !important;">
+                    <tr style="border-color: var(--border) !important;">
+                        <th style="color: var(--text-200);">Roll No</th>
+                        <th style="color: var(--text-200);">Enrollment No.</th>
+                        <th style="color: var(--text-200);">Student Name</th>
+                        <th class="text-center" style="color: var(--text-200);">Status</th>
+                        <th class="text-center" style="color: var(--text-200);">Attendance Time</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for student in students %}
-                        <tr>
-                            <td class="fw-semibold">{{ student.roll_no }}</td>
-                            <td>{{ student.enrollment }}</td>
-                            <td>{{ student.name }}</td>
+                        <tr style="border-color: var(--border) !important;">
+                            <td class="fw-semibold" style="color: var(--text-100);">{{ student.roll_no }}</td>
+                            <td style="color: var(--text-100);">{{ student.enrollment }}</td>
+                            <td style="color: var(--text-100);">{{ student.name }}</td>
                             <td class="text-center">
                                 {% if student.present %}
                                     <span class="badge bg-success-subtle text-success">
@@ -182,7 +182,7 @@
                                     </span>
                                 {% endif %}
                             </td>
-                            <td class="text-center">
+                            <td class="text-center" style="color: var(--text-100);">
                                 {% if student.time %}{{ student.time }}{% else %}—{% endif %}
                             </td>
                         </tr>
@@ -232,9 +232,10 @@
 <style>
     .session-card {
         transition: 0.2s;
+        background: var(--bg) !important;
     }
     .session-card:hover {
-        background: #f8f9fa;
+        background: var(--surface-hover) !important;
     }
     .table td, .table th {
         vertical-align: middle;

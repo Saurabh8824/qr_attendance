@@ -401,6 +401,29 @@
     @media (pointer: coarse), (max-width: 600px) {
       .mobile-ring { display: block; }
     }
+    /* Remove blue click/tap highlight */
+    * {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button,
+    a,
+    input,
+    textarea,
+    select,
+    div,
+    label {
+      outline: none;
+      -webkit-tap-highlight-color: transparent !important;
+    }
+
+    button:focus,
+    a:focus,
+    input:focus,
+    textarea:focus,
+    select:focus {
+       outline: none;
+    }
   </style>
 </head>
 <body>

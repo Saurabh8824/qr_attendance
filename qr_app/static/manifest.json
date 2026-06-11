@@ -2,7 +2,7 @@
   "name": "Student Portal",
   "short_name": "Student",
   "description": "Smart Attendance and Student Portal",
-  "start_url": "/attendance/student/dashboard/",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#f0f4ff",
   "theme_color": "#6366f1",

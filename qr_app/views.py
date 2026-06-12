@@ -951,8 +951,8 @@ def generate_qr(request):
                 expires_at=expires_at
             )
 
-            # 🔥 NGROK URL
-            QR_URL = "https://qrattendance-production-9015.up.railway.app"
+            # 🔥 RENDER URL
+            QR_URL = "https://qr-attendance-1-ard4.onrender.com"
 
             # 🔥 Attendance path
             qr_path = reverse("attendance_form", args=[token])
